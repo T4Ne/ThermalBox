@@ -1,0 +1,116 @@
+[gd_scene load_steps=4 format=3 uid="uid://dgxd2kwwi6tl8"]
+
+[ext_resource type="Script" uid="uid://dt4phjectrhdt" path="res://scripts/main_box.gd" id="1_68iro"]
+[ext_resource type="Script" uid="uid://q2hb4lnranhq" path="res://scripts/ui.gd" id="2_eh4tv"]
+[ext_resource type="Script" uid="uid://2s1d0o5mj4gt" path="res://scripts/renderer.gd" id="2_kre7u"]
+
+[node name="MainBox" type="Node2D"]
+script = ExtResource("1_68iro")
+
+[node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource("2_eh4tv")
+
+[node name="ParticleRenderer" type="Node2D" parent="UI"]
+script = ExtResource("2_kre7u")
+
+[node name="Control" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="UI/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.13725491, 0.11372549, 0.16078432, 1)
+
+[node name="SimulationView" type="ColorRect" parent="UI/Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06666667, 0.06666667, 0.07450981, 1)
+
+[node name="SideBar" type="Control" parent="UI/Control"]
+layout_mode = 1
+anchor_bottom = 1.0
+offset_right = 200.0
+offset_bottom = -200.0
+grow_vertical = 2
+
+[node name="ReferenceRect" type="ReferenceRect" parent="UI/Control/SideBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+border_width = 5.0
+editor_only = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Control/SideBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button" type="Button" parent="UI/Control/SideBar/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Test"
+
+[node name="Button2" type="Button" parent="UI/Control/SideBar/VBoxContainer"]
+layout_mode = 2
+text = "Test2"
+
+[node name="BottomBar" type="Control" parent="UI/Control"]
+layout_mode = 1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -200.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="ReferenceRect" type="ReferenceRect" parent="UI/Control/BottomBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+border_width = 5.0
+editor_only = false
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Control/BottomBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Button" type="Button" parent="UI/Control/BottomBar/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Test 3"
+
+[node name="Button2" type="Button" parent="UI/Control/BottomBar/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 10
+text = "Test4"
