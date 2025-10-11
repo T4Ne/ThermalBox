@@ -1,6 +1,7 @@
 extends Node2D
 var Scheduler
 @onready var Renderer := get_node("UI/ParticleRenderer")
+@onready var UI := get_node("UI")
 var is_paused := false
 var particle_count := 0
 var particle_positions: PackedVector2Array = []
@@ -20,12 +21,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	_resize_simulation_view()
+	pass
 	
-
-func _resize_simulation_view() -> void:
-	var window_size_px = get_viewport_rect().size
-	var simulation_view_size_px
 
 
 func _physics_process(delta: float) -> void:
