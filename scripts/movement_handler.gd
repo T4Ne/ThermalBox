@@ -6,7 +6,7 @@ class MovementHandler:
 	
 	
 	func move(delta: float, particle_count: int, particle_positions: PackedVector2Array, particle_velocities: PackedVector2Array, 
-		particle_accelerations: PackedVector2Array, particle_radii: PackedFloat32Array, particle_masses: PackedFloat32Array) -> void:
+			particle_accelerations: PackedVector2Array, particle_radii: PackedFloat32Array, particle_masses: PackedFloat32Array) -> void:
 		# Velocity Verlet for each particle
 		for particle_indx in range(particle_count):
 			var position := particle_positions[particle_indx]

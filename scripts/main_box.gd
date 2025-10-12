@@ -1,6 +1,5 @@
 extends Node2D
 var Scheduler
-@onready var Renderer := get_node("UI/ParticleRenderer")
 @onready var UI := get_node("UI")
 var is_paused := false
 var particle_count := 0
@@ -11,8 +10,6 @@ var particle_radii: PackedFloat32Array = []
 var particle_masses: PackedFloat32Array = []
 var grid_size: int = 100
 var simulation_area := Vector2(80, 60)
-var simulation_view_resolution: Vector2
-var simulation_view_scale: float
 
 
 
@@ -21,8 +18,7 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	pass
-	
+	UI.draw_particles(grid_size, simulation_area, particle_count, particle_positions, particle_radii)
 
 
 func _physics_process(delta: float) -> void:
@@ -30,7 +26,6 @@ func _physics_process(delta: float) -> void:
 		return
 	Scheduler.step(delta, particle_count, particle_positions, particle_velocities, particle_accelerations,
 	particle_radii, particle_masses)
-	Renderer.render(particle_count, particle_positions, particle_radii)
 
 
 func _input(event: InputEvent) -> void:
