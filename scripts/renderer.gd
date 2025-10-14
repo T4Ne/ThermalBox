@@ -3,11 +3,9 @@ extends Node2D
 var mm_particles_instance: MultiMeshInstance2D
 var mm_particles: MultiMesh
 var particles_quad: QuadMesh
-var background_instance: MeshInstance2D
-var background_quad: QuadMesh
+@onready var SimulationViewBackground = get_node("SimulationView")
 
 func _ready() -> void:
-	_set_up_background_meshes()
 	_set_up_particle_meshes()
 
 
@@ -28,22 +26,20 @@ func _set_up_particle_meshes() -> void:
 	mm_particles_instance.multimesh = mm_particles
 
 
-func _set_up_background_meshes() -> void:
-	background_instance = MeshInstance2D.new()
-	background_instance.z_index = 2
-	add_child(background_instance)
-	
-	background_quad = QuadMesh.new()
-	background_quad.size = Vector2(1, 1)
-	
-	background_instance.mesh = background_quad
-	
 
 func render(grid_size: int, simulation_area: Vector2, particle_count: int, particle_positions: PackedVector2Array, 
 		particle_radii: PackedFloat32Array, simulation_view_size: Vector2, simulation_view_location: Vector2) -> void:
+	_render_simulation_view(simulation_view_size, simulation_view_location)
+	_render_particles(particle_count, particle_positions, particle_radii)
+
+
+func _render_simulation_view(simulation_view_size: Vector2, simulation_view_location: Vector2) -> void:
+	SimulationViewBackground.size = simulation_view_size
+	SimulationViewBackground.global_position = simulation_view_location
+
+
+func _render_particles(particle_count: int, particle_positions: PackedVector2Array, particle_radii: PackedFloat32Array) -> void:
 	# Resize buffer if necessary
-	
-	
 	if mm_particles.instance_count < particle_count:
 		mm_particles.instance_count = particle_count
 	
@@ -56,7 +52,3 @@ func render(grid_size: int, simulation_area: Vector2, particle_count: int, parti
 		#TODO: fix particle scaling issue
 		mm_particles.set_instance_transform_2d(particle_indx, particle_transform)
 		mm_particles.set_instance_color(particle_indx, Color("DARK_GREEN"))
-
-func render_simulation_view(simulation_view_size: Vector2, simulation_view_location: Vector2) -> void:
-	pass
-	

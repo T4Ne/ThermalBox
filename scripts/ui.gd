@@ -1,13 +1,13 @@
 extends CanvasLayer
 
 @onready var SimulationViewRect := get_node("Control/SimulationViewArea/SimulationViewRect")
-@onready var SimulationViewPos := get_node("Control/SimulationViewArea/SimulationViewPos")
+@onready var SimulationViewPos := get_node("Control/SimulationViewArea/SimulationViewRect/SimulationViewPos")
 @onready var Renderer := get_node("ParticleRenderer")
 var simulation_view_aspect_ratio = Vector2(4.0, 3.0)
 var simulation_view_size: Vector2
 var simulation_view_location: Vector2
 var simulation_view_scale: float
-var simulation_view_edge_offset := Vector2(30, 30)
+var simulation_view_edge_offset := Vector2(60, 60)
 
 
 func _process(_delta: float) -> void:

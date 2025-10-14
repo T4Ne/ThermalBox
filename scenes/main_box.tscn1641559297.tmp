@@ -1,8 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://dgxd2kwwi6tl8"]
+[gd_scene load_steps=6 format=3 uid="uid://dgxd2kwwi6tl8"]
 
 [ext_resource type="Script" uid="uid://dt4phjectrhdt" path="res://scripts/main_box.gd" id="1_68iro"]
 [ext_resource type="Script" uid="uid://q2hb4lnranhq" path="res://scripts/ui.gd" id="2_eh4tv"]
 [ext_resource type="Script" uid="uid://2s1d0o5mj4gt" path="res://scripts/renderer.gd" id="2_kre7u"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eh4tv"]
+albedo_color = Color(0.06666667, 0.06666667, 0.07450981, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_ps5bi"]
+material = SubResource("StandardMaterial3D_eh4tv")
 
 [node name="MainBox" type="Node2D"]
 script = ExtResource("1_68iro")
@@ -13,11 +19,8 @@ script = ExtResource("2_eh4tv")
 [node name="ParticleRenderer" type="Node2D" parent="UI"]
 script = ExtResource("2_kre7u")
 
-[node name="SimulationView" type="ColorRect" parent="UI/ParticleRenderer"]
-z_index = 2
-offset_right = 40.0
-offset_bottom = 40.0
-color = Color(0.06666667, 0.06666667, 0.07450981, 1)
+[node name="MeshInstance2D" type="MeshInstance2D" parent="UI/ParticleRenderer"]
+mesh = SubResource("QuadMesh_ps5bi")
 
 [node name="Control" type="Control" parent="UI"]
 layout_mode = 3
