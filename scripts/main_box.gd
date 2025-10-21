@@ -15,10 +15,11 @@ var simulation_area := Vector2(80, 60)
 
 func _ready() -> void:
 	Scheduler = preload("res://scripts/scheduler.gd").Scheduler.new()
+	UI.set_sim_view_size(simulation_area * grid_size)
 
 
 func _process(_delta: float) -> void:
-	UI.draw_particles(grid_size, simulation_area, particle_count, particle_positions, particle_radii)
+	UI.draw_particles(grid_size, particle_count, particle_positions, particle_radii)
 
 
 func _physics_process(delta: float) -> void:
@@ -28,20 +29,17 @@ func _physics_process(delta: float) -> void:
 	particle_radii, particle_masses)
 
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("Place particle"):
-		place_particle()
-	
+func place_particle(mouse_position) -> void:
+	var simulation_view_position = UI.get_simulation_view_position()
+	var simulation_view_scale = UI.get_simulation_view_scale()
+	var particle_simulation_position = (mouse_position - simulation_view_position) / simulation_view_scale
+	var particle_velocity = Vector2.ZERO
+	var particle_radius = randf_range(20.0,50.0)
+	var particle_mass = 1.0
+	add_particle_to_sim(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
-func place_particle() -> void:
-	var mouse_position := get_global_mouse_position()
-	var default_velocity := Vector2.ZERO
-	var default_radius := 10.0
-	var default_mass := 1.0
-	add_particle(mouse_position, default_velocity, default_radius, default_mass)
-	
 
-func add_particle(p_position: Vector2, p_velocity: Vector2, p_radius: float, p_mass: float) -> void:
+func add_particle_to_sim(particle_position: Vector2, particle_velocity: Vector2, particle_radius: float, particle_mass: float) -> void:
 		assert(
 			particle_velocities.size() == particle_count
 			and particle_radii.size() == particle_count
@@ -50,8 +48,13 @@ func add_particle(p_position: Vector2, p_velocity: Vector2, p_radius: float, p_m
 			"ParticleDataDeSyncError: particle arrays have mismatched sizes"
 		)
 		particle_count += 1
-		particle_positions.append(p_position)
-		particle_velocities.append(p_velocity)
+		particle_positions.append(particle_position)
+		particle_velocities.append(particle_velocity)
 		particle_accelerations.append(Vector2.ZERO)
-		particle_radii.append(p_radius)
-		particle_masses.append(p_mass)
+		particle_radii.append(particle_radius)
+		particle_masses.append(particle_mass)
+
+
+func _on_simulation_view_gui_input(event: InputEvent) -> void:
+	if event.is_action_pressed("Place particle"):
+		place_particle(get_global_mouse_position())
