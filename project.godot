@@ -15,6 +15,11 @@ run/main_scene="uid://dgxd2kwwi6tl8"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 config/icon="res://icon.svg"
 
+[debug]
+
+gdscript/warnings/unassigned_variable=2
+gdscript/warnings/untyped_declaration=2
+
 [display]
 
 window/size/viewport_width=1920

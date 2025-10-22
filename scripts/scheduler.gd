@@ -1,6 +1,6 @@
 class Scheduler:
-	var Simulation
-	var Renderer
+	var Simulation: Object
+	var Renderer: Object
 	
 	
 	func _init() -> void:

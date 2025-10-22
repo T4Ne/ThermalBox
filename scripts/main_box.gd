@@ -1,25 +1,33 @@
 extends Node2D
-var Scheduler
-@onready var UI := get_node("UI")
-var is_paused := false
-var particle_count := 0
+var Scheduler: Object
+@onready var UI: Node = get_node("UI")
+var is_paused: bool = false
+var particle_count: int = 0
 var particle_positions: PackedVector2Array = []
 var particle_velocities: PackedVector2Array = []
 var particle_accelerations: PackedVector2Array = []
 var particle_radii: PackedFloat32Array = []
 var particle_masses: PackedFloat32Array = []
-var grid_size: int = 100
-var simulation_area := Vector2(80, 60)
-
+var wall_count: int = 0
+var cell_size: int = 10
+var cell_area: Vector2i = Vector2i(80, 60)
+var cell_count: int
+var cell_offsets: PackedInt32Array = []
+var cell_particle_indexes: PackedInt32Array = []
+var cell_is_filled: PackedByteArray = []
 
 
 func _ready() -> void:
 	Scheduler = preload("res://scripts/scheduler.gd").Scheduler.new()
-	UI.set_sim_view_size(simulation_area * grid_size)
+	UI.set_sim_view_size(cell_area * cell_size)
+	cell_is_filled.resize(int(cell_area.x * cell_area.y))
+	cell_count = cell_area.x * cell_area.y
+	_build_borders()
 
 
 func _process(_delta: float) -> void:
-	UI.draw_particles(grid_size, particle_count, particle_positions, particle_radii)
+	UI.draw_simulation(wall_count, cell_count, cell_size, cell_is_filled, cell_area, 
+particle_count, particle_positions, particle_radii)
 
 
 func _physics_process(delta: float) -> void:
@@ -29,13 +37,36 @@ func _physics_process(delta: float) -> void:
 	particle_radii, particle_masses)
 
 
-func place_particle(mouse_position) -> void:
-	var simulation_view_position = UI.get_simulation_view_position()
-	var simulation_view_scale = UI.get_simulation_view_scale()
-	var particle_simulation_position = (mouse_position - simulation_view_position) / simulation_view_scale
-	var particle_velocity = Vector2.ZERO
-	var particle_radius = randf_range(20.0,50.0)
-	var particle_mass = 1.0
+func _build_borders() -> void:
+	var cell_array_size: int = len(cell_is_filled)
+	var cell_area_row_size: int = cell_area.x
+	for cell_indx in range(cell_array_size):
+		if cell_indx < cell_area_row_size:
+			cell_is_filled[cell_indx] = true
+			wall_count += 1
+			continue
+		elif cell_indx >= cell_array_size - cell_area_row_size:
+			cell_is_filled[cell_indx] = true
+			wall_count += 1
+			continue
+		var cell_row_indx: int = cell_indx % cell_area_row_size
+		if cell_row_indx == 0:
+			cell_is_filled[cell_indx] = true
+			wall_count += 1
+		elif cell_row_indx == cell_area_row_size - 1:
+			cell_is_filled[cell_indx] = true
+			wall_count += 1
+		else:
+			cell_is_filled[cell_indx] = false
+
+
+func place_particle(mouse_position: Vector2) -> void:
+	var simulation_view_position: Vector2 = UI.get_simulation_view_position()
+	var simulation_view_scale: float = UI.get_simulation_view_scale()
+	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
+	var particle_velocity: Vector2 = Vector2.ZERO
+	var particle_radius: float = 5.0
+	var particle_mass: float = 1.0
 	add_particle_to_sim(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
 

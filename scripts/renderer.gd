@@ -1,35 +1,41 @@
 extends Node2D
 
-var mm_particles_instance: MultiMeshInstance2D
-var mm_particles: MultiMesh
-var particles_quad: QuadMesh
-@onready var SimulationViewBackground = get_node("SimulationView")
+var mm_particles_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
+var mm_particles: MultiMesh = MultiMesh.new()
+var particle_quad: QuadMesh = QuadMesh.new()
+var mm_walls_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
+var mm_walls: MultiMesh = MultiMesh.new()
+var wall_quad: QuadMesh = QuadMesh.new()
+@onready var SimulationViewBackground: Node = get_node("SimulationView")
+
 
 func _ready() -> void:
-	_set_up_particle_meshes()
+	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad)
+	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad)
 
 
-func _set_up_particle_meshes() -> void:
-	mm_particles_instance = MultiMeshInstance2D.new()
-	mm_particles_instance.z_index = 3
-	add_child(mm_particles_instance)
+func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh) -> void:
+	mm_instance.z_index = 3
+	add_child(mm_instance)
 	
-	particles_quad = QuadMesh.new()
-	particles_quad.size = Vector2(1, 1)
+	quad.size = Vector2(1, 1)
 	
-	mm_particles = MultiMesh.new()
-	mm_particles.transform_format = MultiMesh.TRANSFORM_2D
-	mm_particles.use_colors = true
-	mm_particles.mesh = particles_quad
-	mm_particles.instance_count = 0
+	mm.transform_format = MultiMesh.TRANSFORM_2D
+	mm.use_colors = true
+	mm.mesh = quad
+	mm.instance_count = 0
 	
-	mm_particles_instance.multimesh = mm_particles
+	mm_instance.multimesh = mm
 
 
-func render(_grid_size: int, particle_count: int, particle_positions: PackedVector2Array, particle_radii: PackedFloat32Array, 
-		simulation_view_size: Vector2, simulation_view_scale: float, simulation_view_location: Vector2) -> void:
-	_render_simulation_view(simulation_view_size, simulation_view_location)
-	_render_particles(particle_count, particle_positions, particle_radii, simulation_view_location, simulation_view_scale)
+func render(wall_count: int, cell_count: int, cell_size: int, cell_is_filled: PackedByteArray, cell_area: Vector2i, 
+particle_count: int, particle_positions: PackedVector2Array, particle_radii: PackedFloat32Array, 
+simulation_view_size: Vector2, simulation_view_scale: float, simulation_view_position: Vector2) -> void:
+	
+	_render_simulation_view(simulation_view_size, simulation_view_position)
+	_render_walls(wall_count, cell_count, cell_size, cell_is_filled, cell_area, simulation_view_scale, simulation_view_position)
+	_render_particles(particle_count, particle_positions, particle_radii, simulation_view_position, simulation_view_scale)
+
 
 
 func _render_simulation_view(simulation_view_size: Vector2, simulation_view_location: Vector2) -> void:
@@ -38,17 +44,43 @@ func _render_simulation_view(simulation_view_size: Vector2, simulation_view_loca
 
 
 func _render_particles(particle_count: int, particle_positions: PackedVector2Array, particle_radii: PackedFloat32Array, 
-		simulation_view_location: Vector2, simulation_view_scale: float) -> void:
+simulation_view_position: Vector2, simulation_view_scale: float) -> void:
 	# Resize buffer if necessary
 	if mm_particles.instance_count < particle_count:
 		mm_particles.instance_count = particle_count
 	
 	for particle_indx in range(particle_count):
-		var particle_screen_position: Vector2 = particle_positions[particle_indx] * simulation_view_scale + simulation_view_location
+		var particle_screen_position: Vector2 = particle_positions[particle_indx] * simulation_view_scale + simulation_view_position
 		var particle_screen_diameter: float = particle_radii[particle_indx] * 2.0 * simulation_view_scale
-		var particle_transform := Transform2D(0.0, particle_screen_position)
+		var particle_transform: Transform2D = Transform2D(0.0, particle_screen_position)
 		particle_transform.x = Vector2(particle_screen_diameter, 0.0)
 		particle_transform.y = Vector2(0.0, particle_screen_diameter)
 		
 		mm_particles.set_instance_transform_2d(particle_indx, particle_transform)
 		mm_particles.set_instance_color(particle_indx, Color("DARK_GREEN"))
+
+
+func _render_walls(wall_count: int, cell_count: int, cell_size: int, cell_is_filled: PackedByteArray, cell_area: Vector2i, 
+simulation_view_scale: float, simulation_view_position: Vector2) -> void:
+	if mm_walls.instance_count < wall_count:
+		mm_walls.instance_count = wall_count
+	
+	var wall_indx: int = 0
+	for cell_indx in range(cell_count):
+		if not cell_is_filled[cell_indx]:
+			continue
+		@warning_ignore("integer_division")
+		var wall_array_position: Vector2i = Vector2i(cell_indx % cell_area.x, cell_indx / cell_area.x)
+		var wall_simulation_position: Vector2 = Vector2(float(wall_array_position.x) * float(cell_size) + float(cell_size) / 2.0, 
+		float(wall_array_position.y) * float(cell_size) + float(cell_size) / 2.0)
+		
+		var wall_screen_position: Vector2 = wall_simulation_position * simulation_view_scale + simulation_view_position
+		var wall_screen_size: float = simulation_view_scale * cell_size
+		
+		var wall_transform: Transform2D = Transform2D(0.0, wall_screen_position)
+		wall_transform.x = Vector2(wall_screen_size, 0.0)
+		wall_transform.y = Vector2(0.0, wall_screen_size)
+		
+		mm_walls.set_instance_transform_2d(wall_indx, wall_transform)
+		mm_walls.set_instance_color(wall_indx, Color("GRAY"))
+		wall_indx += 1

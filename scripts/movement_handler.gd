@@ -1,5 +1,5 @@
 class MovementHandler:
-	var CollisionHandler
+	var CollisionHandler: Object
 	
 	func _init() -> void:
 		CollisionHandler = preload("res://scripts/collision_handler.gd").CollisionHandler.new()
