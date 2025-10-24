@@ -1,15 +1,10 @@
-class Scheduler:
-	var Simulation: Object
-	var Renderer: Object
+class_name Scheduler
+
+var simulation: Simulation = Simulation.new()
+
+func _init() -> void:
+	pass
+
+func step(delta: float, particle_data: ParticleData, _cell_data: CellData) -> void:
 	
-	
-	func _init() -> void:
-		Simulation = preload("res://scripts/simulation.gd").Simulation.new()
-	
-	
-	func step(delta: float, particle_count: int, particle_positions: PackedVector2Array, particle_velocities: PackedVector2Array, 
-			particle_accelerations: PackedVector2Array, particle_radii: PackedFloat32Array, particle_masses: PackedFloat32Array) -> void:
-		
-		Simulation.move_particles(delta, particle_count, particle_positions, 
-		particle_velocities, particle_accelerations, particle_radii, particle_masses)
-	
+	simulation.move_particles(delta, particle_data)

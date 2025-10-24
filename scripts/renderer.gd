@@ -1,3 +1,4 @@
+class_name Renderer
 extends Node2D
 
 var mm_particles_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
@@ -6,13 +7,11 @@ var particle_quad: QuadMesh = QuadMesh.new()
 var mm_walls_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
 var mm_walls: MultiMesh = MultiMesh.new()
 var wall_quad: QuadMesh = QuadMesh.new()
-@onready var SimulationViewBackground: Node = get_node("SimulationView")
-
+@onready var simulation_view_background: ColorRect = get_node("SimulationView")
 
 func _ready() -> void:
 	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad)
 	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad)
-
 
 func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh) -> void:
 	mm_instance.z_index = 3
@@ -27,27 +26,27 @@ func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadM
 	
 	mm_instance.multimesh = mm
 
+func render(particle_data: ParticleData, cell_data: CellData, simulation_view_data: SimulationViewData) -> void:
+	_render_simulation_view(simulation_view_data)
+	_render_walls(cell_data, simulation_view_data)
+	_render_particles(particle_data, simulation_view_data)
 
-func render(wall_count: int, cell_count: int, cell_size: int, cell_is_filled: PackedByteArray, cell_area: Vector2i, 
-particle_count: int, particle_positions: PackedVector2Array, particle_radii: PackedFloat32Array, 
-simulation_view_size: Vector2, simulation_view_scale: float, simulation_view_position: Vector2) -> void:
+func _render_simulation_view(simulation_view_data: SimulationViewData) -> void:
+	var simulation_view_screen_size: Vector2 = simulation_view_data.get_simulation_view_screen_size()
+	var simulation_view_position: Vector2 = simulation_view_data.get_simulation_view_position()
 	
-	_render_simulation_view(simulation_view_size, simulation_view_position)
-	_render_walls(wall_count, cell_count, cell_size, cell_is_filled, cell_area, simulation_view_scale, simulation_view_position)
-	_render_particles(particle_count, particle_positions, particle_radii, simulation_view_position, simulation_view_scale)
+	simulation_view_background.size = simulation_view_screen_size
+	simulation_view_background.global_position = simulation_view_position
 
-
-
-func _render_simulation_view(simulation_view_size: Vector2, simulation_view_location: Vector2) -> void:
-	SimulationViewBackground.size = simulation_view_size
-	SimulationViewBackground.global_position = simulation_view_location
-
-
-func _render_particles(particle_count: int, particle_positions: PackedVector2Array, particle_radii: PackedFloat32Array, 
-simulation_view_position: Vector2, simulation_view_scale: float) -> void:
+func _render_particles(particle_data: ParticleData, simulation_view_data: SimulationViewData) -> void:
 	# Resize buffer if necessary
+	var particle_count: int = particle_data.get_count()
 	if mm_particles.instance_count < particle_count:
 		mm_particles.instance_count = particle_count
+	var particle_positions: PackedVector2Array = particle_data.get_positions()
+	var particle_radii: PackedFloat32Array = particle_data.get_radii()
+	var simulation_view_scale: float = simulation_view_data.get_simulation_view_scale()
+	var simulation_view_position: Vector2 = simulation_view_data.get_simulation_view_position()
 	
 	for particle_indx in range(particle_count):
 		var particle_screen_position: Vector2 = particle_positions[particle_indx] * simulation_view_scale + simulation_view_position
@@ -59,13 +58,18 @@ simulation_view_position: Vector2, simulation_view_scale: float) -> void:
 		mm_particles.set_instance_transform_2d(particle_indx, particle_transform)
 		mm_particles.set_instance_color(particle_indx, Color("DARK_GREEN"))
 
-
-func _render_walls(wall_count: int, cell_count: int, cell_size: int, cell_is_filled: PackedByteArray, cell_area: Vector2i, 
-simulation_view_scale: float, simulation_view_position: Vector2) -> void:
+func _render_walls(cell_data: CellData, simulation_view_data: SimulationViewData) -> void:
+	var wall_count: int = cell_data.get_wall_count()
 	if mm_walls.instance_count < wall_count:
 		mm_walls.instance_count = wall_count
+	var current_wall_indx: int = 0
+	var cell_count: int = cell_data.get_cell_count()
+	var cell_is_filled: PackedByteArray = cell_data.get_cell_is_filled()
+	var cell_area: Vector2i = cell_data.get_cell_area()
+	var cell_size: int = cell_data.get_cell_size()
+	var simulation_view_position: Vector2 = simulation_view_data.get_simulation_view_position()
+	var simulation_view_scale: float = simulation_view_data.get_simulation_view_scale()
 	
-	var wall_indx: int = 0
 	for cell_indx in range(cell_count):
 		if not cell_is_filled[cell_indx]:
 			continue
@@ -81,6 +85,6 @@ simulation_view_scale: float, simulation_view_position: Vector2) -> void:
 		wall_transform.x = Vector2(wall_screen_size, 0.0)
 		wall_transform.y = Vector2(0.0, wall_screen_size)
 		
-		mm_walls.set_instance_transform_2d(wall_indx, wall_transform)
-		mm_walls.set_instance_color(wall_indx, Color("GRAY"))
-		wall_indx += 1
+		mm_walls.set_instance_transform_2d(current_wall_indx, wall_transform)
+		mm_walls.set_instance_color(current_wall_indx, Color("GRAY"))
+		current_wall_indx += 1
