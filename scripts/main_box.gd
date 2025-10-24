@@ -1,5 +1,7 @@
 extends Node2D
-var Scheduler: Object
+@onready var Scheduler: Object = preload("res://scripts/scheduler.gd").Scheduler.new()
+@onready var ParticleData: Object = preload("res://scripts/data_objects.gd").ParticleData.new()
+@onready var CellData: Object = preload("res://scripts/data_objects.gd").CellData.new()
 @onready var UI: Node = get_node("UI")
 var is_paused: bool = false
 var particle_count: int = 0
@@ -18,7 +20,6 @@ var cell_is_filled: PackedByteArray = []
 
 
 func _ready() -> void:
-	Scheduler = preload("res://scripts/scheduler.gd").Scheduler.new()
 	UI.set_sim_view_size(cell_area * cell_size)
 	cell_is_filled.resize(int(cell_area.x * cell_area.y))
 	cell_count = cell_area.x * cell_area.y
