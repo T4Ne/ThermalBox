@@ -10,24 +10,6 @@ var masses: PackedFloat32Array = []
 func _init() -> void:
 	pass
 
-func get_count() -> int:
-	return count
-
-func get_positions() -> PackedVector2Array:
-	return positions
-
-func get_velocities() -> PackedVector2Array:
-	return velocities
-
-func get_accelerations() -> PackedVector2Array:
-	return accelerations
-
-func get_radii() -> PackedFloat32Array:
-	return radii
-
-func get_masses() -> PackedFloat32Array:
-	return masses
-
 func add_particle(position: Vector2, velocity: Vector2, radius: float, mass: float) -> void:
 	assert(
 		velocities.size() == count

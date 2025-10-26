@@ -32,21 +32,21 @@ func render(particle_data: ParticleData, cell_data: CellData, simulation_view_da
 	_render_particles(particle_data, simulation_view_data)
 
 func _render_simulation_view(simulation_view_data: SimulationViewData) -> void:
-	var simulation_view_screen_size: Vector2 = simulation_view_data.get_simulation_view_screen_size()
-	var simulation_view_position: Vector2 = simulation_view_data.get_simulation_view_position()
+	var simulation_view_screen_size: Vector2 = simulation_view_data.simulation_view_screen_size
+	var simulation_view_position: Vector2 = simulation_view_data.simulation_view_position
 	
 	simulation_view_background.size = simulation_view_screen_size
 	simulation_view_background.global_position = simulation_view_position
 
 func _render_particles(particle_data: ParticleData, simulation_view_data: SimulationViewData) -> void:
 	# Resize buffer if necessary
-	var particle_count: int = particle_data.get_count()
+	var particle_count: int = particle_data.count
 	if mm_particles.instance_count < particle_count:
 		mm_particles.instance_count = particle_count
-	var particle_positions: PackedVector2Array = particle_data.get_positions()
-	var particle_radii: PackedFloat32Array = particle_data.get_radii()
-	var simulation_view_scale: float = simulation_view_data.get_simulation_view_scale()
-	var simulation_view_position: Vector2 = simulation_view_data.get_simulation_view_position()
+	var particle_positions: PackedVector2Array = particle_data.positions
+	var particle_radii: PackedFloat32Array = particle_data.radii
+	var simulation_view_scale: float = simulation_view_data.simulation_view_scale
+	var simulation_view_position: Vector2 = simulation_view_data.simulation_view_position
 	
 	for particle_indx in range(particle_count):
 		var particle_screen_position: Vector2 = particle_positions[particle_indx] * simulation_view_scale + simulation_view_position
@@ -59,16 +59,16 @@ func _render_particles(particle_data: ParticleData, simulation_view_data: Simula
 		mm_particles.set_instance_color(particle_indx, Color("DARK_GREEN"))
 
 func _render_walls(cell_data: CellData, simulation_view_data: SimulationViewData) -> void:
-	var wall_count: int = cell_data.get_wall_count()
+	var wall_count: int = cell_data.wall_count
 	if mm_walls.instance_count < wall_count:
 		mm_walls.instance_count = wall_count
 	var current_wall_indx: int = 0
-	var cell_count: int = cell_data.get_cell_count()
-	var cell_is_filled: PackedByteArray = cell_data.get_cell_is_filled()
-	var cell_area: Vector2i = cell_data.get_cell_area()
-	var cell_size: int = cell_data.get_cell_size()
-	var simulation_view_position: Vector2 = simulation_view_data.get_simulation_view_position()
-	var simulation_view_scale: float = simulation_view_data.get_simulation_view_scale()
+	var cell_count: int = cell_data.cell_count
+	var cell_is_filled: PackedByteArray = cell_data.cell_is_filled
+	var cell_area: Vector2i = cell_data.cell_area
+	var cell_size: int = cell_data.cell_size
+	var simulation_view_position: Vector2 = simulation_view_data.simulation_view_position
+	var simulation_view_scale: float = simulation_view_data.simulation_view_scale
 	
 	for cell_indx in range(cell_count):
 		if not cell_is_filled[cell_indx]:

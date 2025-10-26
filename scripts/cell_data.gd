@@ -13,27 +13,7 @@ func _init(size: int, area: Vector2i) -> void:
 	cell_area = area
 	cell_is_filled.resize(int(cell_area.x * cell_area.y))
 	cell_count = cell_area.x * cell_area.y
-
-func get_wall_count() -> int:
-	return wall_count
-
-func get_cell_size() -> int:
-	return cell_size
-
-func get_cell_area() -> Vector2i:
-	return cell_area
-
-func get_cell_count() -> int:
-	return cell_count
-
-func get_cell_offsets() -> PackedInt32Array:
-	return cell_offsets
-
-func get_cell_particle_indexes() -> PackedInt32Array:
-	return cell_particle_indexes
-
-func get_cell_is_filled() -> PackedByteArray:
-	return cell_is_filled
+	cell_offsets.resize(cell_count + 1)
 
 func set_cell_wall_state(indx: int, value: bool) -> void:
 	cell_is_filled[indx] = int(value)

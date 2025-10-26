@@ -27,8 +27,8 @@ func _physics_process(delta: float) -> void:
 	scheduler.step(delta, particle_data, cell_data)
 
 func _build_borders() -> void:
-	var cell_array_size: int = cell_data.get_cell_count()
-	var cell_area_row_size: int = cell_data.get_cell_area().x
+	var cell_array_size: int = cell_data.cell_count
+	var cell_area_row_size: int = cell_data.cell_area.x
 	for cell_indx in range(cell_array_size):
 		if cell_indx < cell_area_row_size:
 			cell_data.set_cell_wall_state(cell_indx, true)
@@ -49,8 +49,8 @@ func _build_borders() -> void:
 			cell_data.set_cell_wall_state(cell_indx, false)
 
 func place_particle(mouse_position: Vector2) -> void:
-	var simulation_view_position: Vector2 = simulation_view_data.get_simulation_view_position()
-	var simulation_view_scale: float = simulation_view_data.get_simulation_view_scale()
+	var simulation_view_position: Vector2 = simulation_view_data.simulation_view_position
+	var simulation_view_scale: float = simulation_view_data.simulation_view_scale
 	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
 	var particle_velocity: Vector2 = Vector2.ZERO
 	var particle_radius: float = 5.0

@@ -4,12 +4,12 @@ var collision_handler: CollisionHandler = CollisionHandler.new()
 func _init() -> void:
 	pass
 
-func move(delta: float, particle_data: ParticleData) -> void:
+func move(delta: float, particle_data: ParticleData, cell_data: CellData) -> void:
 	# Velocity Verlet for each particle
-	var particle_count: int = particle_data.get_count()
-	var particle_positions: PackedVector2Array = particle_data.get_positions()
-	var particle_velocities: PackedVector2Array = particle_data.get_velocities()
-	var particle_accelerations: PackedVector2Array = particle_data.get_accelerations()
+	var particle_count: int = particle_data.count
+	var particle_positions: PackedVector2Array = particle_data.positions
+	var particle_velocities: PackedVector2Array = particle_data.velocities
+	var particle_accelerations: PackedVector2Array = particle_data.accelerations
 	
 	for particle_indx in range(particle_count):
 		var position := particle_positions[particle_indx]

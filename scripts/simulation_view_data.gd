@@ -10,21 +10,6 @@ func _init(simulation_size: Vector2i, edge_offset: Vector2 = Vector2(60.0, 60.0)
 	simulation_view_simulation_size = simulation_size
 	simulation_view_edge_offset = edge_offset
 
-func get_simulation_view_simulation_size() -> Vector2i:
-	return simulation_view_simulation_size
-
-func get_simulation_view_screen_size() -> Vector2:
-	return simulation_view_screen_size
-
-func get_simulation_view_position() -> Vector2:
-	return simulation_view_position
-
-func get_simulation_view_scale() -> float:
-	return simulation_view_scale
-
-func get_simulation_view_edge_offset() -> Vector2:
-	return simulation_view_edge_offset
-
 func update_simulation_view_size(view_rect_size: Vector2) -> void:
 	var simulation_view_area_size: Vector2 = view_rect_size - simulation_view_edge_offset
 	simulation_view_scale = min(simulation_view_area_size.x / float(simulation_view_simulation_size.x), simulation_view_area_size.y / float(simulation_view_simulation_size.y))
