@@ -6,8 +6,8 @@ var cell_area: Vector2i = Vector2i(80, 60)
 var simulation_size: Vector2i = cell_area * cell_size
 var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var scheduler: Scheduler = Scheduler.new()
-@onready var particle_data: ParticleData = ParticleData.new()
-@onready var cell_data: CellData = CellData.new(cell_size, cell_area)
+@onready var particles: ParticleData = ParticleData.new()
+@onready var cells: CellData = CellData.new(cell_size, cell_area)
 @onready var simulation_view_data: SimulationViewData = SimulationViewData.new(simulation_size, edge_offset)
 @onready var ui: UI = get_node("UI")
 @onready var renderer: Renderer = get_node("UI/ParticleRenderer")
@@ -16,37 +16,39 @@ var is_paused: bool = false
 
 func _ready() -> void:
 	ui.set_sim_view(simulation_view_data)
+	scheduler.set_cell_data(cells)
+	scheduler.set_particle_data(particles)
 	_build_borders()
 
 func _process(_delta: float) -> void:
-	renderer.render(particle_data, cell_data, simulation_view_data)
+	renderer.render(particles, cells, simulation_view_data)
 
 func _physics_process(delta: float) -> void:
 	if is_paused:
 		return
-	scheduler.step(delta, particle_data, cell_data)
+	scheduler.step(delta)
 
 func _build_borders() -> void:
-	var cell_array_size: int = cell_data.cell_count
-	var cell_area_row_size: int = cell_data.cell_area.x
+	var cell_array_size: int = cells.cell_count
+	var cell_area_row_size: int = cells.cell_area.x
 	for cell_indx in range(cell_array_size):
 		if cell_indx < cell_area_row_size:
-			cell_data.set_cell_wall_state(cell_indx, true)
-			cell_data.change_wall_count_by(1)
+			cells.set_cell_wall_state(cell_indx, true)
+			cells.change_wall_count_by(1)
 			continue
 		elif cell_indx >= cell_array_size - cell_area_row_size:
-			cell_data.set_cell_wall_state(cell_indx, true)
-			cell_data.change_wall_count_by(1)
+			cells.set_cell_wall_state(cell_indx, true)
+			cells.change_wall_count_by(1)
 			continue
 		var cell_row_indx: int = cell_indx % cell_area_row_size
 		if cell_row_indx == 0:
-			cell_data.set_cell_wall_state(cell_indx, true)
-			cell_data.change_wall_count_by(1)
+			cells.set_cell_wall_state(cell_indx, true)
+			cells.change_wall_count_by(1)
 		elif cell_row_indx == cell_area_row_size - 1:
-			cell_data.set_cell_wall_state(cell_indx, true)
-			cell_data.change_wall_count_by(1)
+			cells.set_cell_wall_state(cell_indx, true)
+			cells.change_wall_count_by(1)
 		else:
-			cell_data.set_cell_wall_state(cell_indx, false)
+			cells.set_cell_wall_state(cell_indx, false)
 
 func place_particle(mouse_position: Vector2) -> void:
 	var simulation_view_position: Vector2 = simulation_view_data.simulation_view_position
@@ -55,7 +57,7 @@ func place_particle(mouse_position: Vector2) -> void:
 	var particle_velocity: Vector2 = Vector2.ZERO
 	var particle_radius: float = 5.0
 	var particle_mass: float = 1.0
-	particle_data.add_particle(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
+	particles.add_particle(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
 func _on_simulation_view_gui_input(event: InputEvent) -> void:
 	if event.is_action_pressed("Place particle"):

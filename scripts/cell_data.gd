@@ -7,6 +7,7 @@ var cell_count: int
 var cell_offsets: PackedInt32Array = []
 var cell_particle_indexes: PackedInt32Array = []
 var cell_is_filled: PackedByteArray = []
+var occupied_cell_count: int
 
 func _init(size: int, area: Vector2i) -> void:
 	cell_size = size
