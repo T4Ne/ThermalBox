@@ -24,8 +24,3 @@ func add_particle(position: Vector2, velocity: Vector2, radius: float, mass: flo
 	accelerations.append(Vector2.ZERO)
 	radii.append(radius)
 	masses.append(mass)
-
-func swap_buffers(new_positions: PackedVector2Array, new_velocities: PackedVector2Array, new_accelerations: PackedVector2Array) -> void:
-	positions = new_positions.duplicate()
-	velocities = new_velocities.duplicate()
-	accelerations = new_accelerations.duplicate()

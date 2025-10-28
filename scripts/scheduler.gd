@@ -4,17 +4,19 @@ var simulation: Simulation = Simulation.new()
 var cells: CellData
 var particles: ParticleData
 var thread_count: int = 4 #TODO: pull from settings. Project settings decoupled from this value
-var chunk_size: int = 100
+var chunk_size: int = 10
 var chunk_iterations: int
-var chunks: Array = []
+var chunks: Array[Chunk] = []
 var time_step: float
 
 func step(delta: float) -> void:
 	time_step = delta
 	_build_cell_map()
 	_assign_chunks()
-	var task_id: int = WorkerThreadPool.add_group_task(multi_threaded_step, chunk_iterations)
-	WorkerThreadPool.wait_for_task_completion(task_id)
+	if chunk_iterations != 0:
+		var group_id: int = WorkerThreadPool.add_group_task(multi_threaded_step, chunk_iterations)
+		WorkerThreadPool.wait_for_group_task_completion(group_id)
+	_apply_chunks()
 
 func multi_threaded_step(chunk_iter: int) -> void:
 	var chunk: Chunk = chunks[chunk_iter]
@@ -32,6 +34,14 @@ func _assign_chunks() -> void:
 		chunks.append(Chunk.new(current_indx, chunk_end))
 		chunk_iterations += 1
 		current_indx = chunk_end + 1
+
+func _apply_chunks() -> void:
+	for chunk in chunks:
+		for particle_indx in range(chunk.particle_count):
+			var particle_id: int = chunk.particle_indexes[particle_indx]
+			particles.positions[particle_id] = chunk.positions[particle_indx]
+			particles.velocities[particle_id] = chunk.velocities[particle_indx]
+			particles.accelerations[particle_id] = chunk.accelerations[particle_indx]
 
 func set_cell_data(object: CellData) -> void:
 	cells = object
@@ -56,15 +66,15 @@ func _build_cell_map() -> void:
 	# Count and determine cells of particles, also count occupied cells
 	for par_indx in count:
 		var cell_id: int = _cell_id_from_pos(particles.positions[par_indx])
-		if cells.cell_offsets[cell_id + 1] == 0:
+		if cells.cell_offsets[cell_id] == 0:
 			non_empty_cells += 1
 			cells.occupied_cell_ids.append(cell_id)
-		cells.cell_offsets[cell_id + 1] += 1
+		cells.cell_offsets[cell_id] += 1
 	cells.occupied_cell_count = non_empty_cells
 	
 	# Exclusive prefix sum
 	var run_sum: int = 0
-	for cell_indx in cells.cell_count + 1:
+	for cell_indx in range(cells.cell_count + 1):
 		var temp: int = cells.cell_offsets[cell_indx]
 		cells.cell_offsets[cell_indx] = run_sum
 		run_sum += temp
@@ -73,7 +83,7 @@ func _build_cell_map() -> void:
 	
 	# Scatter pass
 	var write_cursor: PackedInt32Array = PackedInt32Array(cells.cell_offsets)
-	for par_indx in count:
+	for par_indx in range(count):
 		var cell_id: int = _cell_id_from_pos(particles.positions[par_indx])
 		var destination: int = write_cursor[cell_id]
 		cells.cell_particle_indexes[destination] = par_indx

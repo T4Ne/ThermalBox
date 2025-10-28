@@ -64,14 +64,14 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 		mm_walls.instance_count = wall_count
 	var current_wall_indx: int = 0
 	var cell_count: int = cell_data.cell_count
-	var cell_is_filled: PackedByteArray = cell_data.cell_is_filled
+	var cell_is_wall: PackedByteArray = cell_data.cell_is_wall
 	var cell_area: Vector2i = cell_data.cell_area
 	var cell_size: int = cell_data.cell_size
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	
 	for cell_indx in range(cell_count):
-		if not cell_is_filled[cell_indx]:
+		if not cell_is_wall[cell_indx]:
 			continue
 		@warning_ignore("integer_division")
 		var wall_array_position: Vector2i = Vector2i(cell_indx % cell_area.x, cell_indx / cell_area.x)
