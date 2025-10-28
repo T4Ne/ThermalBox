@@ -3,39 +3,34 @@ class_name Scheduler
 var simulation: Simulation = Simulation.new()
 var cells: CellData
 var particles: ParticleData
-var thread_count: int = 4 #TODO: pull from settings project settings decoupled from this
+var thread_count: int = 4 #TODO: pull from settings. Project settings decoupled from this value
 var chunk_size: int = 100
-var iterations: int
+var chunk_iterations: int
 var chunks: Array = []
-
-class Chunk:
-	var cell_start: int
-	var cell_end: int
-	var particle_indexes: PackedInt32Array
-	var positions: PackedVector2Array
-	var velocities: PackedVector2Array
-	var accelerations: PackedVector2Array
-	
-	func _init(start: int, end: int) -> void:
-		cell_start = start
-		cell_end = end
+var time_step: float
 
 func step(delta: float) -> void:
-	assign_chunks()
-	simulation.move_particles(delta, particles, cells)
+	time_step = delta
 	_build_cell_map()
+	_assign_chunks()
+	var task_id: int = WorkerThreadPool.add_group_task(multi_threaded_step, chunk_iterations)
+	WorkerThreadPool.wait_for_task_completion(task_id)
 
-func assign_chunks() -> void:
+func multi_threaded_step(chunk_iter: int) -> void:
+	var chunk: Chunk = chunks[chunk_iter]
+	simulation.move_particles(time_step, particles, cells, chunk)
+
+func _assign_chunks() -> void:
 	chunks.clear()
 	var current_indx: int = 0
 	var end_indx: int = cells.occupied_cell_count - 1
-	iterations = 0
+	chunk_iterations = 0
 	while current_indx <= end_indx:
 		var chunk_end: int = current_indx + chunk_size - 1
 		if chunk_end > end_indx:
 			chunk_end = end_indx
 		chunks.append(Chunk.new(current_indx, chunk_end))
-		iterations += 1
+		chunk_iterations += 1
 		current_indx = chunk_end + 1
 
 func set_cell_data(object: CellData) -> void:
@@ -53,7 +48,7 @@ func _cell_id_from_pos(position: Vector2) -> int:
 	return cell_id
 
 func _build_cell_map() -> void:
-	cells.cell_offsets.fill(0)
+	cells.particle_mapping_reset()
 	
 	var count: int = particles.count
 	var non_empty_cells: int = 0
@@ -63,6 +58,7 @@ func _build_cell_map() -> void:
 		var cell_id: int = _cell_id_from_pos(particles.positions[par_indx])
 		if cells.cell_offsets[cell_id + 1] == 0:
 			non_empty_cells += 1
+			cells.occupied_cell_ids.append(cell_id)
 		cells.cell_offsets[cell_id + 1] += 1
 	cells.occupied_cell_count = non_empty_cells
 	
