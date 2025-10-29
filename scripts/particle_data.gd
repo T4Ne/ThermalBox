@@ -12,7 +12,8 @@ func _init() -> void:
 
 func add_particle(position: Vector2, velocity: Vector2, radius: float, mass: float) -> void:
 	assert(
-		velocities.size() == count
+		positions.size() == count
+		and velocities.size() == count
 		and radii.size() == count
 		and masses.size() == count
 		and accelerations.size() == count,

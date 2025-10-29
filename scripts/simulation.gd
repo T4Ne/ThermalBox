@@ -5,9 +5,13 @@ var movement_handler: MovementHandler = MovementHandler.new()
 func _init() -> void:
 	pass
 
-func move_particles(delta: float, particles: ParticleData, cells: CellData, chunk: Chunk) -> void:
+func first_move(time_step: float, particles: ParticleData, cells: CellData, chunk: Chunk) -> void:
 	_prepare_chunk(cells, chunk)
-	movement_handler.move(delta, particles, cells, chunk)
+	movement_handler.first_half_verlet(time_step, particles, chunk)
+
+func second_move(time_step: float, particles: ParticleData, cells: CellData, chunk: Chunk) -> void:
+	_prepare_chunk(cells, chunk)
+	movement_handler.second_half_verlet(time_step, particles, cells, chunk)
 
 func _prepare_chunk(cells: CellData, chunk: Chunk) -> void:
 	var start_cell_indx: int = chunk.cell_start
@@ -24,7 +28,7 @@ func _prepare_chunk(cells: CellData, chunk: Chunk) -> void:
 		
 		for indx in range(particle_indx_start, particle_indx_end):
 			var particle_id: int = cell_particle_ids[indx]
-			chunk.particle_indexes.append(particle_id)
+			chunk.particle_indexes.append(particle_id) # TODO: Could cause races as the array is not pre-sized
 			count += 1
 	
 	chunk.particle_count = count

@@ -4,7 +4,7 @@ var simulation: Simulation = Simulation.new()
 var cells: CellData
 var particles: ParticleData
 var thread_count: int = 4 #TODO: pull from settings. Project settings decoupled from this value
-var chunk_size: int = 10
+var chunk_size: int = 100
 var chunk_iterations: int
 var chunks: Array[Chunk] = []
 var time_step: float
@@ -13,16 +13,26 @@ func step(delta: float) -> void:
 	time_step = delta
 	_build_cell_map()
 	_assign_chunks()
-	if chunk_iterations != 0:
-		var group_id: int = WorkerThreadPool.add_group_task(multi_threaded_step, chunk_iterations)
+	if chunk_iterations > 0:
+		var group_id: int = WorkerThreadPool.add_group_task(_first_multi_threaded_step, chunk_iterations)
 		WorkerThreadPool.wait_for_group_task_completion(group_id)
-	_apply_chunks()
+		_apply_chunks()
+		_build_cell_map()
+		_assign_chunks()
+		group_id = WorkerThreadPool.add_group_task(_second_multi_threaded_step, chunk_iterations)
+		WorkerThreadPool.wait_for_group_task_completion(group_id)
+		_apply_chunks()
 
-func multi_threaded_step(chunk_iter: int) -> void:
+func _first_multi_threaded_step(chunk_iter: int) -> void:
 	var chunk: Chunk = chunks[chunk_iter]
-	simulation.move_particles(time_step, particles, cells, chunk)
+	simulation.first_move(time_step, particles, cells, chunk)
+
+func _second_multi_threaded_step(chunk_iter: int) -> void:
+	var chunk: Chunk = chunks[chunk_iter]
+	simulation.second_move(time_step, particles, cells, chunk)
 
 func _assign_chunks() -> void:
+	# TODO: chunk size and occupied cell count is known, so the Chunk array size could be initialized
 	chunks.clear()
 	var current_indx: int = 0
 	var end_indx: int = cells.occupied_cell_count - 1
@@ -64,6 +74,7 @@ func _build_cell_map() -> void:
 	var non_empty_cells: int = 0
 	
 	# Count and determine cells of particles, also count occupied cells
+	# TODO: occupied_cell_ids append is slow
 	for par_indx in count:
 		var cell_id: int = _cell_id_from_pos(particles.positions[par_indx])
 		if cells.cell_offsets[cell_id] == 0:
