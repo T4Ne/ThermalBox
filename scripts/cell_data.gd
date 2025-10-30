@@ -28,3 +28,14 @@ func particle_mapping_reset() -> void:
 	occupied_cell_ids.clear()
 	cell_offsets.fill(0)
 	cell_particle_indexes.clear()
+
+func toggle_wall(coordinates: Vector2i) -> void:
+	var cell_id: int = coordinates.x + cell_area.x * coordinates.y
+	var is_currently_wall: int = cell_is_wall[cell_id]
+	if is_currently_wall:
+		cell_is_wall[cell_id] = false
+		wall_count -= 1
+	else:
+		cell_is_wall[cell_id] = true
+		wall_count += 1
+	print(wall_count)

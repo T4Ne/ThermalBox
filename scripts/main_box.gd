@@ -13,7 +13,6 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var renderer: Renderer = get_node("UI/ParticleRenderer")
 var is_paused: bool = false
 
-
 func _ready() -> void:
 	ui.set_sim_view(simulation_view_data)
 	scheduler.set_cell_data(cells)
@@ -59,9 +58,15 @@ func place_particle(mouse_position: Vector2) -> void:
 	var particle_mass: float = 1.0
 	particles.add_particle(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
-func place_wall(_mouse_position: Vector2) -> void:
-	pass
-
+func place_wall(mouse_position: Vector2) -> void:
+	var simulation_view_position: Vector2 = simulation_view_data.simulation_view_position
+	var simulation_view_scale: float = simulation_view_data.simulation_view_scale
+	var size: int = cells.cell_size
+	var cell_x: int = floori((mouse_position.x - simulation_view_position.x) / simulation_view_scale) / size
+	var cell_y: int = floori((mouse_position.y - simulation_view_position.y) / simulation_view_scale) / size
+	var cell_coordinates: Vector2i = Vector2i(cell_x, cell_y)
+	cells.toggle_wall(cell_coordinates)
+	
 func _on_simulation_view_gui_input(event: InputEvent) -> void:
 	if event.is_action_pressed("Place particle"):
 		place_particle(get_global_mouse_position())
