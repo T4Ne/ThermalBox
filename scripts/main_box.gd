@@ -59,6 +59,11 @@ func place_particle(mouse_position: Vector2) -> void:
 	var particle_mass: float = 1.0
 	particles.add_particle(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
+func place_wall(_mouse_position: Vector2) -> void:
+	pass
+
 func _on_simulation_view_gui_input(event: InputEvent) -> void:
 	if event.is_action_pressed("Place particle"):
 		place_particle(get_global_mouse_position())
+	if event.is_action_pressed("Place wall"):
+		place_wall(get_global_mouse_position())

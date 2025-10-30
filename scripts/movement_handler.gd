@@ -37,9 +37,9 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 		var half_step_velocity: Vector2 = particle_velocities[particle_id]
 		var old_acceleration: Vector2 = particle_accelerations[particle_id]
 		
-		collision_handler.calculate_collision(particle_id, predicted_full_step_position, half_step_velocity, particles, cells, chunk)
-		var final_full_step_position: Vector2 = predicted_full_step_position # TODO: collision_handler
-		var final_half_step_velocity: Vector2 = half_step_velocity # TODO: collision_handler
+		var collision_offsets: PackedVector2Array = collision_handler.calculate_collision_movement(particle_id, predicted_full_step_position, half_step_velocity, particles, cells)
+		var final_full_step_position: Vector2 = collision_offsets[0]
+		var final_half_step_velocity: Vector2 = collision_offsets[1]
 		var full_step_acceleration: Vector2 = _calculate_verlet_acceleration(time_step, old_acceleration)
 		var full_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, final_half_step_velocity, full_step_acceleration)
 		
@@ -52,7 +52,7 @@ func _calculate_verlet_position(time_step: float, position: Vector2, velocity: V
 	return new_position
 
 func _calculate_verlet_velocity(time_step: float, velocity: Vector2, acceleration: Vector2) -> Vector2:
-	var new_velocity := velocity + 0.5 * acceleration * time_step
+	var new_velocity := velocity + acceleration * time_step
 	return new_velocity
 
 func _calculate_verlet_acceleration(_time_step:float, _acceleration: Vector2) -> Vector2:

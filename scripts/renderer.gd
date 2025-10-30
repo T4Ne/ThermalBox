@@ -73,7 +73,6 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 	for cell_indx in range(cell_count):
 		if not cell_is_wall[cell_indx]:
 			continue
-		@warning_ignore("integer_division")
 		var wall_array_coordinates: Vector2i = Vector2i(cell_indx % cell_area.x, cell_indx / cell_area.x)
 		var wall_simulation_position: Vector2 = Vector2(float(wall_array_coordinates.x) * float(cell_size) + float(cell_size) / 2.0, 
 		float(wall_array_coordinates.y) * float(cell_size) + float(cell_size) / 2.0)
