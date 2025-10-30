@@ -22,12 +22,12 @@ func _sequential_wall_collision(id: int, seq_particle_state: PackedVector2Array,
 	var radius: float = particles.radii[id]
 	var cell_area: Vector2i = cells.cell_area
 	
-	for wall_indx in range(1, len(walls), 2):
+	for wall_indx in range(1, len(walls), 2): # Check up,down,left,right squares first
 		var wall_id: int = walls[wall_indx]
 		if wall_id < 0:
 			continue
 		_wall_collision(wall_id, seq_particle_state, cell_side_length, radius, cell_area)
-	for wall_indx in range(0, len(walls), 2):
+	for wall_indx in range(0, len(walls), 2): # Check upper-left, upper-right, middle, lower-left, lower-right squares second
 		var wall_id: int = walls[wall_indx]
 		if wall_id < 0:
 			continue
@@ -46,9 +46,8 @@ func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_
 	var wall_closest_pos: Vector2 = Vector2(wall_closest_x, wall_closest_y)
 	var surface_normal: Vector2 = seq_particle_state[0] - wall_closest_pos
 	var unit_surface_normal: Vector2 = surface_normal.normalized()
-	seq_particle_state[0] += unit_surface_normal * radius - surface_normal
-	if seq_particle_state[1].dot(unit_surface_normal) < 0:
-		seq_particle_state[1] += -2 * unit_surface_normal * seq_particle_state[1].dot(unit_surface_normal) # reflect velocity with normal
+	seq_particle_state[0] += (unit_surface_normal * radius - surface_normal) * 2
+	seq_particle_state[1] += -2 * unit_surface_normal * seq_particle_state[1].dot(unit_surface_normal) # reflect velocity with normal
 
 func _cell_id_by_position(position: Vector2, cells: CellData) -> int:
 	var cell_x: int = floori(position.x / cells.cell_size)
