@@ -38,4 +38,3 @@ func toggle_wall(coordinates: Vector2i) -> void:
 	else:
 		cell_is_wall[cell_id] = true
 		wall_count += 1
-	print(wall_count)

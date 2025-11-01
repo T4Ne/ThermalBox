@@ -66,9 +66,27 @@ func place_wall(mouse_position: Vector2) -> void:
 	var cell_y: int = floori((mouse_position.y - simulation_view_position.y) / simulation_view_scale) / size
 	var cell_coordinates: Vector2i = Vector2i(cell_x, cell_y)
 	cells.toggle_wall(cell_coordinates)
-	
+
 func _on_simulation_view_gui_input(event: InputEvent) -> void:
 	if event.is_action_pressed("Place particle"):
 		place_particle(get_global_mouse_position())
 	if event.is_action_pressed("Place wall"):
 		place_wall(get_global_mouse_position())
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("print energy"):
+		print_energy()
+
+func print_energy() -> void:
+	var energy_sum: float = 0.0
+	var gravity: float = 20.0
+	var simulation_height: float = float(cells.cell_area.y * cells.cell_size)
+	for particle_id in range(particles.count):
+		var height: float = simulation_height - particles.positions[particle_id].y
+		var mass: float = particles.masses[particle_id]
+		var velocity: float = particles.velocities[particle_id].length()
+		var kinetic_energy: float = 0.5 * mass * (velocity ** 2)
+		var potential_energy: float = mass * gravity * height
+		var total_energy: float = kinetic_energy + potential_energy
+		energy_sum += total_energy
+	print("%.0f" % energy_sum)
