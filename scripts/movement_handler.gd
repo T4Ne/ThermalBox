@@ -55,11 +55,11 @@ func _calculate_verlet_velocity(time_step: float, velocity: Vector2, acceleratio
 	var new_velocity := velocity + acceleration * time_step
 	return new_velocity
 
-func _calculate_verlet_acceleration(_time_step:float, _acceleration: Vector2) -> Vector2:
+func _calculate_verlet_acceleration(_time_step:float, acceleration: Vector2) -> Vector2:
 	# TODO: gravitational acceleration should be a global variable controlled by main scene script
 	var g := Vector2(0.0, 20.0)
 	var new_acceleration := g
-	return new_acceleration
+	return acceleration
 
 func _calculate_force(_time_step: float, _mass: float) -> void:
 	# TODO: Nearby particles apply forces to each other.

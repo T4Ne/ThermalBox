@@ -62,6 +62,8 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 	var wall_count: int = cell_data.wall_count
 	if mm_walls.instance_count < wall_count:
 		mm_walls.instance_count = wall_count
+	elif mm_walls.instance_count > wall_count:
+		mm_walls.instance_count = wall_count
 	var current_wall_indx: int = 0
 	var cell_count: int = cell_data.cell_count
 	var cell_is_wall: PackedByteArray = cell_data.cell_is_wall

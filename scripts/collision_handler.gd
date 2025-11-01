@@ -39,6 +39,8 @@ func _sequential_wall_collision(id: int, seq_particle_state: PackedVector2Array,
 func _sequential_particle_collision(id: int, seq_particle_state: PackedVector2Array, neighbor_particles: PackedInt32Array, particles: ParticleData) -> void:
 	var radius: float = particles.radii[id]
 	var mass: float = particles.masses[id]
+	var max_pen: float = 0.0
+	var max_pen_id: int
 	
 	for neighbor_id in neighbor_particles:
 		var neighbor_position: Vector2 = particles.positions[neighbor_id]
@@ -56,10 +58,17 @@ func _sequential_particle_collision(id: int, seq_particle_state: PackedVector2Ar
 		var min_distance_vector: Vector2 = unit_vector_from_neighbor * radius + unit_vector_from_neighbor * neighbor_radius
 		var relative_velocity: Vector2 = seq_particle_state[1] - neighbor_velocity
 		var normal_speed: float = relative_velocity.dot(unit_vector_from_neighbor)
+		
+		if normal_speed >= 0:
+			continue
+		var penetration: float = (vector_from_neigbor - min_distance_vector).length()
+		var step: float = penetration / normal_speed
+		_step(step, seq_particle_state)
 		var inverse_mass_sum: float = (1.0 / mass) + (1.0 / neighbor_mass)
 		var impulse_magnitude: float = -2.0 * normal_speed / inverse_mass_sum
-		seq_particle_state[0] += (min_distance_vector - vector_from_neigbor) * 2
 		seq_particle_state[1] += (impulse_magnitude / mass) * unit_vector_from_neighbor
+		_step(-step, seq_particle_state)
+		break
 
 func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_side_length: int, radius: float, cell_area: Vector2i) -> void:
 	var wall_array_coordinates: Vector2i = Vector2i(wall_id % cell_area.x, wall_id / cell_area.x)
@@ -70,13 +79,24 @@ func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_
 	
 	if distance_to_wall_squared > radius**2:
 		return
-	
 	var wall_closest_pos: Vector2 = Vector2(wall_closest_x, wall_closest_y)
 	var surface_normal: Vector2 = seq_particle_state[0] - wall_closest_pos
+	
+	if surface_normal == Vector2.ZERO:
+		return
 	var unit_surface_normal: Vector2 = surface_normal.normalized()
-	seq_particle_state[0] += (unit_surface_normal * radius - surface_normal) * 2.0
-	if unit_surface_normal.dot(seq_particle_state[1]) < 0:
-		seq_particle_state[1] += -2.0 * unit_surface_normal * seq_particle_state[1].dot(unit_surface_normal) # reflect velocity with normal
+	var penetration: float = (unit_surface_normal * radius - surface_normal).length()
+	var velocity_normal_magnitude: float = unit_surface_normal.dot(seq_particle_state[1]) # Negative towards wall
+	
+	if velocity_normal_magnitude >= 0:
+		return
+	var step: float = penetration / velocity_normal_magnitude
+	_step(step, seq_particle_state) # step back
+	seq_particle_state[1] += -2.0 * unit_surface_normal * seq_particle_state[1].dot(unit_surface_normal) # reflect velocity with normal
+	_step(-step, seq_particle_state) # step forward
+
+func _step(step: float, seq_particle_state: PackedVector2Array) -> void:
+	seq_particle_state[0] += seq_particle_state[1] * step
 
 func _cell_id_by_position(position: Vector2, cells: CellData) -> int:
 	var cell_x: int = floori(position.x / cells.cell_size)
