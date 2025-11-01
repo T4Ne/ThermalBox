@@ -41,11 +41,12 @@ func _sequential_particle_collision(id: int, seq_particle_state: PackedVector2Ar
 	var mass: float = particles.masses[id]
 	var max_pen: float = 0.0
 	var max_pen_id: int
+	var max_normal_speed: float
+	var max_unit_vector: Vector2
 	
 	for neighbor_id in neighbor_particles:
 		var neighbor_position: Vector2 = particles.positions[neighbor_id]
 		var neighbor_radius: float = particles.radii[neighbor_id]
-		var neighbor_mass: float = particles.masses[neighbor_id]
 		var neighbor_velocity: Vector2 = particles.velocities[neighbor_id]
 		var vector_from_neigbor: Vector2 = seq_particle_state[0] - neighbor_position
 		var min_distance_squared: float = (radius + neighbor_radius)**2
@@ -62,13 +63,20 @@ func _sequential_particle_collision(id: int, seq_particle_state: PackedVector2Ar
 		if normal_speed >= 0:
 			continue
 		var penetration: float = (vector_from_neigbor - min_distance_vector).length()
-		var step: float = penetration / normal_speed
+		if penetration > max_pen:
+			max_pen = penetration
+			max_pen_id = neighbor_id
+			max_normal_speed = normal_speed
+			max_unit_vector = unit_vector_from_neighbor
+	
+	if max_pen_id:
+		var neighbor_mass: float = particles.masses[max_pen_id]
+		var step: float = max_pen / max_normal_speed
 		_step(step, seq_particle_state)
 		var inverse_mass_sum: float = (1.0 / mass) + (1.0 / neighbor_mass)
-		var impulse_magnitude: float = -2.0 * normal_speed / inverse_mass_sum
-		seq_particle_state[1] += (impulse_magnitude / mass) * unit_vector_from_neighbor
+		var impulse_magnitude: float = -2.0 * max_normal_speed / inverse_mass_sum
+		seq_particle_state[1] += (impulse_magnitude / mass) * max_unit_vector
 		_step(-step, seq_particle_state)
-		break
 
 func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_side_length: int, radius: float, cell_area: Vector2i) -> void:
 	var wall_array_coordinates: Vector2i = Vector2i(wall_id % cell_area.x, wall_id / cell_area.x)
