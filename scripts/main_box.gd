@@ -53,7 +53,7 @@ func place_particle(mouse_position: Vector2) -> void:
 	var simulation_view_position: Vector2 = simulation_view_data.simulation_view_position
 	var simulation_view_scale: float = simulation_view_data.simulation_view_scale
 	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
-	var particle_velocity: Vector2 = Vector2(cos(deg_to_rad(randf_range(0.0, 180.0))), sin(deg_to_rad(randf_range(0.0, 180.0)))) * 50.0
+	var particle_velocity: Vector2 = Vector2(cos(deg_to_rad(randf_range(0.0, 360.0))), sin(deg_to_rad(randf_range(0.0, 360.0)))) * 10.0
 	var particle_radius: float = 5.0
 	var particle_mass: float = 1.0
 	particles.add_particle(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
@@ -79,12 +79,9 @@ func _input(event: InputEvent) -> void:
 
 func print_energy() -> void:
 	var energy_sum: float = 0.0
-	var gravity: float = 20.0
 	var count: int = particles.count
-	var simulation_height: float = float(cells.cell_area.y * cells.cell_size)
 	
 	for particle_id in range(count):
-		var height: float = simulation_height - particles.positions[particle_id].y
 		var mass: float = particles.masses[particle_id]
 		var velocity: float = particles.velocities[particle_id].length()
 		var kinetic_energy: float = 0.5 * mass * (velocity ** 2)

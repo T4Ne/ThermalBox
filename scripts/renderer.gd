@@ -56,7 +56,7 @@ func _render_particles(particles: ParticleData, simulation_view: SimulationViewD
 		particle_transform.y = Vector2(0.0, particle_screen_diameter)
 		
 		mm_particles.set_instance_transform_2d(particle_indx, particle_transform)
-		mm_particles.set_instance_color(particle_indx, Color("DARK_GREEN"))
+		mm_particles.set_instance_color(particle_indx, Color("006488ff"))
 
 func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> void:
 	var wall_count: int = cell_data.wall_count
@@ -87,5 +87,5 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 		wall_transform.y = Vector2(0.0, wall_screen_size)
 		
 		mm_walls.set_instance_transform_2d(current_wall_indx, wall_transform)
-		mm_walls.set_instance_color(current_wall_indx, Color("GRAY"))
+		mm_walls.set_instance_color(current_wall_indx, Color("303030ff"))
 		current_wall_indx += 1

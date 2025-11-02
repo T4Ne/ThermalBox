@@ -30,17 +30,21 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 	var particle_positions: PackedVector2Array = particles.positions
 	var particle_velocities: PackedVector2Array = particles.velocities
 	var particle_accelerations: PackedVector2Array = particles.accelerations
+	var particle_radii: PackedFloat32Array = particles.radii
+	var particle_masses: PackedFloat32Array = particles.masses
 	
 	for particle_indx in range(particle_count):
 		var particle_id: int = particle_ids[particle_indx]
 		var predicted_full_step_position: Vector2 = particle_positions[particle_id]
 		var half_step_velocity: Vector2 = particle_velocities[particle_id]
 		var old_acceleration: Vector2 = particle_accelerations[particle_id]
+		var radius: float = particle_radii[particle_id]
+		var mass: float = particle_masses[particle_id]
 		
 		var collision_offsets: PackedVector2Array = collision_handler.calculate_collision_movement(particle_id, predicted_full_step_position, half_step_velocity, particles, cells)
 		var final_full_step_position: Vector2 = collision_offsets[0]
 		var final_half_step_velocity: Vector2 = collision_offsets[1]
-		var full_step_acceleration: Vector2 = _calculate_verlet_acceleration(time_step, old_acceleration)
+		var full_step_acceleration: Vector2 = _calculate_verlet_acceleration(particle_id, final_full_step_position, radius, mass, particles)
 		var full_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, final_half_step_velocity, full_step_acceleration)
 		
 		chunk.positions[particle_indx] = final_full_step_position
@@ -55,12 +59,38 @@ func _calculate_verlet_velocity(time_step: float, velocity: Vector2, acceleratio
 	var new_velocity := velocity + acceleration * time_step
 	return new_velocity
 
-func _calculate_verlet_acceleration(_time_step:float, acceleration: Vector2) -> Vector2:
+func _calculate_verlet_acceleration(id: int, position: Vector2, radius: float, mass: float, particles: ParticleData) -> Vector2:
 	# TODO: gravitational acceleration should be a global variable controlled by main scene script
-	var g := Vector2(0.0, 20.0)
-	var new_acceleration := g
+	var near_particles: PackedInt32Array = _find_close_particles(id, position, radius, particles)
+	var other_positions: PackedVector2Array = particles.positions
+	var acceleration: Vector2 = Vector2(0.0, 20.0)
+	for particle_id in near_particles:
+		var other_position: Vector2 = other_positions[particle_id]
+		var other_to_current: Vector2 = other_position - position
+		var other_to_current_unit: Vector2 = other_to_current.normalized()
+		var distance_r: float = other_to_current.length() / radius
+		var force_magnitude: float = _calculate_force(distance_r)
+		var acceleration_magnitude: float = force_magnitude / mass
+		var acceleration_vector: Vector2 = other_to_current_unit * acceleration_magnitude
+		acceleration += acceleration_vector
+	
 	return acceleration
 
-func _calculate_force(_time_step: float, _mass: float) -> void:
-	# TODO: Nearby particles apply forces to each other.
-	pass
+func _calculate_force(distance: float) -> float:
+	var force: float = 8.8*distance**3 - 110*distance**2 + 440*distance - 550
+	return force
+
+func _find_close_particles(id: int, position: Vector2, radius: float, particles: ParticleData) -> PackedInt32Array:
+	var reach_range_squared: float = (radius * 5.0)**2
+	var particle_count: int = particles.count
+	var positions: PackedVector2Array = particles.positions
+	var close_particles: PackedInt32Array = []
+	for particle_id in range(particle_count):
+		if particle_id == id:
+			continue
+		var other_particle_position: Vector2 = positions[particle_id]
+		var distance_squared: float = (other_particle_position - position).length_squared()
+		if reach_range_squared < distance_squared:
+			continue
+		close_particles.append(particle_id)
+	return close_particles
