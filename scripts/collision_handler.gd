@@ -5,17 +5,18 @@ func _init() -> void:
 
 func calculate_collision_movement(id: int, position: Vector2, velocity: Vector2, particles: ParticleData, cells: CellData) -> PackedVector2Array:
 	var seq_particle_state: PackedVector2Array = [position, velocity]
-	var cell_id: int = _cell_id_by_position(position, cells)
-	var neighbor_cells: PackedInt32Array = _get_neighbor_cells(cell_id, cells)
-	#_collide_with_particles(id, seq_particle_state, neighbor_cells, particles, cells)
+	var cell_id: int = cells.cell_id_by_pos(position)
+	var neighbor_cells: PackedInt32Array = cells.get_neighbor_cells(cell_id)
+	_collide_with_particles(id, seq_particle_state, neighbor_cells, particles, cells)
 	_collide_with_walls(id, seq_particle_state, neighbor_cells, particles, cells)
 	return seq_particle_state
 
-func _collide_with_particles(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array,particles: ParticleData, cells: CellData) -> void:
-	var neighbor_particles: PackedInt32Array = _particles_by_cells(id, neighbor_cells, cells)
+## @deprecated: Ideal particle collisions don't conserve energy
+func _collide_with_particles(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
+	var neighbor_particles: PackedInt32Array = cells.particles_by_cells(id, neighbor_cells)
 	_sequential_particle_collision(id, seq_particle_state, neighbor_particles, particles)
 
-## @deprecated: Old-school wall collisions don't conserve energy
+## @deprecated: Ideal wall collisions don't conserve energy
 func _collide_with_walls(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
 	var walls: PackedInt32Array = _walls_by_cells(neighbor_cells, cells)
 	_sequential_wall_collision(id, seq_particle_state, walls, particles, cells)
@@ -106,28 +107,7 @@ func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_
 func _step(step: float, seq_particle_state: PackedVector2Array) -> void:
 	seq_particle_state[0] += seq_particle_state[1] * step
 
-func _cell_id_by_position(position: Vector2, cells: CellData) -> int:
-	var cell_x: int = floori(position.x / cells.cell_size)
-	var cell_y: int = floori(position.y / cells.cell_size)
-	var cell_id: int = cell_x + cell_y * cells.cell_area.x
-	return cell_id
-
-func _get_neighbor_cells(cell_id: int, cells: CellData, range: int = 1) -> PackedInt32Array:
-	var cell_area: Vector2i = cells.cell_area
-	var row_size: int = cells.cell_area.x
-	var cell_x: int = cell_id % row_size
-	var cell_y: int = cell_id / row_size
-	
-	assert(cell_id % cell_area.x > 0 and cell_id % cell_area.x < cell_area.x - 1, "NeighborCellOutOfRangeError: Neighbor cell is out of range")
-	assert(cell_id / cell_area.x > 0 and cell_id / cell_area.x < cell_area.y - 1, "NeighborCellOutOfRangeError: Neighbor cell is out of range")
-	
-	var neighbor_ids: PackedInt32Array = [
-	cell_id - 1 - row_size, cell_id - row_size, cell_id + 1 - row_size,
-	cell_id - 1, cell_id, cell_id + 1,
-	cell_id - 1 + row_size, cell_id + row_size, cell_id + 1 + row_size
-	]
-	return neighbor_ids
-
+# TODO: Change this to something better
 func _walls_by_cells(neighbor_ids: PackedInt32Array, cells: CellData) -> PackedInt32Array:
 	var wall_ids: PackedInt32Array = []
 	var cell_is_wall: PackedByteArray = cells.cell_is_wall
@@ -140,18 +120,62 @@ func _walls_by_cells(neighbor_ids: PackedInt32Array, cells: CellData) -> PackedI
 			wall_ids.append(-1)
 	return wall_ids
 
-func _particles_by_cells(id: int, neighbor_cells: PackedInt32Array, cells: CellData) -> PackedInt32Array:
-	var neigbor_particles: PackedInt32Array = []
-	var cell_offsets: PackedInt32Array = cells.cell_offsets
-	var particles_in_cell: PackedInt32Array = cells.cell_particle_indexes
+func calculate_collision_acceleration(id: int, position: Vector2, particles: ParticleData, cells: CellData) -> Vector2:
+	var combined_acceleration: Vector2 = Vector2.ZERO
+	var cell_id: int = cells.cell_id_by_pos(position)
+	var neighbor_cells: PackedInt32Array = cells.get_neighbor_cells(cell_id, 2)
+	combined_acceleration += interact_with_walls(id, position, neighbor_cells, particles, cells)
+	combined_acceleration += interact_with_particles(id, position, neighbor_cells, particles, cells)
+	return combined_acceleration
+
+## @experimental: Treating walls as particles that apply forces
+func interact_with_walls(id: int, position: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
+	var accumulated_acceleration: Vector2 = Vector2.ZERO
+	var cell_radius: float = cells.cell_size / 2.0
+	var walls: PackedInt32Array = _walls_by_cells(neighbor_cells, cells)
+	var mass: float = particles.masses[id]
 	
-	for cell_id in neighbor_cells:
-		var particle_indx_start: int = cell_offsets[cell_id]
-		var particle_indx_end: int = cell_offsets[cell_id + 1]
-		for particle_indx in range(particle_indx_start, particle_indx_end):
-			var particle_id: int = particles_in_cell[particle_indx]
-			if particle_id == id:
-				continue
-			neigbor_particles.append(particle_id)
+	for wall_id in walls:
+		if wall_id < 0: # Cell is not wall
+			continue
+		
+		var wall_array_coordinates: Vector2i = cells.array_coords_by_cell_id(wall_id)
+		var wall_position: Vector2 = cells.cell_pos_by_array_coords(wall_array_coordinates)
+		var wall_center_position: Vector2 = wall_position + Vector2(cell_radius, cell_radius)
+		var wall_to_particle: Vector2 = position - wall_center_position
+		var distance_to_wall_squared: float = wall_to_particle.length_squared()
+		
+		if distance_to_wall_squared > (2.5 * cell_radius)**2: # Wall is not in range to collide
+			continue
+		
+		var wall_to_particle_unit: Vector2 = wall_to_particle.normalized()
+		var wall_to_particle_distance_r: float = wall_to_particle.length() / cell_radius
+		var wall_force_magnitude: float = 10000.0 * ((2.5 / wall_to_particle_distance_r) - 1.0)
+		var wall_acceleration_magnitude: float = wall_force_magnitude / mass
+		var wall_acceleration: Vector2 = wall_to_particle_unit * wall_acceleration_magnitude
+		accumulated_acceleration += wall_acceleration
 	
-	return neigbor_particles
+	return accumulated_acceleration
+
+func interact_with_particles(id: int, position: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
+	var neighbor_particles: PackedInt32Array = cells.particles_by_cells(id, neighbor_cells)
+	var other_positions: PackedVector2Array = particles.positions
+	var accumulated_acceleration: Vector2 = Vector2.ZERO
+	var radius: float = particles.radii[id]
+	var mass: float = particles.radii[id]
+	
+	for particle_id in neighbor_particles:
+		var other_position: Vector2 = other_positions[particle_id]
+		var other_to_current: Vector2 = other_position - position
+		
+		if other_to_current.length_squared() > (7 * radius)**2:
+			continue
+		
+		var other_to_current_unit: Vector2 = other_to_current.normalized()
+		var distance_r: float = other_to_current.length() / radius
+		var force_magnitude: float = 40*distance_r**3 - 740*distance_r**2 + 4480*distance_r - 8820
+		var acceleration_magnitude: float = force_magnitude / mass
+		var acceleration_vector: Vector2 = other_to_current_unit * acceleration_magnitude
+		accumulated_acceleration += acceleration_vector
+	
+	return accumulated_acceleration

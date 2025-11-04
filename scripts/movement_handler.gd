@@ -42,10 +42,11 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 		var radius: float = particle_radii[particle_id]
 		var mass: float = particle_masses[particle_id]
 		
-		var collision_offsets: PackedVector2Array = collision_handler.calculate_collision_movement(particle_id, predicted_full_step_position, half_step_velocity, particles, cells)
-		var final_full_step_position: Vector2 = collision_offsets[0]
-		var final_half_step_velocity: Vector2 = collision_offsets[1]
-		var full_step_acceleration: Vector2 = _calculate_verlet_acceleration(particle_id, final_full_step_position, radius, mass, gravity, gravity_is_on, particles)
+		# var collision_offsets: PackedVector2Array = collision_handler.calculate_collision_movement(particle_id, predicted_full_step_position, half_step_velocity, particles, cells)
+		var final_full_step_position: Vector2 = predicted_full_step_position #collision_offsets[0]
+		var final_half_step_velocity: Vector2 = half_step_velocity #collision_offsets[1]
+		var full_step_acceleration: Vector2 = _calculate_gravity(gravity, gravity_is_on)
+		full_step_acceleration += collision_handler.calculate_collision_acceleration(particle_id, final_full_step_position, particles, cells)
 		var full_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, final_half_step_velocity, full_step_acceleration)
 		
 		chunk.positions[particle_indx] = final_full_step_position
