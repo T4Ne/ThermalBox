@@ -9,20 +9,21 @@ var mm_walls: MultiMesh = MultiMesh.new()
 var wall_quad: QuadMesh = QuadMesh.new()
 @onready var simulation_view_background: ColorRect = get_node("SimulationView")
 
-func _ready() -> void:
+func reinitialize_render() -> void:
 	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad)
 	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad)
 
 func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh) -> void:
 	mm_instance.z_index = 3
-	add_child(mm_instance)
+	if self != mm_instance.get_parent():
+		add_child(mm_instance)
 	
 	quad.size = Vector2(1, 1)
 	
+	mm.instance_count = 0
 	mm.transform_format = MultiMesh.TRANSFORM_2D
 	mm.use_colors = true
 	mm.mesh = quad
-	mm.instance_count = 0
 	
 	mm_instance.multimesh = mm
 

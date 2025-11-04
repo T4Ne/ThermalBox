@@ -32,19 +32,20 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 	var _particle_accelerations: PackedVector2Array = particles.accelerations
 	var particle_radii: PackedFloat32Array = particles.radii
 	var particle_masses: PackedFloat32Array = particles.masses
+	var gravity: Vector2 = Globals.gravity
+	var gravity_is_on: bool = Globals.gravity_is_on
 	
 	for particle_indx in range(particle_count):
 		var particle_id: int = particle_ids[particle_indx]
 		var predicted_full_step_position: Vector2 = particle_positions[particle_id]
 		var half_step_velocity: Vector2 = particle_velocities[particle_id]
-		var gravity: Vector2 = Globals.gravity
-		var _radius: float = particle_radii[particle_id]
-		var _mass: float = particle_masses[particle_id]
+		var radius: float = particle_radii[particle_id]
+		var mass: float = particle_masses[particle_id]
 		
 		var collision_offsets: PackedVector2Array = collision_handler.calculate_collision_movement(particle_id, predicted_full_step_position, half_step_velocity, particles, cells)
 		var final_full_step_position: Vector2 = collision_offsets[0]
 		var final_half_step_velocity: Vector2 = collision_offsets[1]
-		var full_step_acceleration: Vector2 = _calculate_verlet_gravity(gravity)
+		var full_step_acceleration: Vector2 = _calculate_verlet_acceleration(particle_id, final_full_step_position, radius, mass, gravity, gravity_is_on, particles)
 		var full_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, final_half_step_velocity, full_step_acceleration)
 		
 		chunk.positions[particle_indx] = final_full_step_position
@@ -60,11 +61,10 @@ func _calculate_verlet_velocity(time_step: float, velocity: Vector2, acceleratio
 	return new_velocity
 
 ## @deprecated: Attraction calculation is very slow
-func _calculate_verlet_acceleration(id: int, position: Vector2, radius: float, mass: float, particles: ParticleData) -> Vector2:
-	
+func _calculate_verlet_acceleration(id: int, position: Vector2, radius: float, mass: float, gravity: Vector2, gravity_is_on: bool, particles: ParticleData) -> Vector2:
 	var near_particles: PackedInt32Array = _find_close_particles(id, position, radius, particles)
 	var other_positions: PackedVector2Array = particles.positions
-	var acceleration: Vector2 = Vector2.ZERO #Vector2(0.0, 20.0)
+	var acceleration: Vector2 = _calculate_gravity(gravity, gravity_is_on)
 	for particle_id in near_particles:
 		var other_position: Vector2 = other_positions[particle_id]
 		var other_to_current: Vector2 = other_position - position
@@ -77,11 +77,14 @@ func _calculate_verlet_acceleration(id: int, position: Vector2, radius: float, m
 	
 	return acceleration
 
-func _calculate_verlet_gravity(gravity: Vector2) -> Vector2:
-	return gravity
+func _calculate_gravity(gravity: Vector2, gravity_is_on: bool) -> Vector2:
+	if gravity_is_on:
+		return gravity
+	else:
+		return Vector2.ZERO
 
 func _calculate_force(distance: float) -> float:
-	var force: float = 8.8*distance**3 - 110*distance**2 + 440*distance - 550
+	var force: float = 32*distance**3 - 400*distance**2 + 1600*distance - 2000
 	return force
 
 func _find_close_particles(id: int, position: Vector2, radius: float, particles: ParticleData) -> PackedInt32Array:

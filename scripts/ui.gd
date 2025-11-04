@@ -1,14 +1,23 @@
 class_name UI
 extends CanvasLayer
 
+var edge_offset: Vector2 = Vector2(60.0, 60.0)
+
 @onready var SimulationViewRect: ColorRect = get_node("Control/SimulationViewArea/SimulationViewRect")
 @onready var SimulationViewPos: Control = get_node("Control/SimulationViewArea/SimulationViewRect/SimulationViewPos")
-@onready var simulation_view: SimulationViewData
 @onready var SelectedLabel: Label = get_node("Control/BottomBar/ItemButtons/Selected")
+@onready var simulation_view: SimulationViewData
+@onready var main_box: MainBox = get_node("MainBox")
+@onready var Pause: Button = get_node("Control/SideBar/MainControls/Pause")
+@onready var Gravity: Button = get_node("Control/SideBar/MainControls/Gravity")
 
 enum Items {NONE, PARTICLE1, WALL}
 var selected_item: Items = Items.NONE
-var item_buttons: Array = []
+
+func _ready() -> void:
+	var simulation_true_size: Vector2i = Globals.default_cell_size * Globals.default_simulation_area
+	simulation_view = SimulationViewData.new(simulation_true_size, edge_offset)
+	main_box.set_simulation_view(simulation_view)
 
 func _process(_delta: float) -> void:
 	_update_simulation_view_info()
@@ -20,6 +29,22 @@ func _update_simulation_view_info() -> void:
 func set_sim_view(sim_view: SimulationViewData) -> void:
 	simulation_view = sim_view
 
+func toggle_pause() -> void:
+	Globals.is_paused = not Globals.is_paused
+	if Globals.is_paused:
+		Pause.text = "Resume"
+	else:
+		Pause.text = "Pause"
+
+func _handle_item_placement(mouse_position: Vector2) -> void:
+	match selected_item:
+		Items.NONE:
+			return
+		Items.PARTICLE1:
+			main_box.place_particle(mouse_position)
+		Items.WALL:
+			main_box.place_wall(mouse_position)
+
 func _on_particle_1_item_pressed() -> void:
 	selected_item = Items.PARTICLE1
 	SelectedLabel.text = "Selected: Particle 1"
@@ -27,3 +52,26 @@ func _on_particle_1_item_pressed() -> void:
 func _on_wall_item_pressed() -> void:
 	selected_item = Items.WALL
 	SelectedLabel.text = "Selected: Wall"
+
+func _on_simulation_view_gui_input(event: InputEvent) -> void:
+	if event.is_action_pressed("primary action"):
+		_handle_item_placement(main_box.get_global_mouse_position())
+
+func _on_pause_pressed() -> void:
+	toggle_pause()
+
+func _on_reset_pressed() -> void:
+	main_box.reinitialize_sim()
+
+func _on_gravity_pressed() -> void:
+	Globals.gravity_is_on = not Globals.gravity_is_on
+	if Globals.gravity_is_on:
+		Gravity.text = "Gravity Off"
+	else:
+		Gravity.text = "Gravity On"
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("simulation toggle"):
+		toggle_pause()
+	if event.is_action_pressed("reduce energy"):
+		main_box.reduce_energy()

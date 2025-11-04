@@ -7,7 +7,7 @@ func calculate_collision_movement(id: int, position: Vector2, velocity: Vector2,
 	var seq_particle_state: PackedVector2Array = [position, velocity]
 	var cell_id: int = _cell_id_by_position(position, cells)
 	var neighbor_cells: PackedInt32Array = _get_neighbor_cells(cell_id, cells)
-	_collide_with_particles(id, seq_particle_state, neighbor_cells, particles, cells)
+	#_collide_with_particles(id, seq_particle_state, neighbor_cells, particles, cells)
 	_collide_with_walls(id, seq_particle_state, neighbor_cells, particles, cells)
 	return seq_particle_state
 
@@ -15,8 +15,9 @@ func _collide_with_particles(id: int, seq_particle_state: PackedVector2Array, ne
 	var neighbor_particles: PackedInt32Array = _particles_by_cells(id, neighbor_cells, cells)
 	_sequential_particle_collision(id, seq_particle_state, neighbor_particles, particles)
 
+## @deprecated: Old-school wall collisions don't conserve energy
 func _collide_with_walls(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
-	var walls: PackedInt32Array = _get_neighbor_walls(neighbor_cells, cells)
+	var walls: PackedInt32Array = _walls_by_cells(neighbor_cells, cells)
 	_sequential_wall_collision(id, seq_particle_state, walls, particles, cells)
 
 func _sequential_wall_collision(id: int, seq_particle_state: PackedVector2Array, walls: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
@@ -111,13 +112,15 @@ func _cell_id_by_position(position: Vector2, cells: CellData) -> int:
 	var cell_id: int = cell_x + cell_y * cells.cell_area.x
 	return cell_id
 
-func _get_neighbor_cells(cell_id: int, cells: CellData) -> PackedInt32Array:
+func _get_neighbor_cells(cell_id: int, cells: CellData, range: int = 1) -> PackedInt32Array:
 	var cell_area: Vector2i = cells.cell_area
+	var row_size: int = cells.cell_area.x
+	var cell_x: int = cell_id % row_size
+	var cell_y: int = cell_id / row_size
 	
 	assert(cell_id % cell_area.x > 0 and cell_id % cell_area.x < cell_area.x - 1, "NeighborCellOutOfRangeError: Neighbor cell is out of range")
 	assert(cell_id / cell_area.x > 0 and cell_id / cell_area.x < cell_area.y - 1, "NeighborCellOutOfRangeError: Neighbor cell is out of range")
 	
-	var row_size: int = cells.cell_area.x
 	var neighbor_ids: PackedInt32Array = [
 	cell_id - 1 - row_size, cell_id - row_size, cell_id + 1 - row_size,
 	cell_id - 1, cell_id, cell_id + 1,
@@ -125,7 +128,7 @@ func _get_neighbor_cells(cell_id: int, cells: CellData) -> PackedInt32Array:
 	]
 	return neighbor_ids
 
-func _get_neighbor_walls(neighbor_ids: PackedInt32Array, cells: CellData) -> PackedInt32Array:
+func _walls_by_cells(neighbor_ids: PackedInt32Array, cells: CellData) -> PackedInt32Array:
 	var wall_ids: PackedInt32Array = []
 	var cell_is_wall: PackedByteArray = cells.cell_is_wall
 	

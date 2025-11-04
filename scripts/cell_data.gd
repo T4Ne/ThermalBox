@@ -10,12 +10,14 @@ var cell_offsets: PackedInt32Array = []
 var cell_particle_indexes: PackedInt32Array = []
 var cell_is_wall: PackedByteArray = []
 
-func _init(size: int, area: Vector2i) -> void:
+func _init(size: int, area: Vector2i, borders: bool = true) -> void:
 	cell_size = size
 	cell_area = area
 	cell_is_wall.resize(int(cell_area.x * cell_area.y))
 	cell_count = cell_area.x * cell_area.y
 	cell_offsets.resize(cell_count + 1)
+	if borders:
+		build_borders()
 
 func set_cell_wall_state(indx: int, value: bool) -> void:
 	cell_is_wall[indx] = int(value)
@@ -38,3 +40,24 @@ func toggle_wall(coordinates: Vector2i) -> void:
 	else:
 		cell_is_wall[cell_id] = true
 		wall_count += 1
+
+func build_borders() -> void:
+	var cell_area_row_size: int = cell_area.x
+	for cell_indx in range(cell_count):
+		if cell_indx < cell_area_row_size:
+			cell_is_wall[cell_indx] = int(true)
+			wall_count += 1
+			continue
+		elif cell_indx >= cell_count - cell_area_row_size:
+			cell_is_wall[cell_indx] = int(true)
+			wall_count += 1
+			continue
+		var cell_row_indx: int = cell_indx % cell_area_row_size
+		if cell_row_indx == 0:
+			cell_is_wall[cell_indx] = int(true)
+			wall_count += 1
+		elif cell_row_indx == cell_area_row_size - 1:
+			cell_is_wall[cell_indx] = int(true)
+			wall_count += 1
+		else:
+			cell_is_wall[cell_indx] = int(false)
