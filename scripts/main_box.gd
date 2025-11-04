@@ -11,7 +11,6 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var simulation_view_data: SimulationViewData = SimulationViewData.new(simulation_size, edge_offset)
 @onready var ui: UI = get_node("UI")
 @onready var renderer: Renderer = get_node("UI/ParticleRenderer")
-var is_paused: bool = false
 
 func _ready() -> void:
 	ui.set_sim_view(simulation_view_data)
@@ -23,7 +22,7 @@ func _process(_delta: float) -> void:
 	renderer.render(particles, cells, simulation_view_data)
 
 func _physics_process(delta: float) -> void:
-	if is_paused:
+	if Globals.is_paused:
 		return
 	scheduler.step(delta)
 
@@ -54,7 +53,7 @@ func place_particle(mouse_position: Vector2) -> void:
 	var simulation_view_scale: float = simulation_view_data.simulation_view_scale
 	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
 	var particle_velocity: Vector2 = Vector2(cos(deg_to_rad(randf_range(0.0, 360.0))), sin(deg_to_rad(randf_range(0.0, 360.0)))) * 10.0
-	var particle_radius: float = 5.0
+	var particle_radius: float = 2.5
 	var particle_mass: float = 1.0
 	particles.add_particle(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 

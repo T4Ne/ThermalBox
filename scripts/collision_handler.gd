@@ -1,22 +1,21 @@
 class_name CollisionHandler
-	
+
 func _init() -> void:
 	pass
 
 func calculate_collision_movement(id: int, position: Vector2, velocity: Vector2, particles: ParticleData, cells: CellData) -> PackedVector2Array:
 	var seq_particle_state: PackedVector2Array = [position, velocity]
 	var cell_id: int = _cell_id_by_position(position, cells)
-	_collide_with_particles(id, seq_particle_state, cell_id, particles, cells)
-	_collide_with_walls(id, seq_particle_state, cell_id, particles, cells)
+	var neighbor_cells: PackedInt32Array = _get_neighbor_cells(cell_id, cells)
+	_collide_with_particles(id, seq_particle_state, neighbor_cells, particles, cells)
+	_collide_with_walls(id, seq_particle_state, neighbor_cells, particles, cells)
 	return seq_particle_state
 
-func _collide_with_particles(id: int, seq_particle_state: PackedVector2Array, cell_id: int, particles: ParticleData, cells: CellData) -> void:
-	var neighbor_cells: PackedInt32Array = _get_neighbor_cells(cell_id, cells)
+func _collide_with_particles(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array,particles: ParticleData, cells: CellData) -> void:
 	var neighbor_particles: PackedInt32Array = _particles_by_cells(id, neighbor_cells, cells)
 	_sequential_particle_collision(id, seq_particle_state, neighbor_particles, particles)
 
-func _collide_with_walls(id: int, seq_particle_state: PackedVector2Array, cell_id: int, particles: ParticleData, cells: CellData) -> void:
-	var neighbor_cells: PackedInt32Array = _get_neighbor_cells(cell_id, cells)
+func _collide_with_walls(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
 	var walls: PackedInt32Array = _get_neighbor_walls(neighbor_cells, cells)
 	_sequential_wall_collision(id, seq_particle_state, walls, particles, cells)
 
