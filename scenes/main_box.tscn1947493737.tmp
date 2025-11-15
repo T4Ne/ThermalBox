@@ -149,13 +149,7 @@ text = "Particle 1"
 
 [node name="Particle2Item" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
-focus_mode = 0
 text = "Particle 2"
-
-[node name="Particle3Item" type="Button" parent="Control/BottomBar/ItemButtons"]
-layout_mode = 2
-focus_mode = 0
-text = "Particle 3"
 
 [node name="WallItem" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
@@ -174,5 +168,4 @@ text = "Selected: None"
 [connection signal="pressed" from="Control/SideBar/MainControls/Gravity" to="." method="_on_gravity_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle1Item" to="." method="_on_particle_1_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle2Item" to="." method="_on_particle_2_item_pressed"]
-[connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle3Item" to="." method="_on_particle_3_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallItem" to="." method="_on_wall_item_pressed"]

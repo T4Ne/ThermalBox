@@ -43,11 +43,13 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 		var mass: float = particle_masses[particle_id]
 		
 		# var collision_offsets: PackedVector2Array = collision_handler.calculate_collision_movement(particle_id, predicted_full_step_position, half_step_velocity, particles, cells)
-		var final_full_step_position: Vector2 = predicted_full_step_position #collision_offsets[0]
-		var final_half_step_velocity: Vector2 = half_step_velocity #collision_offsets[1]
+		var final_full_step_position: Vector2 = predicted_full_step_position 
+		var final_half_step_velocity: Vector2 = half_step_velocity 
 		var full_step_acceleration: Vector2 = _calculate_gravity(gravity, gravity_is_on)
 		full_step_acceleration += collision_handler.calculate_collision_acceleration(particle_id, final_full_step_position, particles, cells)
 		var full_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, final_half_step_velocity, full_step_acceleration)
+		if full_step_velocity.length_squared() > 200.0**2:
+			full_step_velocity = full_step_velocity.normalized() * 200.0
 		
 		chunk.positions[particle_indx] = final_full_step_position
 		chunk.velocities[particle_indx] = full_step_velocity
@@ -88,6 +90,7 @@ func _calculate_force(distance: float) -> float:
 	var force: float = 32*distance**3 - 400*distance**2 + 1600*distance - 2000
 	return force
 
+## @deprecated: very slow
 func _find_close_particles(id: int, position: Vector2, radius: float, particles: ParticleData) -> PackedInt32Array:
 	var reach_range_squared: float = (radius * 5.0)**2
 	var particle_count: int = particles.count

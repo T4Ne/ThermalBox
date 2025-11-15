@@ -3,7 +3,6 @@ class_name Scheduler
 var simulation: Simulation = Simulation.new()
 var cells: CellData
 var particles: ParticleData
-var thread_count: int = 4 #TODO: pull from settings. Project settings decoupled from this value
 var chunk_size: int = 100
 var chunk_iterations: int
 var chunks: Array[Chunk] = []

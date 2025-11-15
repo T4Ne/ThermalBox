@@ -26,14 +26,14 @@ func reinitialize_sim() -> void:
 	scheduler.set_particle_data(particles)
 	renderer.reinitialize_render()
 
-func place_particle(mouse_position: Vector2) -> void:
+func place_particle(type: int, mouse_position: Vector2) -> void:
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
-	var particle_velocity: Vector2 = Vector2.ZERO #Vector2(cos(deg_to_rad(randf_range(0.0, 360.0))), sin(deg_to_rad(randf_range(0.0, 360.0)))) * 1.0
-	var particle_radius: float = 2.5
-	var particle_mass: float = 1.0
-	particles.add_particle(particle_simulation_position, particle_velocity, particle_radius, particle_mass)
+	var particle_velocity: Vector2 = Vector2.ZERO
+	var particle_radius: float = Globals.default_particle_radius
+	var particle_mass: float = Globals.default_particle_mass
+	particles.add_particle(type, particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
 func place_wall(mouse_position: Vector2) -> void:
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position

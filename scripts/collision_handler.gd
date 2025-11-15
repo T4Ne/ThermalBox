@@ -1,8 +1,10 @@
 class_name CollisionHandler
 
+
 func _init() -> void:
 	pass
 
+## @deprecated: Causes energy loss
 func calculate_collision_movement(id: int, position: Vector2, velocity: Vector2, particles: ParticleData, cells: CellData) -> PackedVector2Array:
 	var seq_particle_state: PackedVector2Array = [position, velocity]
 	var cell_id: int = cells.cell_id_by_pos(position)
@@ -123,9 +125,9 @@ func _walls_by_cells(neighbor_ids: PackedInt32Array, cells: CellData) -> PackedI
 func calculate_collision_acceleration(id: int, position: Vector2, particles: ParticleData, cells: CellData) -> Vector2:
 	var combined_acceleration: Vector2 = Vector2.ZERO
 	var cell_id: int = cells.cell_id_by_pos(position)
-	var neighbor_cells: PackedInt32Array = cells.get_neighbor_cells(cell_id, 2)
+	var neighbor_cells: PackedInt32Array = cells.get_neighbor_cells(cell_id, 1)
 	combined_acceleration += interact_with_walls(id, position, neighbor_cells, particles, cells)
-	combined_acceleration += interact_with_particles(id, position, neighbor_cells, particles, cells)
+	#combined_acceleration += interact_with_particles(id, position, particles)
 	return combined_acceleration
 
 ## @experimental: Treating walls as particles that apply forces
@@ -157,23 +159,24 @@ func interact_with_walls(id: int, position: Vector2, neighbor_cells: PackedInt32
 	
 	return accumulated_acceleration
 
-func interact_with_particles(id: int, position: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
-	var neighbor_particles: PackedInt32Array = cells.particles_by_cells(id, neighbor_cells)
+func interact_with_particles(id: int, position: Vector2, particles: ParticleData) -> Vector2:
 	var other_positions: PackedVector2Array = particles.positions
+	var particle_count: int = particles.count
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
 	var radius: float = particles.radii[id]
 	var mass: float = particles.radii[id]
+	var interaction_range: float = Globals.interaction_range
 	
-	for particle_id in neighbor_particles:
+	for particle_id in particle_count:
 		var other_position: Vector2 = other_positions[particle_id]
 		var other_to_current: Vector2 = other_position - position
 		
-		if other_to_current.length_squared() > (7 * radius)**2:
+		if other_to_current.length_squared() > interaction_range**2:
 			continue
 		
 		var other_to_current_unit: Vector2 = other_to_current.normalized()
-		var distance_r: float = other_to_current.length() / radius
-		var force_magnitude: float = 40*distance_r**3 - 740*distance_r**2 + 4480*distance_r - 8820
+		var dist_r: float = other_to_current.length() / radius
+		var force_magnitude: float = 2*0.7*200*exp(-0.7*(-4+dist_r)) - 2*0.7*200*(exp(-0.7*(-4+dist_r)))**2
 		var acceleration_magnitude: float = force_magnitude / mass
 		var acceleration_vector: Vector2 = other_to_current_unit * acceleration_magnitude
 		accumulated_acceleration += acceleration_vector

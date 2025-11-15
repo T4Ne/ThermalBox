@@ -11,8 +11,7 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var Pause: Button = get_node("Control/SideBar/MainControls/Pause")
 @onready var Gravity: Button = get_node("Control/SideBar/MainControls/Gravity")
 
-enum Items {NONE, PARTICLE1, WALL}
-var selected_item: Items = Items.NONE
+var selected_item: Globals.Items = Globals.Items.NONE
 
 func _ready() -> void:
 	var simulation_true_size: Vector2i = Globals.default_cell_size * Globals.default_simulation_area
@@ -37,20 +36,28 @@ func toggle_pause() -> void:
 		Pause.text = "Pause"
 
 func _handle_item_placement(mouse_position: Vector2) -> void:
+	var type: int
 	match selected_item:
-		Items.NONE:
+		Globals.Items.NONE:
 			return
-		Items.PARTICLE1:
-			main_box.place_particle(mouse_position)
-		Items.WALL:
+		Globals.Items.WALL:
 			main_box.place_wall(mouse_position)
+		Globals.Items.PARTICLE1:
+			type = 1
+			main_box.place_particle(type, mouse_position)
+		Globals.Items.PARTICLE2:
+			type = 2
+			main_box.place_particle(type, mouse_position)
+		Globals.Items.PARTICLE3:
+			type = 3
+			main_box.place_particle(type, mouse_position)
 
 func _on_particle_1_item_pressed() -> void:
-	selected_item = Items.PARTICLE1
+	selected_item = Globals.Items.PARTICLE1
 	SelectedLabel.text = "Selected: Particle 1"
 
 func _on_wall_item_pressed() -> void:
-	selected_item = Items.WALL
+	selected_item = Globals.Items.WALL
 	SelectedLabel.text = "Selected: Wall"
 
 func _on_simulation_view_gui_input(event: InputEvent) -> void:
@@ -75,3 +82,11 @@ func _input(event: InputEvent) -> void:
 		toggle_pause()
 	if event.is_action_pressed("reduce energy"):
 		main_box.reduce_energy()
+
+func _on_particle_2_item_pressed() -> void:
+	selected_item = Globals.Items.PARTICLE2
+	SelectedLabel.text = "Selected: Particle 2"
+
+func _on_particle_3_item_pressed() -> void:
+	selected_item = Globals.Items.PARTICLE3
+	SelectedLabel.text = "Selected: Particle 3"
