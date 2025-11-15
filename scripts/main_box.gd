@@ -2,6 +2,8 @@ class_name MainBox
 extends Node2D
 
 var simulation_view: SimulationViewData
+var time_step: float
+signal fps(tps: int)
 
 @onready var scheduler: Scheduler = Scheduler.new()
 @onready var particles: ParticleData
@@ -10,14 +12,17 @@ var simulation_view: SimulationViewData
 
 func _ready() -> void:
 	reinitialize_sim()
+	var physics_fps: int = ProjectSettings.get_setting("physics/common/physics_ticks_per_second")
+	time_step = 1 / float(physics_fps)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	renderer.render(particles, cells, simulation_view)
+	fps.emit(floor(1 / delta))
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if Globals.is_paused:
 		return
-	scheduler.step(delta)
+	scheduler.step(time_step)
 
 func reinitialize_sim() -> void:
 	particles = ParticleData.new()

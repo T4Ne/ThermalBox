@@ -18,6 +18,8 @@ func first_half_verlet(time_step: float, particles: ParticleData, chunk: Chunk) 
 		var old_acceleration: Vector2 = particle_accelerations[particle_id]
 		
 		var half_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, old_velocity, old_acceleration)
+		if half_step_velocity.length_squared() > 200.0**2:
+			half_step_velocity = half_step_velocity.normalized() * 200.0
 		var predicted_full_step_position: Vector2 = _calculate_verlet_position(time_step, old_position, half_step_velocity)
 		
 		chunk.positions[particle_indx] = predicted_full_step_position
@@ -30,8 +32,6 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 	var particle_positions: PackedVector2Array = particles.positions
 	var particle_velocities: PackedVector2Array = particles.velocities
 	var _particle_accelerations: PackedVector2Array = particles.accelerations
-	var particle_radii: PackedFloat32Array = particles.radii
-	var particle_masses: PackedFloat32Array = particles.masses
 	var gravity: Vector2 = Globals.gravity
 	var gravity_is_on: bool = Globals.gravity_is_on
 	
@@ -39,8 +39,6 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 		var particle_id: int = particle_ids[particle_indx]
 		var predicted_full_step_position: Vector2 = particle_positions[particle_id]
 		var half_step_velocity: Vector2 = particle_velocities[particle_id]
-		var radius: float = particle_radii[particle_id]
-		var mass: float = particle_masses[particle_id]
 		
 		# var collision_offsets: PackedVector2Array = collision_handler.calculate_collision_movement(particle_id, predicted_full_step_position, half_step_velocity, particles, cells)
 		var final_full_step_position: Vector2 = predicted_full_step_position 
@@ -48,8 +46,6 @@ func second_half_verlet(time_step: float, particles: ParticleData, cells: CellDa
 		var full_step_acceleration: Vector2 = _calculate_gravity(gravity, gravity_is_on)
 		full_step_acceleration += collision_handler.calculate_collision_acceleration(particle_id, final_full_step_position, particles, cells)
 		var full_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, final_half_step_velocity, full_step_acceleration)
-		if full_step_velocity.length_squared() > 200.0**2:
-			full_step_velocity = full_step_velocity.normalized() * 200.0
 		
 		chunk.positions[particle_indx] = final_full_step_position
 		chunk.velocities[particle_indx] = full_step_velocity

@@ -127,7 +127,7 @@ func calculate_collision_acceleration(id: int, position: Vector2, particles: Par
 	var cell_id: int = cells.cell_id_by_pos(position)
 	var neighbor_cells: PackedInt32Array = cells.get_neighbor_cells(cell_id, 1)
 	combined_acceleration += interact_with_walls(id, position, neighbor_cells, particles, cells)
-	#combined_acceleration += interact_with_particles(id, position, particles)
+	combined_acceleration += interact_with_particles(id, position, particles)
 	return combined_acceleration
 
 ## @experimental: Treating walls as particles that apply forces
@@ -166,17 +166,20 @@ func interact_with_particles(id: int, position: Vector2, particles: ParticleData
 	var radius: float = particles.radii[id]
 	var mass: float = particles.radii[id]
 	var interaction_range: float = Globals.interaction_range
+	var a: float = Globals.particle_1_interaction_params[Globals.Params.A]
+	var d: float = Globals.particle_1_interaction_params[Globals.Params.D]
+	var r: float = Globals.particle_1_interaction_params[Globals.Params.R]
 	
 	for particle_id in particle_count:
 		var other_position: Vector2 = other_positions[particle_id]
 		var other_to_current: Vector2 = other_position - position
 		
-		if other_to_current.length_squared() > interaction_range**2:
+		if false: # other_to_current.length_squared() > interaction_range**2:
 			continue
 		
 		var other_to_current_unit: Vector2 = other_to_current.normalized()
 		var dist_r: float = other_to_current.length() / radius
-		var force_magnitude: float = 2*0.7*200*exp(-0.7*(-4+dist_r)) - 2*0.7*200*(exp(-0.7*(-4+dist_r)))**2
+		var force_magnitude: float = 2*a*d*exp(-a*(-r+dist_r)) - 2*a*d*(exp(-a*(-r+dist_r)))**2
 		var acceleration_magnitude: float = force_magnitude / mass
 		var acceleration_vector: Vector2 = other_to_current_unit * acceleration_magnitude
 		accumulated_acceleration += acceleration_vector
