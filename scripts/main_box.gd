@@ -3,7 +3,7 @@ extends Node2D
 
 var simulation_view: SimulationViewData
 var time_step: float
-signal fps(tps: int)
+signal ui_info(tps: int, count: int)
 
 @onready var scheduler: Scheduler = Scheduler.new()
 @onready var particles: ParticleData
@@ -17,12 +17,12 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	renderer.render(particles, cells, simulation_view)
-	fps.emit(floor(1 / delta))
-
-func _physics_process(_delta: float) -> void:
+	ui_info.emit(floor(1 / delta), particles.count)
 	if Globals.is_paused:
 		return
 	scheduler.step(time_step)
+
+#func _physics_process(_delta: float) -> void:
 
 func reinitialize_sim() -> void:
 	particles = ParticleData.new()
@@ -31,14 +31,20 @@ func reinitialize_sim() -> void:
 	scheduler.set_particle_data(particles)
 	renderer.reinitialize_render()
 
-func place_particle(type: int, mouse_position: Vector2) -> void:
+func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
 	var particle_velocity: Vector2 = Vector2.ZERO
 	var particle_radius: float = Globals.default_particle_radius
 	var particle_mass: float = Globals.default_particle_mass
-	particles.add_particle(type, particle_simulation_position, particle_velocity, particle_radius, particle_mass)
+	if place_25:
+		for y in range(-2, 3):
+			for x in range(-2, 3):
+				var neighbor_particle_position: Vector2 = particle_simulation_position + Vector2(y * particle_radius * 3, x * particle_radius * 3)
+				particles.add_particle(type, neighbor_particle_position, particle_velocity, particle_radius, particle_mass)
+	else:
+		particles.add_particle(type, particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
 func place_wall(mouse_position: Vector2) -> void:
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position

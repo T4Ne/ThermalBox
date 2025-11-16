@@ -15,7 +15,7 @@ func calculate_collision_movement(id: int, position: Vector2, velocity: Vector2,
 
 ## @deprecated: Ideal particle collisions don't conserve energy
 func _collide_with_particles(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
-	var neighbor_particles: PackedInt32Array = cells.particles_by_cells(id, neighbor_cells)
+	var neighbor_particles: PackedInt32Array = cells.particles_by_cells(neighbor_cells)
 	_sequential_particle_collision(id, seq_particle_state, neighbor_particles, particles)
 
 ## @deprecated: Ideal wall collisions don't conserve energy
@@ -125,12 +125,12 @@ func _walls_by_cells(neighbor_ids: PackedInt32Array, cells: CellData) -> PackedI
 func calculate_collision_acceleration(id: int, position: Vector2, particles: ParticleData, cells: CellData) -> Vector2:
 	var combined_acceleration: Vector2 = Vector2.ZERO
 	var cell_id: int = cells.cell_id_by_pos(position)
-	var neighbor_cells: PackedInt32Array = cells.get_neighbor_cells(cell_id, 1)
+	var neighbor_cells: PackedInt32Array = cells.get_neighbor_cells(cell_id, 2)
+	var neighbor_particles: PackedInt32Array = cells.particles_by_cells(neighbor_cells)
 	combined_acceleration += interact_with_walls(id, position, neighbor_cells, particles, cells)
-	combined_acceleration += interact_with_particles(id, position, particles)
+	combined_acceleration += interact_with_particles(id, position, neighbor_particles, particles)
 	return combined_acceleration
 
-## @experimental: Treating walls as particles that apply forces
 func interact_with_walls(id: int, position: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
 	var cell_radius: float = cells.cell_size / 2.0
@@ -152,16 +152,15 @@ func interact_with_walls(id: int, position: Vector2, neighbor_cells: PackedInt32
 		
 		var wall_to_particle_unit: Vector2 = wall_to_particle.normalized()
 		var wall_to_particle_distance_r: float = wall_to_particle.length() / cell_radius
-		var wall_force_magnitude: float = 10000.0 * ((2.5 / wall_to_particle_distance_r) - 1.0)
+		var wall_force_magnitude: float = 5000.0 * ((2.5 / wall_to_particle_distance_r) - 1.0)
 		var wall_acceleration_magnitude: float = wall_force_magnitude / mass
 		var wall_acceleration: Vector2 = wall_to_particle_unit * wall_acceleration_magnitude
 		accumulated_acceleration += wall_acceleration
 	
 	return accumulated_acceleration
 
-func interact_with_particles(id: int, position: Vector2, particles: ParticleData) -> Vector2:
+func interact_with_particles(id: int, position: Vector2, neighbor_particles: PackedInt32Array, particles: ParticleData) -> Vector2:
 	var other_positions: PackedVector2Array = particles.positions
-	var particle_count: int = particles.count
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
 	var radius: float = particles.radii[id]
 	var mass: float = particles.radii[id]
@@ -170,11 +169,13 @@ func interact_with_particles(id: int, position: Vector2, particles: ParticleData
 	var d: float = Globals.particle_1_interaction_params[Globals.Params.D]
 	var r: float = Globals.particle_1_interaction_params[Globals.Params.R]
 	
-	for particle_id in particle_count:
+	for particle_id in neighbor_particles:
+		if particle_id == id:
+			continue
 		var other_position: Vector2 = other_positions[particle_id]
 		var other_to_current: Vector2 = other_position - position
 		
-		if false: # other_to_current.length_squared() > interaction_range**2:
+		if other_to_current.length_squared() > interaction_range**2:
 			continue
 		
 		var other_to_current_unit: Vector2 = other_to_current.normalized()

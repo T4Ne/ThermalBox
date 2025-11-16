@@ -18,8 +18,6 @@ func first_half_verlet(time_step: float, particles: ParticleData, chunk: Chunk) 
 		var old_acceleration: Vector2 = particle_accelerations[particle_id]
 		
 		var half_step_velocity: Vector2 = _calculate_verlet_velocity(time_step * 0.5, old_velocity, old_acceleration)
-		if half_step_velocity.length_squared() > 200.0**2:
-			half_step_velocity = half_step_velocity.normalized() * 200.0
 		var predicted_full_step_position: Vector2 = _calculate_verlet_position(time_step, old_position, half_step_velocity)
 		
 		chunk.positions[particle_indx] = predicted_full_step_position
@@ -56,7 +54,9 @@ func _calculate_verlet_position(time_step: float, position: Vector2, velocity: V
 	return new_position
 
 func _calculate_verlet_velocity(time_step: float, velocity: Vector2, acceleration: Vector2) -> Vector2:
-	var new_velocity := velocity + acceleration * time_step
+	var new_velocity: Vector2 = velocity + acceleration * time_step
+	if new_velocity.length_squared() > 150.0**2:
+			new_velocity = new_velocity.normalized() * 150.0
 	return new_velocity
 
 ## @deprecated: Attraction calculation is very slow
@@ -82,6 +82,7 @@ func _calculate_gravity(gravity: Vector2, gravity_is_on: bool) -> Vector2:
 	else:
 		return Vector2.ZERO
 
+## @deprecated: not used anymore
 func _calculate_force(distance: float) -> float:
 	var force: float = 32*distance**3 - 400*distance**2 + 1600*distance - 2000
 	return force

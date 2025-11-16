@@ -112,13 +112,11 @@ func build_cell_map(particle_count: int, particle_positions: PackedVector2Array)
 		cell_particle_indexes[destination] = par_indx
 		write_cursor[cell_id] = destination + 1
 
+# TODO: this method slow af
 func get_neighbor_cells(cell_id: int, cell_range: int = 1) -> PackedInt32Array:
 	var row_size: int = cell_area.x
 	var column_size: int = cell_area.y
 	var cell_coords: Vector2i = array_coords_by_cell_id(cell_id)
-	
-	#assert(cell_coords.x > 0 and cell_coords.x < cell_area.x - 1, "NeighborCellOutOfRangeError: Neighbor cell is out of range")
-	#assert(cell_coords.y > 0 and cell_coords.y < cell_area.y - 1, "NeighborCellOutOfRangeError: Neighbor cell is out of range")
 	
 	var neighbor_coordinates: PackedVector2Array = []
 	var local_neighbor_range: Vector2i = Vector2i(-cell_range, cell_range + 1) # exclusive range
@@ -138,7 +136,7 @@ func get_neighbor_cells(cell_id: int, cell_range: int = 1) -> PackedInt32Array:
 		neighbor_ids.append(neighbor_id)
 	return neighbor_ids
 
-func particles_by_cells(id: int, neighbor_cells: PackedInt32Array) -> PackedInt32Array:
+func particles_by_cells(neighbor_cells: PackedInt32Array) -> PackedInt32Array:
 	var neigbor_particles: PackedInt32Array = []
 	
 	for cell_id in neighbor_cells:
@@ -146,8 +144,6 @@ func particles_by_cells(id: int, neighbor_cells: PackedInt32Array) -> PackedInt3
 		var particle_indx_end: int = cell_offsets[cell_id + 1]
 		for particle_indx in range(particle_indx_start, particle_indx_end):
 			var particle_id: int = cell_particle_indexes[particle_indx]
-			if particle_id == id:
-				continue
 			neigbor_particles.append(particle_id)
 	
 	return neigbor_particles

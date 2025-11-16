@@ -11,14 +11,16 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var Pause: Button = get_node("Control/SideBar/MainControls/Pause")
 @onready var Gravity: Button = get_node("Control/SideBar/MainControls/Gravity")
 @onready var FPSLabel: Label = get_node("Control/SideBar/MainControls/FPSLabel")
+@onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
 var selected_item: Globals.Items = Globals.Items.NONE
+var place_25: bool = false
 
 func _ready() -> void:
 	var simulation_true_size: Vector2i = Globals.default_cell_size * Globals.default_simulation_area
 	simulation_view = SimulationViewData.new(simulation_true_size, edge_offset)
 	main_box.set_simulation_view(simulation_view)
-	main_box.fps.connect(display_fps)
+	main_box.ui_info.connect(display_info)
 
 func _process(_delta: float) -> void:
 	_update_simulation_view_info()
@@ -46,13 +48,13 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 			main_box.place_wall(mouse_position)
 		Globals.Items.PARTICLE1:
 			type = 1
-			main_box.place_particle(type, mouse_position)
+			main_box.place_particle(type, mouse_position, place_25)
 		Globals.Items.PARTICLE2:
 			type = 2
-			main_box.place_particle(type, mouse_position)
+			main_box.place_particle(type, mouse_position, place_25)
 		Globals.Items.PARTICLE3:
 			type = 3
-			main_box.place_particle(type, mouse_position)
+			main_box.place_particle(type, mouse_position, place_25)
 
 func _on_particle_1_item_pressed() -> void:
 	selected_item = Globals.Items.PARTICLE1
@@ -102,5 +104,9 @@ func _on_d_edit_text_submitted(new_text: String) -> void:
 func _on_r_edit_text_submitted(new_text: String) -> void:
 	Globals.particle_1_interaction_params[Globals.Params.R] = float(new_text)
 
-func display_fps(tps: int) -> void:
-	FPSLabel.text = "FPS = %d" % tps
+func display_info(tps: int, count: int) -> void:
+	FPSLabel.text = "FPS: %d" % tps
+	Countlabel.text = "Count: %d" % count
+
+func _on_place_many_toggled(toggled_on: bool) -> void:
+	place_25 = toggled_on

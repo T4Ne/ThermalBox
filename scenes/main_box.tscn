@@ -94,6 +94,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="CountLabel" type="Label" parent="Control/SideBar/MainControls"]
+layout_mode = 2
+text = "Count:"
+
 [node name="FPSLabel" type="Label" parent="Control/SideBar/MainControls"]
 layout_mode = 2
 text = "FPS: "
@@ -177,6 +181,11 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="PlaceMany" type="CheckButton" parent="Control/BottomBar/ItemButtons"]
+layout_mode = 2
+focus_mode = 0
+text = "Place many"
+
 [node name="Particle1Item" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -212,6 +221,7 @@ text = "Selected: None"
 [connection signal="pressed" from="Control/SideBar/MainControls/Pause" to="." method="_on_pause_pressed"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Reset" to="." method="_on_reset_pressed"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Gravity" to="." method="_on_gravity_pressed"]
+[connection signal="toggled" from="Control/BottomBar/ItemButtons/PlaceMany" to="." method="_on_place_many_toggled"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle1Item" to="." method="_on_particle_1_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle2Item" to="." method="_on_particle_2_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle3Item" to="." method="_on_particle_3_item_pressed"]

@@ -7,6 +7,8 @@ var particle_indexes: PackedInt32Array = []
 var positions: PackedVector2Array = []
 var velocities: PackedVector2Array = []
 var accelerations: PackedVector2Array = []
+var start_time: float
+var end_time: float
 
 func _init(start: int, end: int) -> void:
 	cell_start = start
