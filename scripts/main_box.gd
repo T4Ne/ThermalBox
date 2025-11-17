@@ -41,7 +41,7 @@ func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	if place_25:
 		for y in range(-2, 3):
 			for x in range(-2, 3):
-				var neighbor_particle_position: Vector2 = particle_simulation_position + Vector2(y * particle_radius * 3, x * particle_radius * 3)
+				var neighbor_particle_position: Vector2 = particle_simulation_position + Vector2(y * particle_radius * 2.5, x * particle_radius * 2.5)
 				particles.add_particle(type, neighbor_particle_position, particle_velocity, particle_radius, particle_mass)
 	else:
 		particles.add_particle(type, particle_simulation_position, particle_velocity, particle_radius, particle_mass)
@@ -76,3 +76,6 @@ func set_simulation_view(sim_view: SimulationViewData) -> void:
 func reduce_energy() -> void:
 	for particle_id in range(particles.count):
 		particles.velocities[particle_id] = particles.velocities[particle_id] * 0.8
+
+func delete_particles() -> void:
+	particles.delete_particles()

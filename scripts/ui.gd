@@ -96,13 +96,13 @@ func _on_particle_3_item_pressed() -> void:
 	SelectedLabel.text = "Selected: Particle 3"
 
 func _on_a_edit_text_submitted(new_text: String) -> void:
-	Globals.particle_1_interaction_params[Globals.Params.A] = float(new_text)
+	Globals.particle_strong_interaction_params[Globals.InteractionParams.A] = float(new_text)
 
 func _on_d_edit_text_submitted(new_text: String) -> void:
-	Globals.particle_1_interaction_params[Globals.Params.D] = float(new_text)
+	Globals.particle_strong_interaction_params[Globals.InteractionParams.D] = float(new_text)
 
 func _on_r_edit_text_submitted(new_text: String) -> void:
-	Globals.particle_1_interaction_params[Globals.Params.R] = float(new_text)
+	Globals.particle_strong_interaction_params[Globals.InteractionParams.R] = float(new_text)
 
 func display_info(tps: int, count: int) -> void:
 	FPSLabel.text = "FPS: %d" % tps
@@ -110,3 +110,6 @@ func display_info(tps: int, count: int) -> void:
 
 func _on_place_many_toggled(toggled_on: bool) -> void:
 	place_25 = toggled_on
+
+func _on_particles_reset_pressed() -> void:
+	main_box.delete_particles()

@@ -42,28 +42,35 @@ func _render_simulation_view(simulation_view: SimulationViewData) -> void:
 func _render_particles(particles: ParticleData, simulation_view: SimulationViewData) -> void:
 	# Resize buffer if necessary
 	var particle_count: int = particles.count
-	if mm_particles.instance_count < particle_count:
+	if mm_particles.instance_count != particle_count:
 		mm_particles.instance_count = particle_count
 	var particle_positions: PackedVector2Array = particles.positions
 	var particle_radii: PackedFloat32Array = particles.radii
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	
-	for particle_indx in range(particle_count):
-		var particle_screen_position: Vector2 = particle_positions[particle_indx] * simulation_view_scale + simulation_view_position
-		var particle_screen_diameter: float = particle_radii[particle_indx] * 2.0 * simulation_view_scale
+	for particle_id in range(particle_count):
+		var particle_screen_position: Vector2 = particle_positions[particle_id] * simulation_view_scale + simulation_view_position
+		var particle_screen_diameter: float = particle_radii[particle_id] * 2.0 * simulation_view_scale
 		var particle_transform: Transform2D = Transform2D(0.0, particle_screen_position)
 		particle_transform.x = Vector2(particle_screen_diameter, 0.0)
 		particle_transform.y = Vector2(0.0, particle_screen_diameter)
 		
-		mm_particles.set_instance_transform_2d(particle_indx, particle_transform)
-		mm_particles.set_instance_color(particle_indx, Color("006488ff"))
+		mm_particles.set_instance_transform_2d(particle_id, particle_transform)
+		var particle_type: int = particles.types[particle_id]
+		match particle_type:
+			1:
+				mm_particles.set_instance_color(particle_id, Color("#A23A3A"))
+			2:
+				mm_particles.set_instance_color(particle_id, Color("#1F6B2C"))
+			3:
+				mm_particles.set_instance_color(particle_id, Color("#2E5D9E"))
+			_:
+				assert(false, "ParticleTypeError: particle has no valid type")
 
 func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> void:
 	var wall_count: int = cell_data.wall_count
-	if mm_walls.instance_count < wall_count:
-		mm_walls.instance_count = wall_count
-	elif mm_walls.instance_count > wall_count:
+	if mm_walls.instance_count != wall_count:
 		mm_walls.instance_count = wall_count
 	var current_wall_indx: int = 0
 	var cell_count: int = cell_data.cell_count

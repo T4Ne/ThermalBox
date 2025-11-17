@@ -28,3 +28,12 @@ func add_particle(type: int, position: Vector2, velocity: Vector2, radius: float
 	accelerations.append(Vector2.ZERO)
 	radii.append(radius)
 	masses.append(mass)
+
+func delete_particles() -> void:
+	count = 0
+	types = []
+	positions = []
+	velocities = []
+	accelerations = []
+	radii = []
+	masses = []
