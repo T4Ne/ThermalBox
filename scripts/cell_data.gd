@@ -118,28 +118,28 @@ func get_neighbor_cells(cell_id: int, cell_range: int = 1) -> PackedInt32Array:
 	var column_size: int = cell_area.y
 	var cell_coords: Vector2i = array_coords_by_cell_id(cell_id)
 	
-	var neighbor_coordinates: PackedVector2Array = []
+	var neighbor_ids: PackedInt32Array = []
+	neighbor_ids.resize((2*cell_range+1)**2)
+	var local_indx: int = 0
 	var local_neighbor_range: Vector2i = Vector2i(-cell_range, cell_range + 1) # exclusive range
 	for local_y in range(local_neighbor_range.x, local_neighbor_range.y):
 		for local_x in range(local_neighbor_range.x, local_neighbor_range.y):
 			var neighbor_coords: Vector2i = Vector2i(cell_coords.x + local_x, cell_coords.y + local_y)
 			if neighbor_coords.x < 0 or neighbor_coords.x >= row_size:
-				continue
+				neighbor_ids[local_indx] = -1
 			elif neighbor_coords.y < 0 or neighbor_coords.y >= column_size:
-				continue
+				neighbor_ids[local_indx] = -1
 			else:
-				neighbor_coordinates.append(neighbor_coords)
-	
-	var neighbor_ids: PackedInt32Array = []
-	for cell_coordinates in neighbor_coordinates:
-		var neighbor_id: int = cell_id_by_array_coords(cell_coordinates)
-		neighbor_ids.append(neighbor_id)
+				neighbor_ids[local_indx] = cell_id_by_array_coords(neighbor_coords)
+			local_indx += 1
 	return neighbor_ids
 
 func particles_by_cells(neighbor_cells: PackedInt32Array) -> PackedInt32Array:
 	var neigbor_particles: PackedInt32Array = []
 	
 	for cell_id in neighbor_cells:
+		if cell_id < 0:
+			continue
 		var particle_indx_start: int = cell_offsets[cell_id]
 		var particle_indx_end: int = cell_offsets[cell_id + 1]
 		for particle_indx in range(particle_indx_start, particle_indx_end):

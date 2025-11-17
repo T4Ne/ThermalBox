@@ -20,8 +20,9 @@ func _collide_with_particles(id: int, seq_particle_state: PackedVector2Array, ne
 
 ## @deprecated: Ideal wall collisions don't conserve energy
 func _collide_with_walls(id: int, seq_particle_state: PackedVector2Array, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
-	var walls: PackedInt32Array = _walls_by_cells(neighbor_cells, cells)
-	_sequential_wall_collision(id, seq_particle_state, walls, particles, cells)
+	pass
+	#var walls: PackedInt32Array = _walls_by_cells(neighbor_cells, cells)
+	#_sequential_wall_collision(id, seq_particle_state, walls, particles, cells)
 
 func _sequential_wall_collision(id: int, seq_particle_state: PackedVector2Array, walls: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
 	var cell_side_length: int = cells.cell_size
@@ -109,19 +110,6 @@ func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_
 func _step(step: float, seq_particle_state: PackedVector2Array) -> void:
 	seq_particle_state[0] += seq_particle_state[1] * step
 
-# TODO: Change this to something better
-func _walls_by_cells(neighbor_ids: PackedInt32Array, cells: CellData) -> PackedInt32Array:
-	var wall_ids: PackedInt32Array = []
-	var cell_is_wall: PackedByteArray = cells.cell_is_wall
-	
-	for id in neighbor_ids:
-		var is_wall: bool = cell_is_wall[id]
-		if is_wall:
-			wall_ids.append(id)
-		else:
-			wall_ids.append(-1)
-	return wall_ids
-
 func calculate_collision_acceleration(id: int, position: Vector2, particles: ParticleData, cells: CellData) -> Vector2:
 	var combined_acceleration: Vector2 = Vector2.ZERO
 	var cell_id: int = cells.cell_id_by_pos(position)
@@ -134,14 +122,15 @@ func calculate_collision_acceleration(id: int, position: Vector2, particles: Par
 func interact_with_walls(id: int, position: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
 	var cell_radius: float = cells.cell_size / 2.0
-	var walls: PackedInt32Array = _walls_by_cells(neighbor_cells, cells)
 	var mass: float = particles.masses[id]
 	
-	for wall_id in walls:
-		if wall_id < 0: # Cell is not wall
+	for cell_id in neighbor_cells:
+		if cell_id < 0: # Is not cell
+			continue
+		if not cells.cell_is_wall[cell_id]: # cell is not wall
 			continue
 		
-		var wall_array_coordinates: Vector2i = cells.array_coords_by_cell_id(wall_id)
+		var wall_array_coordinates: Vector2i = cells.array_coords_by_cell_id(cell_id)
 		var wall_position: Vector2 = cells.cell_pos_by_array_coords(wall_array_coordinates)
 		var wall_center_position: Vector2 = wall_position + Vector2(cell_radius, cell_radius)
 		var wall_to_particle: Vector2 = position - wall_center_position
