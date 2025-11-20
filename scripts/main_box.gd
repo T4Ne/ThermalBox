@@ -18,11 +18,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	renderer.render(particles, cells, simulation_view)
 	ui_info.emit(floor(1 / delta), particles.count)
+
+func _physics_process(_delta: float) -> void:
 	if Globals.is_paused:
 		return
 	scheduler.step(time_step)
-
-#func _physics_process(_delta: float) -> void:
 
 func reinitialize_sim() -> void:
 	particles = ParticleData.new()
