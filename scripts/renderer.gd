@@ -80,10 +80,10 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	
-	for cell_indx in range(cell_count):
-		if not cell_is_wall[cell_indx]:
+	for cell_id in range(cell_count):
+		if not cell_is_wall[cell_id]:
 			continue
-		var wall_array_coordinates: Vector2i = Vector2i(cell_indx % cell_area.x, cell_indx / cell_area.x)
+		var wall_array_coordinates: Vector2i = Vector2i(cell_id % cell_area.x, cell_id / cell_area.x)
 		var wall_simulation_position: Vector2 = Vector2(float(wall_array_coordinates.x) * float(cell_size) + float(cell_size) / 2.0, 
 		float(wall_array_coordinates.y) * float(cell_size) + float(cell_size) / 2.0)
 		
@@ -95,5 +95,14 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 		wall_transform.y = Vector2(0.0, wall_screen_size)
 		
 		mm_walls.set_instance_transform_2d(current_wall_indx, wall_transform)
-		mm_walls.set_instance_color(current_wall_indx, Color("303030ff"))
+		var cell_wall_type: int = cell_is_wall[cell_id]
+		match cell_wall_type:
+			1:
+				mm_walls.set_instance_color(current_wall_indx, Color("303030"))
+			2:
+				mm_walls.set_instance_color(current_wall_indx, Color("303080"))
+			3:
+				mm_walls.set_instance_color(current_wall_indx, Color("803030"))
+			_:
+				assert(false)
 		current_wall_indx += 1

@@ -196,16 +196,9 @@ size_flags_vertical = 4
 focus_mode = 0
 text = "Hot wall"
 
-[node name="WallNone" type="Button" parent="Control/BottomBar/ItemButtons"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-focus_mode = 0
-text = "Clear Wall"
-
 [node name="Selected" type="Label" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
-text = "Selected: Clear Wall"
+text = "Selected: None"
 
 [connection signal="gui_input" from="MainBox/ParticleRenderer/SimulationView" to="." method="_on_simulation_view_gui_input"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Pause" to="." method="_on_pause_pressed"]
@@ -219,4 +212,3 @@ text = "Selected: Clear Wall"
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallNeutral" to="." method="_on_wall_neutral_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallCold" to="." method="_on_wall_cold_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallHot" to="." method="_on_wall_hot_pressed"]
-[connection signal="pressed" from="Control/BottomBar/ItemButtons/WallNone" to="." method="_on_wall_none_pressed"]

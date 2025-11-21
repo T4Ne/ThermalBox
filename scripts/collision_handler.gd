@@ -2,9 +2,10 @@ class_name CollisionHandler
 
 var interaction_range_r: float = 4.0
 var interaction_range: float = interaction_range_r * Globals.default_particle_radius
+var wall_thermal_coef: float = 20.0
 
-var particle_strong_interaction_params: PackedFloat32Array = [1.0, 200.0, Globals.default_particle_radius]
-var particle_weak_interaction_params: PackedFloat32Array = [1.0, 100.0, Globals.default_particle_radius]
+var particle_strong_interaction_params: PackedFloat32Array = [1.0, 150.0, Globals.default_particle_radius]
+var particle_weak_interaction_params: PackedFloat32Array = [1.0, 50.0, Globals.default_particle_radius]
 var particle_strong_repulsion_params: PackedFloat32Array = [500.0, interaction_range_r]
 var particle_weak_repulsion_params: PackedFloat32Array = [200.0, interaction_range_r]
 
@@ -35,6 +36,7 @@ func _collide_with_walls(id: int, seq_particle_state: PackedVector2Array, neighb
 	#var walls: PackedInt32Array = _walls_by_cells(neighbor_cells, cells)
 	#_sequential_wall_collision(id, seq_particle_state, walls, particles, cells)
 
+## @deprecated
 func _sequential_wall_collision(id: int, seq_particle_state: PackedVector2Array, walls: PackedInt32Array, particles: ParticleData, cells: CellData) -> void:
 	var cell_side_length: int = cells.cell_size
 	var radius: float = particles.radii[id]
@@ -51,6 +53,7 @@ func _sequential_wall_collision(id: int, seq_particle_state: PackedVector2Array,
 			continue
 		_wall_collision(wall_id, seq_particle_state, cell_side_length, radius, cell_area)
 
+## @deprecated
 func _sequential_particle_collision(id: int, seq_particle_state: PackedVector2Array, neighbor_particles: PackedInt32Array, particles: ParticleData) -> void:
 	var radius: float = particles.radii[id]
 	var mass: float = particles.masses[id]
@@ -93,6 +96,7 @@ func _sequential_particle_collision(id: int, seq_particle_state: PackedVector2Ar
 		seq_particle_state[1] += (impulse_magnitude / mass) * max_unit_vector
 		_step(-step, seq_particle_state)
 
+## @deprecated
 func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_side_length: int, radius: float, cell_area: Vector2i) -> void:
 	var wall_array_coordinates: Vector2i = Vector2i(wall_id % cell_area.x, wall_id / cell_area.x)
 	var wall_position: Vector2 = Vector2(float(wall_array_coordinates.x * cell_side_length), float(wall_array_coordinates.y * cell_side_length))
@@ -118,6 +122,7 @@ func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_
 	seq_particle_state[1] += -2.0 * unit_surface_normal * seq_particle_state[1].dot(unit_surface_normal) # reflect velocity with normal
 	_step(-step, seq_particle_state) # step forward
 
+## @deprecated
 func _step(step: float, seq_particle_state: PackedVector2Array) -> void:
 	seq_particle_state[0] += seq_particle_state[1] * step
 
@@ -137,14 +142,14 @@ func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 	
 	for cell_indx in range(1, len(neighbor_cells), 2): # Check up,down,left,right squares first
 		var cell_id: int = neighbor_cells[cell_indx]
-		accumulated_acceleration += wall_interaction(cell_id, position, accumulated_acceleration, mass, cell_side_length, cells)
+		accumulated_acceleration += wall_interaction(cell_id, position, velocity, accumulated_acceleration, mass, cell_side_length, cells)
 	for cell_indx in range(0, len(neighbor_cells), 2): # Check upper-left, upper-right, middle, lower-left, lower-right squares second
 		var cell_id: int = neighbor_cells[cell_indx]
-		accumulated_acceleration += wall_interaction(cell_id, position, accumulated_acceleration, mass, cell_side_length, cells)
+		accumulated_acceleration += wall_interaction(cell_id, position, velocity, accumulated_acceleration, mass, cell_side_length, cells)
 	
 	return accumulated_acceleration
 
-func wall_interaction(cell_id: int, position: Vector2, old_acceleration: Vector2, mass: float, cell_side_length: float, cells: CellData) -> Vector2:
+func wall_interaction(cell_id: int, position: Vector2, velocity: Vector2, old_acceleration: Vector2, mass: float, cell_side_length: float, cells: CellData) -> Vector2:
 	if cell_id < 0: # Is not cell
 		return Vector2.ZERO
 	if not cells.cell_is_wall[cell_id]: # cell is not wall
@@ -171,7 +176,32 @@ func wall_interaction(cell_id: int, position: Vector2, old_acceleration: Vector2
 	if wall_acceleration.dot(old_acceleration) > 0:
 		return Vector2.ZERO
 	
+	var thermal_acceleration: Vector2
+	var wall_type: int = cells.cell_is_wall[cell_id]
+	match wall_type:
+		1:
+			thermal_acceleration = Vector2.ZERO
+		2:
+			thermal_acceleration = cold_wall_acceleration(velocity, wall_to_particle_unit)
+		3:
+			thermal_acceleration = hot_wall_acceleration(velocity, wall_to_particle_unit)
+	
+	wall_acceleration += thermal_acceleration
 	return wall_acceleration
+
+func cold_wall_acceleration(velocity: Vector2, wall_unit: Vector2) -> Vector2:
+	var normal_velocity: float = velocity.dot(wall_unit)
+	if normal_velocity < 0:
+		return Vector2.ZERO
+	var acceleration: Vector2 = -wall_thermal_coef * normal_velocity * wall_unit
+	return acceleration
+
+func hot_wall_acceleration(velocity: Vector2, wall_unit: Vector2) -> Vector2:
+	var normal_velocity: float = velocity.dot(wall_unit)
+	if normal_velocity < 0:
+		return Vector2.ZERO
+	var acceleration: Vector2 = wall_thermal_coef * normal_velocity * wall_unit
+	return acceleration
 
 func interact_with_particles(id: int, position: Vector2, neighbor_particles: PackedInt32Array, particles: ParticleData) -> Vector2:
 	var other_positions: PackedVector2Array = particles.positions
@@ -258,7 +288,7 @@ func get_interaction_type(type: int, other_type: int) -> InteractionType:
 		3:
 			match other_type:
 				3:
-					return InteractionType.WEAKREPUL
+					return InteractionType.STRONGREPUL
 				_:
 					assert(false)
 		_:

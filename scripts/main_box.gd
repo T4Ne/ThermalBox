@@ -46,14 +46,14 @@ func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	else:
 		particles.add_particle(type, particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
-func place_wall(mouse_position: Vector2) -> void:
+func place_wall(type: int, mouse_position: Vector2) -> void:
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	var size: int = cells.cell_size
 	var cell_x: int = floori((mouse_position.x - simulation_view_position.x) / simulation_view_scale) / size
 	var cell_y: int = floori((mouse_position.y - simulation_view_position.y) / simulation_view_scale) / size
 	var cell_coordinates: Vector2i = Vector2i(cell_x, cell_y)
-	cells.toggle_wall(cell_coordinates)
+	cells.set_cell_wall_state(cell_coordinates, type)
 
 func print_energy() -> void:
 	var energy_sum: float = 0.0

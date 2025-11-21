@@ -28,7 +28,7 @@ func _prepare_chunk(cells: CellData, chunk: Chunk) -> void:
 		
 		for indx in range(particle_indx_start, particle_indx_end):
 			var particle_id: int = cell_particle_ids[indx]
-			chunk.particle_indexes.append(particle_id) # TODO: Could cause races as the array is not pre-sized
+			chunk.particle_indexes.append(particle_id)
 			count += 1
 	
 	chunk.particle_count = count

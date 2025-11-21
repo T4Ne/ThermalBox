@@ -37,21 +37,31 @@ func _build_neighbor_offsets() -> void:
 			write_index += 1
 		neighbor_offsets[cell_id + 1] = write_index
 
-func set_cell_wall_state(indx: int, value: bool) -> void:
-	cell_is_wall[indx] = int(value)
+func set_cell_wall_state(arr_pos: Vector2i, type: int) -> void:
+	var cell_id: int = cell_id_by_array_coords(arr_pos)
+	if cell_id >= cell_count:
+		return
+	var current_type: int = cell_is_wall[cell_id]
+	if current_type == type:
+		return
+	elif type == 0:
+		wall_count -= 1
+	else:
+		wall_count += 1
+	cell_is_wall[cell_id] = type
 
 func change_wall_count_by(value: int) -> void:
 	assert(wall_count + value >= 0, "WallCountValueError: Wall count cannot be smaller than 0")
 	wall_count += value
 
-func toggle_wall(coordinates: Vector2i) -> void:
+func toggle_wall(type: int, coordinates: Vector2i) -> void:
 	var cell_id: int = coordinates.x + cell_area.x * coordinates.y
 	var is_currently_wall: int = cell_is_wall[cell_id]
 	if is_currently_wall:
 		cell_is_wall[cell_id] = false
 		wall_count -= 1
 	else:
-		cell_is_wall[cell_id] = true
+		cell_is_wall[cell_id] = type
 		wall_count += 1
 
 func build_borders() -> void:

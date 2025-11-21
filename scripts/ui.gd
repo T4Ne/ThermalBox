@@ -43,9 +43,17 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 	var type: int
 	match selected_item:
 		Globals.Items.NONE:
-			return
-		Globals.Items.WALL:
-			main_box.place_wall(mouse_position)
+			type = 0
+			main_box.place_wall(type, mouse_position)
+		Globals.Items.WALLNEUTRAL:
+			type = 1
+			main_box.place_wall(type, mouse_position)
+		Globals.Items.WALLCOLD:
+			type = 2
+			main_box.place_wall(type, mouse_position)
+		Globals.Items.WALLHOT:
+			type = 3
+			main_box.place_wall(type, mouse_position)
 		Globals.Items.PARTICLE1:
 			type = 1
 			main_box.place_particle(type, mouse_position, place_25)
@@ -60,12 +68,8 @@ func _on_particle_1_item_pressed() -> void:
 	selected_item = Globals.Items.PARTICLE1
 	SelectedLabel.text = "Selected: Particle 1"
 
-func _on_wall_item_pressed() -> void:
-	selected_item = Globals.Items.WALL
-	SelectedLabel.text = "Selected: Wall"
-
-func _on_simulation_view_gui_input(event: InputEvent) -> void:
-	if event.is_action_pressed("primary action"):
+func _on_simulation_view_gui_input(_event: InputEvent) -> void:
+	if Input.is_action_pressed("primary action"):
 		_handle_item_placement(main_box.get_global_mouse_position())
 
 func _on_pause_pressed() -> void:
@@ -104,3 +108,19 @@ func _on_place_many_toggled(toggled_on: bool) -> void:
 
 func _on_particles_reset_pressed() -> void:
 	main_box.delete_particles()
+
+func _on_wall_neutral_pressed() -> void:
+	selected_item = Globals.Items.WALLNEUTRAL
+	SelectedLabel.text = "Selected: Neutral Wall"
+
+func _on_wall_cold_pressed() -> void:
+	selected_item = Globals.Items.WALLCOLD
+	SelectedLabel.text = "Selected: Cold Wall"
+
+func _on_wall_hot_pressed() -> void:
+	selected_item = Globals.Items.WALLHOT
+	SelectedLabel.text = "Selected: Hot Wall"
+
+func _on_wall_none_pressed() -> void:
+	selected_item = Globals.Items.NONE
+	SelectedLabel.text = "Selected: Clear Wall"
