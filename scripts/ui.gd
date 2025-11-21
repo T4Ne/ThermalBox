@@ -95,15 +95,6 @@ func _on_particle_3_item_pressed() -> void:
 	selected_item = Globals.Items.PARTICLE3
 	SelectedLabel.text = "Selected: Particle 3"
 
-func _on_a_edit_text_submitted(new_text: String) -> void:
-	Globals.particle_strong_interaction_params[Globals.InteractionParams.A] = float(new_text)
-
-func _on_d_edit_text_submitted(new_text: String) -> void:
-	Globals.particle_strong_interaction_params[Globals.InteractionParams.D] = float(new_text)
-
-func _on_r_edit_text_submitted(new_text: String) -> void:
-	Globals.particle_strong_interaction_params[Globals.InteractionParams.R] = float(new_text)
-
 func display_info(tps: int, count: int) -> void:
 	FPSLabel.text = "FPS: %d" % tps
 	Countlabel.text = "Count: %d" % count

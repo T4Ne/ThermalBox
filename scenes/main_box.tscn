@@ -102,39 +102,6 @@ text = "Count:"
 layout_mode = 2
 text = "FPS: "
 
-[node name="Hbox" type="HBoxContainer" parent="Control/SideBar/MainControls"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Control/SideBar/MainControls/Hbox"]
-layout_mode = 2
-text = "a="
-
-[node name="aEdit" type="LineEdit" parent="Control/SideBar/MainControls/Hbox"]
-layout_mode = 2
-focus_mode = 1
-
-[node name="Hbox2" type="HBoxContainer" parent="Control/SideBar/MainControls"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Control/SideBar/MainControls/Hbox2"]
-layout_mode = 2
-text = "D="
-
-[node name="DEdit" type="LineEdit" parent="Control/SideBar/MainControls/Hbox2"]
-layout_mode = 2
-focus_mode = 1
-
-[node name="Hbox3" type="HBoxContainer" parent="Control/SideBar/MainControls"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Control/SideBar/MainControls/Hbox3"]
-layout_mode = 2
-text = "r_0="
-
-[node name="rEdit" type="LineEdit" parent="Control/SideBar/MainControls/Hbox3"]
-layout_mode = 2
-focus_mode = 1
-
 [node name="Pause" type="Button" parent="Control/SideBar/MainControls"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -220,9 +187,6 @@ layout_mode = 2
 text = "Selected: None"
 
 [connection signal="gui_input" from="MainBox/ParticleRenderer/SimulationView" to="." method="_on_simulation_view_gui_input"]
-[connection signal="text_submitted" from="Control/SideBar/MainControls/Hbox/aEdit" to="." method="_on_a_edit_text_submitted"]
-[connection signal="text_submitted" from="Control/SideBar/MainControls/Hbox2/DEdit" to="." method="_on_d_edit_text_submitted"]
-[connection signal="text_submitted" from="Control/SideBar/MainControls/Hbox3/rEdit" to="." method="_on_r_edit_text_submitted"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Pause" to="." method="_on_pause_pressed"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Reset" to="." method="_on_reset_pressed"]
 [connection signal="pressed" from="Control/SideBar/MainControls/ParticlesReset" to="." method="_on_particles_reset_pressed"]

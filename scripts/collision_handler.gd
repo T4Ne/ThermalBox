@@ -3,10 +3,10 @@ class_name CollisionHandler
 var interaction_range_r: float = 4.0
 var interaction_range: float = interaction_range_r * Globals.default_particle_radius
 
-var particle_strong_interaction_params: Array = [1.0, 200.0, Globals.default_particle_radius]
-var particle_weak_interaction_params: Array = [1.0, 100.0, Globals.default_particle_radius]
-var particle_strong_repulsion_params: Array = [500.0, interaction_range_r]
-var particle_weak_repulsion_params: Array = [200.0, interaction_range_r]
+var particle_strong_interaction_params: PackedFloat32Array = [1.0, 200.0, Globals.default_particle_radius]
+var particle_weak_interaction_params: PackedFloat32Array = [1.0, 100.0, Globals.default_particle_radius]
+var particle_strong_repulsion_params: PackedFloat32Array = [500.0, interaction_range_r]
+var particle_weak_repulsion_params: PackedFloat32Array = [200.0, interaction_range_r]
 
 enum InteractionParams {A, D, R}
 enum RepulsionParams {A, D}
@@ -121,16 +121,16 @@ func _wall_collision(wall_id: int, seq_particle_state: PackedVector2Array, cell_
 func _step(step: float, seq_particle_state: PackedVector2Array) -> void:
 	seq_particle_state[0] += seq_particle_state[1] * step
 
-func calculate_collision_acceleration(id: int, position: Vector2, particles: ParticleData, cells: CellData) -> Vector2:
+func calculate_collision_acceleration(id: int, position: Vector2, velocity: Vector2, particles: ParticleData, cells: CellData) -> Vector2:
 	var combined_acceleration: Vector2 = Vector2.ZERO
 	var cell_id: int = cells.cell_id_by_pos(position)
 	var neighbor_cells: PackedInt32Array = cells.get_neighbors(cell_id)
 	var neighbor_particles: PackedInt32Array = cells.particles_by_cells(neighbor_cells)
-	combined_acceleration += interact_with_walls(id, position, neighbor_cells, particles, cells)
+	combined_acceleration += interact_with_walls(id, position, velocity, neighbor_cells, particles, cells)
 	combined_acceleration += interact_with_particles(id, position, neighbor_particles, particles)
 	return combined_acceleration
 
-func interact_with_walls(id: int, position: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
+func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
 	var cell_side_length: float = cells.cell_size
 	var mass: float = particles.masses[id]
@@ -167,8 +167,10 @@ func wall_interaction(cell_id: int, position: Vector2, old_acceleration: Vector2
 	var wall_force_magnitude: float = 5000.0 * ((0.45 / wall_to_particle_distance_w) - 1.0)
 	var wall_acceleration_magnitude: float = wall_force_magnitude / mass
 	var wall_acceleration: Vector2 = wall_to_particle_unit * wall_acceleration_magnitude
+	
 	if wall_acceleration.dot(old_acceleration) > 0:
 		return Vector2.ZERO
+	
 	return wall_acceleration
 
 func interact_with_particles(id: int, position: Vector2, neighbor_particles: PackedInt32Array, particles: ParticleData) -> Vector2:
@@ -190,7 +192,7 @@ func interact_with_particles(id: int, position: Vector2, neighbor_particles: Pac
 		
 		var other_to_current_unit: Vector2 = other_to_current.normalized()
 		var dist_r: float = other_to_current.length() / radius
-		var force_magnitude: float = get_force_magnitude(type, other_type, dist_r)
+		var force_magnitude: float = get_force_magnitude(type, other_type, dist_r) 
 		var acceleration_magnitude: float = force_magnitude / mass
 		var acceleration_vector: Vector2 = other_to_current_unit * acceleration_magnitude
 		accumulated_acceleration += acceleration_vector
@@ -204,24 +206,29 @@ func get_force_magnitude(type: int, other_type: int, distance: float) -> float:
 	match interaction_type:
 		InteractionType.STRONGINTER:
 			params = particle_strong_interaction_params
-			force = interaction_force(distance, params[InteractionParams.A], params[InteractionParams.D], params[InteractionParams.R])
+			force = interaction_force(distance, params)
 		InteractionType.WEAKINTER:
 			params = particle_weak_interaction_params
-			force = interaction_force(distance, params[InteractionParams.A], params[InteractionParams.D], params[InteractionParams.R])
+			force = interaction_force(distance, params)
 		InteractionType.STRONGREPUL:
 			params = particle_strong_repulsion_params
-			force = repulsion_force(distance, params[RepulsionParams.A], params[RepulsionParams.D])
+			force = repulsion_force(distance, params)
 		InteractionType.WEAKREPUL:
 			params = particle_weak_repulsion_params
-			force = repulsion_force(distance, params[RepulsionParams.A], params[RepulsionParams.D])
+			force = repulsion_force(distance, params)
 	return force
 
-func interaction_force(distance: float, a: float, d: float, r: float) -> float:
+func interaction_force(distance: float, params: PackedFloat32Array) -> float:
+	var a: float = params[InteractionParams.A]
+	var d: float = params[InteractionParams.D]
+	var r: float = params[InteractionParams.R]
 	var force: float = 2*a*d*exp(-a*(-r+distance)) - 2*a*d*(exp(-a*(-r+distance)))**2
 	return force
 
-func repulsion_force(distance: float, a: float, d: float) -> float:
-	var force: float = -a * ((d / distance) - 0.7)
+func repulsion_force(distance: float, params: PackedFloat32Array) -> float:
+	var a: float = params[RepulsionParams.A]
+	var d: float = params[RepulsionParams.D]
+	var force: float = -a * ((d / (distance+0.05)) - 0.95)
 	return force
 
 func get_interaction_type(type: int, other_type: int) -> InteractionType:
@@ -237,13 +244,13 @@ func get_interaction_type(type: int, other_type: int) -> InteractionType:
 				2:
 					return InteractionType.STRONGINTER
 				3:
-					return InteractionType.WEAKREPUL
+					return InteractionType.STRONGREPUL
 				_:
 					assert(false)
 		2:
 			match other_type:
 				2:
-					return InteractionType.STRONGREPUL
+					return InteractionType.WEAKREPUL
 				3:
 					return InteractionType.WEAKINTER
 				_:

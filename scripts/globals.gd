@@ -18,11 +18,11 @@ enum Items {NONE, PARTICLE1, PARTICLE2, PARTICLE3, WALL}
 # -- = repulsive
 # TODO: particle interactions: 
 # 1-1: +
-# 2-2: --
+# 2-2: -
 # 3-3: -
 # 1-2: ++
-# 1-3: -
-# 2-3: +
+# 1-3: --
+# 2-3: ++
 # TODO: force calculations with:
 # Harmonic spring
 # Morse potential * 
