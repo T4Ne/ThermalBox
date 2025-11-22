@@ -3,9 +3,10 @@ class_name CollisionHandler
 var interaction_range_r: float = 4.0
 var interaction_range: float = interaction_range_r * Globals.default_particle_radius
 var wall_thermal_coef: float = 20.0
+var max_accel: float = Globals.max_accel
 
-var particle_strong_interaction_params: PackedFloat32Array = [1.0, 150.0, Globals.default_particle_radius]
-var particle_weak_interaction_params: PackedFloat32Array = [1.0, 50.0, Globals.default_particle_radius]
+var particle_strong_interaction_params: PackedFloat32Array = [1.0, 200.0, Globals.default_particle_radius]
+var particle_weak_interaction_params: PackedFloat32Array = [1.0, 100.0, Globals.default_particle_radius]
 var particle_strong_repulsion_params: PackedFloat32Array = [500.0, interaction_range_r]
 var particle_weak_repulsion_params: PackedFloat32Array = [200.0, interaction_range_r]
 

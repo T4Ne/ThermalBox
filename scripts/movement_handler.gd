@@ -1,5 +1,6 @@
 class_name MovementHandler
 var collision_handler: CollisionHandler = CollisionHandler.new()
+var max_speed: float = Globals.lightspeed
 
 func _init() -> void:
 	pass
@@ -55,8 +56,8 @@ func _calculate_verlet_position(time_step: float, position: Vector2, velocity: V
 
 func _calculate_verlet_velocity(time_step: float, velocity: Vector2, acceleration: Vector2) -> Vector2:
 	var new_velocity: Vector2 = velocity + acceleration * time_step
-	if new_velocity.length_squared() > 150.0**2:
-			new_velocity = new_velocity.normalized() * 150.0
+	if new_velocity.length_squared() > max_speed**2:
+			new_velocity = new_velocity.normalized() * max_speed
 	return new_velocity
 
 ## @deprecated: Attraction calculation is very slow

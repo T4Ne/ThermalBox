@@ -7,6 +7,9 @@ var default_cell_size: int = 10
 var default_simulation_area: Vector2i = Vector2i(30, 30)
 var default_particle_mass: float = 1.0
 var default_particle_radius: float = 2.5
+var time_step: float = 0.015
+var lightspeed: float = (default_particle_radius / time_step) * 0.9
+var max_accel: float = 2.0*lightspeed / time_step
 
 enum Items {NONE, PARTICLE1, PARTICLE2, PARTICLE3, WALLNEUTRAL, WALLCOLD, WALLHOT}
 
