@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://dgxd2kwwi6tl8"]
+[gd_scene load_steps=5 format=3 uid="uid://dgxd2kwwi6tl8"]
 
 [ext_resource type="Script" uid="uid://dt4phjectrhdt" path="res://scripts/main_box.gd" id="1_68iro"]
 [ext_resource type="Script" uid="uid://q2hb4lnranhq" path="res://scripts/ui.gd" id="2_eh4tv"]
 [ext_resource type="Script" uid="uid://2s1d0o5mj4gt" path="res://scripts/renderer.gd" id="2_kre7u"]
+[ext_resource type="Texture2D" uid="uid://dima0pcnp025r" path="res://resources/particle.png" id="4_ps5bi"]
 
 [node name="UI" type="CanvasLayer"]
 script = ExtResource("2_eh4tv")
@@ -206,6 +207,9 @@ text = "Clear Wall"
 [node name="Selected" type="Label" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
 text = "Selected: Clear Wall"
+
+[node name="MultiMeshInstance2D" type="MultiMeshInstance2D" parent="."]
+texture = ExtResource("4_ps5bi")
 
 [connection signal="gui_input" from="MainBox/ParticleRenderer/SimulationView" to="." method="_on_simulation_view_gui_input"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Pause" to="." method="_on_pause_pressed"]

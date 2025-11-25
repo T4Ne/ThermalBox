@@ -5,13 +5,11 @@ var interaction_range: float = interaction_range_r * Globals.default_particle_ra
 var wall_thermal_coef: float = 20.0
 var max_accel: float = Globals.max_accel
 
-var particle_strong_interaction_params: PackedFloat32Array = [1.0, 200.0, Globals.default_particle_radius]
-var particle_weak_interaction_params: PackedFloat32Array = [1.0, 100.0, Globals.default_particle_radius]
-var particle_strong_repulsion_params: PackedFloat32Array = [500.0, interaction_range_r]
-var particle_weak_repulsion_params: PackedFloat32Array = [200.0, interaction_range_r]
+var particle_strong_interaction_params: PackedFloat32Array = [-100.0, 3.5]
+var particle_weak_interaction_params: PackedFloat32Array = [-50.0, 4.0]
+var particle_strong_repulsion_params: PackedFloat32Array = [-1000.0, interaction_range_r]
+var particle_weak_repulsion_params: PackedFloat32Array = [-500.0, interaction_range_r]
 
-enum InteractionParams {A, D, R}
-enum RepulsionParams {A, D}
 enum InteractionType {STRONGINTER, WEAKINTER, STRONGREPUL, WEAKREPUL}
 
 func _init() -> void:
@@ -237,29 +235,34 @@ func get_force_magnitude(type: int, other_type: int, distance: float) -> float:
 	match interaction_type:
 		InteractionType.STRONGINTER:
 			params = particle_strong_interaction_params
-			force = interaction_force(distance, params)
+			force = lennard_jones_interaction(distance, params)
 		InteractionType.WEAKINTER:
 			params = particle_weak_interaction_params
-			force = interaction_force(distance, params)
+			force = lennard_jones_interaction(distance, params)
 		InteractionType.STRONGREPUL:
 			params = particle_strong_repulsion_params
-			force = repulsion_force(distance, params)
+			force = adv_repulsion_force(distance, params)
 		InteractionType.WEAKREPUL:
 			params = particle_weak_repulsion_params
-			force = repulsion_force(distance, params)
+			force = adv_repulsion_force(distance, params)
 	return force
 
-func interaction_force(distance: float, params: PackedFloat32Array) -> float:
-	var a: float = params[InteractionParams.A]
-	var d: float = params[InteractionParams.D]
-	var r: float = params[InteractionParams.R]
-	var force: float = 2*a*d*exp(-a*(-r+distance)) - 2*a*d*(exp(-a*(-r+distance)))**2
+func lennard_jones_interaction(distance: float, params: PackedFloat32Array) -> float:
+	var a: float = params[0]
+	var b: float = params[1]
+	if distance == 0.0:
+		return -max_accel
+	var force: float = a*((b/distance)**4 - 2*(b/distance)**2)
+	force = clampf(force, -max_accel, 1000.0)
 	return force
 
-func repulsion_force(distance: float, params: PackedFloat32Array) -> float:
-	var a: float = params[RepulsionParams.A]
-	var d: float = params[RepulsionParams.D]
-	var force: float = -a * ((d / (distance+0.05)) - 0.95)
+func adv_repulsion_force(distance: float, params: PackedFloat32Array) -> float:
+	var a: float = params[0]
+	var b: float = params[1]
+	if distance == 0.0:
+		return -max_accel
+	var force: float = a * ((b / distance) - 1.0)
+	force = clampf(force, -max_accel, 1000.0)
 	return force
 
 func get_interaction_type(type: int, other_type: int) -> InteractionType:
@@ -289,10 +292,18 @@ func get_interaction_type(type: int, other_type: int) -> InteractionType:
 		3:
 			match other_type:
 				3:
-					return InteractionType.STRONGREPUL
+					return InteractionType.WEAKREPUL
 				_:
 					assert(false)
 		_:
 			assert(false)
 	
 	return InteractionType
+
+# old interactions:
+# 1-1: Weakinter
+# 1-2: Stronginter
+# 1-3: Strongrepul
+# 2-2: Weakrepul
+# 2-3: Stronginter
+# 3-3: Strongrepul

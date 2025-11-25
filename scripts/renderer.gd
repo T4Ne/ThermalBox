@@ -11,12 +11,14 @@ var wall_quad: QuadMesh = QuadMesh.new()
 
 func reinitialize_render() -> void:
 	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad)
-	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad)
+	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad, true)
 
-func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh) -> void:
+func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh, has_particle_texture: bool = false) -> void:
 	mm_instance.z_index = 3
 	if self != mm_instance.get_parent():
 		add_child(mm_instance)
+	if has_particle_texture:
+		mm_instance.texture = preload("res://resources/particle.png")
 	
 	quad.size = Vector2(1, 1)
 	
