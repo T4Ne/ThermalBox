@@ -51,7 +51,7 @@ func _render_particles(particles: ParticleData, simulation_view: SimulationViewD
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	
-	for particle_id in range(particle_count):
+	for particle_id: int in range(particle_count):
 		var particle_screen_position: Vector2 = particle_positions[particle_id] * simulation_view_scale + simulation_view_position
 		var particle_screen_diameter: float = particle_radii[particle_id] * 2.0 * simulation_view_scale
 		var particle_transform: Transform2D = Transform2D(0.0, particle_screen_position)
@@ -82,7 +82,7 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	var simulation_view_scale: float = simulation_view.simulation_view_scale
 	
-	for cell_id in range(cell_count):
+	for cell_id: int in range(cell_count):
 		if not cell_is_wall[cell_id]:
 			continue
 		var wall_array_coordinates: Vector2i = Vector2i(cell_id % cell_area.x, cell_id / cell_area.x)
@@ -108,3 +108,7 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 			_:
 				assert(false)
 		current_wall_indx += 1
+
+func _render_selection(cell_data: CellData, simulation_view: SimulationViewData, selected_cell: Vector2i, previous_cell: Vector2i) -> void:
+	if selected_cell == Vector2i(-1, -1):
+		return

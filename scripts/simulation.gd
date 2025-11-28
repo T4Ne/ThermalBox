@@ -21,12 +21,12 @@ func _prepare_chunk(cells: CellData, chunk: Chunk) -> void:
 	var cell_particle_ids: PackedInt32Array = cells.cell_particle_indexes
 	var count: int = 0
 	
-	for occup_indx in range(start_cell_indx, end_cell_indx + 1):
+	for occup_indx: int in range(start_cell_indx, end_cell_indx + 1):
 		var cell_indx: int = occup_cell_ids[occup_indx]
 		var particle_indx_start: int = offsets[cell_indx]
 		var particle_indx_end: int = offsets[cell_indx + 1] # exclusive endpoint
 		
-		for indx in range(particle_indx_start, particle_indx_end):
+		for indx: int in range(particle_indx_start, particle_indx_end):
 			var particle_id: int = cell_particle_ids[indx]
 			chunk.particle_indexes.append(particle_id)
 			count += 1

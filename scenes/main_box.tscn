@@ -202,11 +202,11 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 focus_mode = 0
-text = "Clear Wall"
+text = "Remove Wall"
 
 [node name="Selected" type="Label" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
-text = "Selected: Clear Wall"
+text = "Selected: Remove Wall"
 
 [node name="MultiMeshInstance2D" type="MultiMeshInstance2D" parent="."]
 texture = ExtResource("4_ps5bi")

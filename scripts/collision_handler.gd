@@ -4,7 +4,7 @@ var interaction_range_r: float = 4.0
 var interaction_range_sq: float = (interaction_range_r * Globals.default_particle_radius)**2
 var wall_thermal_coef: float = 20.0
 var max_force: float = Globals.max_accel
-var interaction_matrix: Array = []
+var interaction_matrix: Array[Array] = []
 
 var cell_iteration_order: PackedInt32Array = [1, 3, 5, 7, 0, 2, 4, 6, 8]
 
@@ -17,7 +17,7 @@ func _init() -> void:
 func _build_interaction_matrix() -> void:
 	var type_count: int = 3
 	interaction_matrix.resize(type_count)
-	for indx in range(type_count):
+	for indx: int in range(type_count):
 		interaction_matrix[indx] = []
 		interaction_matrix[indx].resize(type_count)
 	
@@ -63,7 +63,7 @@ func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 	assert(len(neighbor_cells) == 9, "NeighborCountError: Simulation doesn't support neighbor ranges over 1")
 	
 	
-	for cell_indx in cell_iteration_order: # Check up,down,left,right squares first
+	for cell_indx: int in cell_iteration_order: # Check up,down,left,right squares first
 		var cell_id: int = neighbor_cells[cell_indx]
 		if cell_id < 0: # Is not cell
 			continue
@@ -124,14 +124,14 @@ func interact_with_particles(id: int, position: Vector2, neighbor_cells: PackedI
 	var type: int = particles.types[id]
 	var interaction_row: Array = interaction_matrix[type]
 	
-	for cell_id in neighbor_cells:
+	for cell_id: int in neighbor_cells:
 		if cell_id == -1:
 			continue
 		
 		var start_index: int = cell_offsets[cell_id]
 		var end_index: int = cell_offsets[cell_id + 1]
 		
-		for indx in range(start_index, end_index):
+		for indx: int in range(start_index, end_index):
 			var other_id: int = cell_particle_indexes[indx]
 			if id == other_id:
 				continue

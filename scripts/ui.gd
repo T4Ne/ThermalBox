@@ -13,7 +13,10 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var FPSLabel: Label = get_node("Control/SideBar/MainControls/FPSLabel")
 @onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
-var selected_item: Globals.Items = Globals.Items.NONE
+enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
+enum ItemPlaceMode {PARTICLE, WALL, PUMP}
+
+var selected_item: Items = Items.REMOVEWALL
 var place_25: bool = false
 
 func _ready() -> void:
@@ -42,30 +45,30 @@ func toggle_pause() -> void:
 func _handle_item_placement(mouse_position: Vector2) -> void:
 	var type: int
 	match selected_item:
-		Globals.Items.NONE:
+		Items.REMOVEWALL:
 			type = 0
 			main_box.place_wall(type, mouse_position)
-		Globals.Items.WALLNEUTRAL:
+		Items.WALLNEUTRAL:
 			type = 1
 			main_box.place_wall(type, mouse_position)
-		Globals.Items.WALLCOLD:
+		Items.WALLCOLD:
 			type = 2
 			main_box.place_wall(type, mouse_position)
-		Globals.Items.WALLHOT:
+		Items.WALLHOT:
 			type = 3
 			main_box.place_wall(type, mouse_position)
-		Globals.Items.PARTICLE1:
+		Items.PARTICLE1:
 			type = 0
 			main_box.place_particle(type, mouse_position, place_25)
-		Globals.Items.PARTICLE2:
+		Items.PARTICLE2:
 			type = 1
 			main_box.place_particle(type, mouse_position, place_25)
-		Globals.Items.PARTICLE3:
+		Items.PARTICLE3:
 			type = 2
 			main_box.place_particle(type, mouse_position, place_25)
 
 func _on_particle_1_item_pressed() -> void:
-	selected_item = Globals.Items.PARTICLE1
+	selected_item = Items.PARTICLE1
 	SelectedLabel.text = "Selected: Particle 1"
 
 func _on_simulation_view_gui_input(_event: InputEvent) -> void:
@@ -92,11 +95,11 @@ func _input(event: InputEvent) -> void:
 		main_box.reduce_energy()
 
 func _on_particle_2_item_pressed() -> void:
-	selected_item = Globals.Items.PARTICLE2
+	selected_item = Items.PARTICLE2
 	SelectedLabel.text = "Selected: Particle 2"
 
 func _on_particle_3_item_pressed() -> void:
-	selected_item = Globals.Items.PARTICLE3
+	selected_item = Items.PARTICLE3
 	SelectedLabel.text = "Selected: Particle 3"
 
 func display_info(tps: int, count: int) -> void:
@@ -110,17 +113,17 @@ func _on_particles_reset_pressed() -> void:
 	main_box.delete_particles()
 
 func _on_wall_neutral_pressed() -> void:
-	selected_item = Globals.Items.WALLNEUTRAL
+	selected_item = Items.WALLNEUTRAL
 	SelectedLabel.text = "Selected: Neutral Wall"
 
 func _on_wall_cold_pressed() -> void:
-	selected_item = Globals.Items.WALLCOLD
+	selected_item = Items.WALLCOLD
 	SelectedLabel.text = "Selected: Cold Wall"
 
 func _on_wall_hot_pressed() -> void:
-	selected_item = Globals.Items.WALLHOT
+	selected_item = Items.WALLHOT
 	SelectedLabel.text = "Selected: Hot Wall"
 
 func _on_wall_none_pressed() -> void:
-	selected_item = Globals.Items.NONE
-	SelectedLabel.text = "Selected: Clear Wall"
+	selected_item = Items.REMOVEWALL
+	SelectedLabel.text = "Selected: Remove Wall"

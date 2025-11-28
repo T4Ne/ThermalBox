@@ -8,18 +8,45 @@ signal ui_info(tps: int, count: int)
 @onready var particles: ParticleData
 @onready var cells: CellData
 @onready var renderer: Renderer = get_node("ParticleRenderer")
+var mouse_cell_coords: Vector2i = Vector2i(-1, -1)
+var prev_mouse_cell_coords: Vector2i = Vector2i(-1, -1)
 
 func _ready() -> void:
 	reinitialize_sim()
 
 func _process(delta: float) -> void:
+	_update_mouse_cell_coords()
 	renderer.render(particles, cells, simulation_view)
 	ui_info.emit(floor(1 / delta), particles.count)
+	print(prev_mouse_cell_coords)
 
 func _physics_process(_delta: float) -> void:
 	if Globals.is_paused:
 		return
 	scheduler.step(Globals.time_step)
+
+func _update_mouse_cell_coords() -> void:
+	var mouse_pos_global: Vector2 = get_global_mouse_position()
+	var simulation_view_global_pos: Vector2 = simulation_view.simulation_view_position
+	var simulation_view_screen_size: Vector2 = simulation_view.simulation_view_screen_size
+	if mouse_pos_global.x < simulation_view_global_pos.x or mouse_pos_global.x > simulation_view_global_pos.x + simulation_view_screen_size.x:
+		mouse_cell_coords = Vector2(-1, -1)
+		prev_mouse_cell_coords = Vector2(-1, -1)
+		return
+	if mouse_pos_global.y < simulation_view_global_pos.y or mouse_pos_global.y > simulation_view_global_pos.y + simulation_view_screen_size.y:
+		mouse_cell_coords = Vector2(-1, -1)
+		prev_mouse_cell_coords = Vector2(-1, -1)
+		return
+	var simulation_view_scale: float = simulation_view.simulation_view_scale
+	var cell_size: int = cells.cell_size
+	var cell_x: int = int((mouse_pos_global.x - simulation_view_global_pos.x) / simulation_view_scale) / cell_size
+	var cell_y: int = int((mouse_pos_global.y - simulation_view_global_pos.y) / simulation_view_scale) / cell_size
+	var new_cell_coords: Vector2i = Vector2i(cell_x, cell_y)
+	if new_cell_coords == mouse_cell_coords:
+		return
+	else:
+		prev_mouse_cell_coords = mouse_cell_coords
+		mouse_cell_coords = new_cell_coords
 
 func reinitialize_sim() -> void:
 	particles = ParticleData.new()
