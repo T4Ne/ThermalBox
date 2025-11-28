@@ -8,6 +8,8 @@ var mm_walls_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
 var mm_walls: MultiMesh = MultiMesh.new()
 var wall_quad: QuadMesh = QuadMesh.new()
 @onready var simulation_view_background: ColorRect = get_node("SimulationView")
+@onready var selected_cell: Sprite2D = get_node("SelectedCell")
+@onready var previous_cell: Sprite2D = get_node("PreviousCell")
 
 func reinitialize_render() -> void:
 	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad)
@@ -29,27 +31,28 @@ func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadM
 	
 	mm_instance.multimesh = mm
 
-func render(particles: ParticleData, cells: CellData, simulation_view: SimulationViewData) -> void:
-	_render_simulation_view(simulation_view)
-	_render_walls(cells, simulation_view)
-	_render_particles(particles, simulation_view)
+func render(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
+	_render_simulation_view(simulation_render_state)
+	_render_walls(world_state, simulation_render_state)
+	_render_particles(world_state, simulation_render_state)
+	_render_selection(world_state, simulation_render_state)
 
-func _render_simulation_view(simulation_view: SimulationViewData) -> void:
+func _render_simulation_view(simulation_view: SimulationRenderState) -> void:
 	var simulation_view_screen_size: Vector2 = simulation_view.simulation_view_screen_size
 	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
 	
 	simulation_view_background.size = simulation_view_screen_size
 	simulation_view_background.global_position = simulation_view_position
 
-func _render_particles(particles: ParticleData, simulation_view: SimulationViewData) -> void:
+func _render_particles(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
 	# Resize buffer if necessary
-	var particle_count: int = particles.count
+	var particle_count: int = world_state.particle_count
 	if mm_particles.instance_count != particle_count:
 		mm_particles.instance_count = particle_count
-	var particle_positions: PackedVector2Array = particles.positions
-	var particle_radii: PackedFloat32Array = particles.radii
-	var simulation_view_scale: float = simulation_view.simulation_view_scale
-	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
+	var particle_positions: PackedVector2Array = world_state.particle_positions
+	var particle_radii: PackedFloat32Array = world_state.particle_radii
+	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
+	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
 	
 	for particle_id: int in range(particle_count):
 		var particle_screen_position: Vector2 = particle_positions[particle_id] * simulation_view_scale + simulation_view_position
@@ -59,7 +62,7 @@ func _render_particles(particles: ParticleData, simulation_view: SimulationViewD
 		particle_transform.y = Vector2(0.0, particle_screen_diameter)
 		
 		mm_particles.set_instance_transform_2d(particle_id, particle_transform)
-		var particle_type: int = particles.types[particle_id]
+		var particle_type: int = world_state.particle_types[particle_id]
 		match particle_type:
 			0:
 				mm_particles.set_instance_color(particle_id, Color("#A23A3A"))
@@ -70,17 +73,17 @@ func _render_particles(particles: ParticleData, simulation_view: SimulationViewD
 			_:
 				assert(false, "ParticleTypeError: particle has no valid type")
 
-func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> void:
-	var wall_count: int = cell_data.wall_count
+func _render_walls(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
+	var wall_count: int = world_state.wall_count
 	if mm_walls.instance_count != wall_count:
 		mm_walls.instance_count = wall_count
 	var current_wall_indx: int = 0
-	var cell_count: int = cell_data.cell_count
-	var cell_is_wall: PackedByteArray = cell_data.cell_is_wall
-	var cell_area: Vector2i = cell_data.cell_area
-	var cell_size: int = cell_data.cell_size
-	var simulation_view_position: Vector2 = simulation_view.simulation_view_position
-	var simulation_view_scale: float = simulation_view.simulation_view_scale
+	var cell_count: int = world_state.cell_count
+	var cell_is_wall: PackedByteArray = world_state.cell_types
+	var cell_area: Vector2i = world_state.cell_area
+	var cell_size: int = world_state.cell_size
+	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
+	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
 	
 	for cell_id: int in range(cell_count):
 		if not cell_is_wall[cell_id]:
@@ -109,6 +112,34 @@ func _render_walls(cell_data: CellData, simulation_view: SimulationViewData) -> 
 				assert(false)
 		current_wall_indx += 1
 
-func _render_selection(cell_data: CellData, simulation_view: SimulationViewData, selected_cell: Vector2i, previous_cell: Vector2i) -> void:
-	if selected_cell == Vector2i(-1, -1):
-		return
+func _render_selection(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
+	var mouse_cell_coords: Array[Vector2i] = simulation_render_state.mouse_cell_coords
+	var cell_size: int = world_state.cell_size
+	var sim_view_scale: float = simulation_render_state.simulation_view_scale
+	var sim_view_position: Vector2 = simulation_render_state.simulation_view_position
+	var indx: int = 0
+	
+	for cell_coords: Vector2i in mouse_cell_coords:
+		if cell_coords == Vector2i(-1, -1):
+			if indx == 0:
+				selected_cell.visible = false
+			else:
+				previous_cell.visible = false
+			indx += 1
+			continue
+		if indx == 0:
+			selected_cell.visible = true
+		else:
+			previous_cell.visible = true
+		var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * float(cell_size) + float(cell_size) / 2.0,
+		float(cell_coords.y) * float(cell_size) + float(cell_size) / 2.0)
+		var current_cell_screen_position: Vector2 = cell_simulation_position * sim_view_scale + sim_view_position
+		var cell_screen_size: float = sim_view_scale * cell_size
+		var cell_transform: Transform2D = Transform2D(0.0, current_cell_screen_position)
+		cell_transform.x = Vector2(cell_screen_size / 16.0, 0.0)
+		cell_transform.y = Vector2(0.0, cell_screen_size / 16.0)
+		if indx == 0:
+			selected_cell.global_transform = cell_transform
+		else:
+			previous_cell.global_transform = cell_transform
+		indx += 1

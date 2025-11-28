@@ -3,7 +3,7 @@ class_name Chunk
 var cell_start: int = -1
 var cell_end: int = -1
 var particle_count: int = -1
-var particle_indexes: PackedInt32Array = []
+var particle_ids: PackedInt32Array = []
 var positions: PackedVector2Array = []
 var velocities: PackedVector2Array = []
 var accelerations: PackedVector2Array = []

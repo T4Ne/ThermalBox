@@ -6,7 +6,7 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var SimulationViewRect: ColorRect = get_node("Control/SimulationViewArea/SimulationViewRect")
 @onready var SimulationViewPos: Control = get_node("Control/SimulationViewArea/SimulationViewRect/SimulationViewPos")
 @onready var SelectedLabel: Label = get_node("Control/BottomBar/ItemButtons/Selected")
-@onready var simulation_view: SimulationViewData
+@onready var simulation_render_state: SimulationRenderState
 @onready var main_box: MainBox = get_node("MainBox")
 @onready var Pause: Button = get_node("Control/SideBar/MainControls/Pause")
 @onready var Gravity: Button = get_node("Control/SideBar/MainControls/Gravity")
@@ -14,26 +14,25 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
 enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
-enum ItemPlaceMode {PARTICLE, WALL, PUMP}
 
 var selected_item: Items = Items.REMOVEWALL
 var place_25: bool = false
 
 func _ready() -> void:
 	var simulation_true_size: Vector2i = Globals.default_cell_size * Globals.default_simulation_area
-	simulation_view = SimulationViewData.new(simulation_true_size, edge_offset)
-	main_box.set_simulation_view(simulation_view)
+	simulation_render_state = SimulationRenderState.new(simulation_true_size, edge_offset)
+	main_box.set_simulation_view(simulation_render_state)
 	main_box.ui_info.connect(display_info)
 
 func _process(_delta: float) -> void:
 	_update_simulation_view_info()
 
 func _update_simulation_view_info() -> void:
-	simulation_view.update_simulation_view_size(SimulationViewRect.get_global_rect().size)
-	simulation_view.update_simulation_view_position(SimulationViewPos.get_global_position())
+	simulation_render_state.update_simulation_view_size(SimulationViewRect.get_global_rect().size)
+	simulation_render_state.update_simulation_view_position(SimulationViewPos.get_global_position())
 
-func set_sim_view(sim_view: SimulationViewData) -> void:
-	simulation_view = sim_view
+func set_sim_view(render_state_instance: SimulationRenderState) -> void:
+	simulation_render_state = render_state_instance
 
 func toggle_pause() -> void:
 	Globals.is_paused = not Globals.is_paused

@@ -39,26 +39,26 @@ func _build_interaction_matrix() -> void:
 	# 1-2: WEAKINTER
 	# 2-2: WEAKREPUL
 
-func calculate_collision_acceleration(id: int, position: Vector2, velocity: Vector2, particles: ParticleData, cells: CellData) -> Vector2:
+func calculate_collision_acceleration(id: int, position: Vector2, velocity: Vector2, world_state: WorldState) -> Vector2:
 	var combined_acceleration: Vector2 = Vector2.ZERO
-	var cell_x: int = floori(position.x * cells.inverted_cell_size)
-	var cell_y: int = floori(position.y * cells.inverted_cell_size)
-	assert(cell_x >= 0 and cell_x < cells.cell_area.x, "ParticleOutOfBoundsError: Particle x-coordinate couldn't be mapped to grid.")
-	assert(cell_y >= 0 and cell_y < cells.cell_area.y, "ParticleOutOfBoundsError: Particle y-coordinate couldn't be mapped to grid.")
-	var cell_id: int = cell_x + cell_y * cells.cell_area.x
-	var neighbor_count: int = cells.neighbor_count
-	var neighbor_by_cell: PackedInt32Array = cells.neighbor_cells
-	var neighbor_indx_start: int = cells.neighbor_offsets[cell_id]
+	var cell_x: int = floori(position.x * world_state.inverted_cell_size)
+	var cell_y: int = floori(position.y * world_state.inverted_cell_size)
+	assert(cell_x >= 0 and cell_x < world_state.cell_area.x, "ParticleOutOfBoundsError: Particle x-coordinate couldn't be mapped to grid.")
+	assert(cell_y >= 0 and cell_y < world_state.cell_area.y, "ParticleOutOfBoundsError: Particle y-coordinate couldn't be mapped to grid.")
+	var cell_id: int = cell_x + cell_y * world_state.cell_area.x
+	var neighbor_count: int = world_state.neighbor_count
+	var neighbor_by_cell: PackedInt32Array = world_state.cell_neighbor_ids
+	var neighbor_indx_start: int = world_state.cell_neighbor_offsets[cell_id]
 	var neighbors: PackedInt32Array = neighbor_by_cell.slice(neighbor_indx_start, neighbor_indx_start + neighbor_count)
 	
-	combined_acceleration += interact_with_walls(id, position, velocity, neighbors, particles, cells)
-	combined_acceleration += interact_with_particles(id, position, neighbors, particles, cells)
+	combined_acceleration += interact_with_walls(id, position, velocity, neighbors, world_state)
+	combined_acceleration += interact_with_particles(id, position, neighbors, world_state)
 	return combined_acceleration
 
-func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
+func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor_cells: PackedInt32Array, world_state: WorldState) -> Vector2:
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
-	var cell_side_length: float = cells.cell_size
-	var mass: float = particles.masses[id]
+	var cell_side_length: float = world_state.cell_size
+	var mass: float = world_state.particle_masses[id]
 	var wall_collision_range_sq: float = (0.45 * cell_side_length)**2
 	assert(len(neighbor_cells) == 9, "NeighborCountError: Simulation doesn't support neighbor ranges over 1")
 	
@@ -67,11 +67,11 @@ func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 		var cell_id: int = neighbor_cells[cell_indx]
 		if cell_id < 0: # Is not cell
 			continue
-		if not cells.cell_is_wall[cell_id]: # cell is not wall
+		if not world_state.cell_types[cell_id]: # cell is not wall
 			continue
 		
-		var wall_array_coordinates: Vector2i = cells.array_coords_by_cell_id(cell_id)
-		var wall_position: Vector2 = cells.cell_pos_by_array_coords(wall_array_coordinates)
+		var wall_array_coordinates: Vector2i = world_state.array_coords_by_cell_id(cell_id) # TODO: delete this
+		var wall_position: Vector2 = world_state.cell_pos_by_array_coords(wall_array_coordinates) # TODO: delete this
 		var wall_closest_x: float = clampf(position.x, wall_position.x, wall_position.x + cell_side_length)
 		var wall_closest_y: float = clampf(position.y, wall_position.y, wall_position.y + cell_side_length)
 		var wall_to_particle: Vector2 = position - Vector2(wall_closest_x, wall_closest_y)
@@ -84,7 +84,7 @@ func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 		
 		var wall_to_particle_unit: Vector2 = wall_to_particle.normalized()
 		var wall_to_particle_distance_w: float = wall_to_particle.length() / cell_side_length
-		var wall_force_magnitude: float = 1000.0 * ((0.45 / wall_to_particle_distance_w) - 1.0)
+		var wall_force_magnitude: float = 2000.0 * ((0.45 / wall_to_particle_distance_w) - 1.0)
 		var wall_acceleration_magnitude: float = wall_force_magnitude / mass
 		var wall_acceleration: Vector2 = wall_to_particle_unit * wall_acceleration_magnitude
 		
@@ -92,7 +92,7 @@ func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 			continue
 		
 		var thermal_acceleration: Vector2
-		var wall_type: int = cells.cell_is_wall[cell_id]
+		var wall_type: int = world_state.cell_types[cell_id]
 		var normal_velocity: float = velocity.dot(wall_to_particle_unit)
 		match wall_type:
 			1: # Normal Wall
@@ -113,15 +113,15 @@ func interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 		
 	return accumulated_acceleration
 
-func interact_with_particles(id: int, position: Vector2, neighbor_cells: PackedInt32Array, particles: ParticleData, cells: CellData) -> Vector2:
-	var particle_positions: PackedVector2Array = particles.positions
+func interact_with_particles(id: int, position: Vector2, neighbor_cells: PackedInt32Array, world_state: WorldState) -> Vector2:
+	var particle_positions: PackedVector2Array = world_state.particle_positions
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
-	var particle_types: PackedByteArray = particles.types
-	var cell_offsets: PackedInt32Array = cells.cell_offsets
-	var cell_particle_indexes: PackedInt32Array = cells.cell_particle_indexes
-	var radius: float = particles.radii[id]
-	var mass: float = particles.radii[id]
-	var type: int = particles.types[id]
+	var particle_types: PackedByteArray = world_state.particle_types
+	var cell_offsets: PackedInt32Array = world_state.cell_particle_offsets
+	var cell_particle_indexes: PackedInt32Array = world_state.cell_particle_ids
+	var radius: float = world_state.particle_radii[id]
+	var mass: float = world_state.particle_masses[id]
+	var type: int = world_state.particle_types[id]
 	var interaction_row: Array = interaction_matrix[type]
 	
 	for cell_id: int in neighbor_cells:
