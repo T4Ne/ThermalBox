@@ -61,11 +61,11 @@ func _render_particles(particles: ParticleData, simulation_view: SimulationViewD
 		mm_particles.set_instance_transform_2d(particle_id, particle_transform)
 		var particle_type: int = particles.types[particle_id]
 		match particle_type:
-			1:
+			0:
 				mm_particles.set_instance_color(particle_id, Color("#A23A3A"))
-			2:
+			1:
 				mm_particles.set_instance_color(particle_id, Color("#1F6B2C"))
-			3:
+			2:
 				mm_particles.set_instance_color(particle_id, Color("#2E5D9E"))
 			_:
 				assert(false, "ParticleTypeError: particle has no valid type")

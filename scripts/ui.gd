@@ -55,13 +55,13 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 			type = 3
 			main_box.place_wall(type, mouse_position)
 		Globals.Items.PARTICLE1:
-			type = 1
+			type = 0
 			main_box.place_particle(type, mouse_position, place_25)
 		Globals.Items.PARTICLE2:
-			type = 2
+			type = 1
 			main_box.place_particle(type, mouse_position, place_25)
 		Globals.Items.PARTICLE3:
-			type = 3
+			type = 2
 			main_box.place_particle(type, mouse_position, place_25)
 
 func _on_particle_1_item_pressed() -> void:
