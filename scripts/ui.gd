@@ -24,8 +24,9 @@ func _ready() -> void:
 	main_box.set_simulation_view(simulation_render_state)
 	main_box.ui_info.connect(display_info)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_simulation_view_info()
+	main_box.frame(delta)
 
 func _update_simulation_view_info() -> void:
 	simulation_render_state.update_simulation_view_size(SimulationViewRect.get_global_rect().size)
@@ -46,16 +47,19 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 	match selected_item:
 		Items.REMOVEWALL:
 			type = 0
-			main_box.place_wall(type, mouse_position)
+			main_box.place_wall(type)
 		Items.WALLNEUTRAL:
 			type = 1
-			main_box.place_wall(type, mouse_position)
+			main_box.place_wall(type)
 		Items.WALLCOLD:
 			type = 2
-			main_box.place_wall(type, mouse_position)
+			main_box.place_wall(type)
 		Items.WALLHOT:
 			type = 3
-			main_box.place_wall(type, mouse_position)
+			main_box.place_wall(type)
+		Items.PUMP:
+			type = 4
+			main_box.place_pump(type)
 		Items.PARTICLE1:
 			type = 0
 			main_box.place_particle(type, mouse_position, place_25)
@@ -68,6 +72,7 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 
 func _on_particle_1_item_pressed() -> void:
 	selected_item = Items.PARTICLE1
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 1"
 
 func _on_simulation_view_gui_input(_event: InputEvent) -> void:
@@ -95,10 +100,12 @@ func _input(event: InputEvent) -> void:
 
 func _on_particle_2_item_pressed() -> void:
 	selected_item = Items.PARTICLE2
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 2"
 
 func _on_particle_3_item_pressed() -> void:
 	selected_item = Items.PARTICLE3
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 3"
 
 func display_info(tps: int, count: int) -> void:
@@ -113,16 +120,25 @@ func _on_particles_reset_pressed() -> void:
 
 func _on_wall_neutral_pressed() -> void:
 	selected_item = Items.WALLNEUTRAL
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Neutral Wall"
 
 func _on_wall_cold_pressed() -> void:
 	selected_item = Items.WALLCOLD
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Cold Wall"
 
 func _on_wall_hot_pressed() -> void:
 	selected_item = Items.WALLHOT
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Hot Wall"
 
 func _on_wall_none_pressed() -> void:
 	selected_item = Items.REMOVEWALL
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Remove Wall"
+
+func _on_pump_pressed() -> void:
+	selected_item = Items.PUMP
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PUMP
+	SelectedLabel.text = "Selected: Pump"

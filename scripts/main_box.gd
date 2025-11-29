@@ -16,7 +16,12 @@ var selected_item: Items = Items.REMOVEWALL
 func _ready() -> void:
 	reinitialize_sim()
 
-func _process(delta: float) -> void:
+#func _process(delta: float) -> void:
+	#simulation_render_state.update_mouse_cell_coords(get_global_mouse_position(), world_state.cell_size)
+	#renderer.render(world_state, simulation_render_state)
+	#ui_info.emit(floor(1 / delta), world_state.particle_count)
+
+func frame(delta: float) -> void:
 	simulation_render_state.update_mouse_cell_coords(get_global_mouse_position(), world_state.cell_size)
 	renderer.render(world_state, simulation_render_state)
 	ui_info.emit(floor(1 / delta), world_state.particle_count)
@@ -46,14 +51,25 @@ func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	else:
 		world_state.add_particle(type, particle_simulation_position, particle_velocity, particle_radius, particle_mass)
 
-func place_wall(type: int, mouse_position: Vector2) -> void:
-	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
-	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
-	var size: int = world_state.cell_size
-	var cell_x: int = floori((mouse_position.x - simulation_view_position.x) / simulation_view_scale) / size
-	var cell_y: int = floori((mouse_position.y - simulation_view_position.y) / simulation_view_scale) / size
-	var cell_coordinates: Vector2i = Vector2i(cell_x, cell_y)
-	world_state.set_cell_wall_state(cell_coordinates, type)
+func place_wall(type: int) -> void:
+	var cell_coordinates: Vector2i = simulation_render_state.mouse_cell_coords[0]
+	world_state.set_cell_state(cell_coordinates, type)
+
+func place_pump(type: int) -> void:
+	var pump_coordinates: Vector2i = simulation_render_state.mouse_cell_coords[1]
+	if pump_coordinates == Vector2i(-1, -1):
+		return
+	var direction_vec: Vector2i = simulation_render_state.mouse_cell_coords[0] - simulation_render_state.mouse_cell_coords[1]
+	if direction_vec.x == 0:
+		if direction_vec.y > 0:
+			world_state.set_cell_state(pump_coordinates, type + 1)
+		else:
+			world_state.set_cell_state(pump_coordinates, type)
+	else:
+		if direction_vec.x > 0:
+			world_state.set_cell_state(pump_coordinates, type + 3)
+		else:
+			world_state.set_cell_state(pump_coordinates, type + 2)
 
 func print_energy() -> void:
 	var energy_sum: float = 0.0

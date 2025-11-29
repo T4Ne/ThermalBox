@@ -11,9 +11,6 @@ var time_step: float = 0.015
 var lightspeed: float = ((default_particle_radius / time_step) / 2.0)*0.9
 var max_accel: float = 2.0 * lightspeed / time_step
 
-enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
-enum ItemPlaceMode {PARTICLE, WALL, PUMP}
-
 # ++ = strong attraction
 # + = weak attraction
 # - = neutral / very weak

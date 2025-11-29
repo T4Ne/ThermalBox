@@ -8,6 +8,7 @@ var particle_accelerations: PackedVector2Array = []
 var particle_radii: PackedFloat32Array = []
 var particle_masses: PackedFloat32Array = []
 var wall_count: int = 0
+var pump_count: int = 0
 var cell_size: int
 var cell_area: Vector2i
 var cell_count: int
@@ -22,11 +23,14 @@ var neighbor_range: int = 1
 var neighbor_count: int = (neighbor_range*2+1)**2
 var inverted_cell_size: float
 
+enum CellType {EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT}
+
 func _init(size: int, area: Vector2i, borders: bool = true) -> void:
 	cell_size = size
 	inverted_cell_size = 1.0 / float(cell_size)
 	cell_area = area
 	cell_types.resize(int(cell_area.x * cell_area.y))
+	cell_types.fill(CellType.EMPTY)
 	cell_count = cell_area.x * cell_area.y
 	cell_particle_offsets.resize(cell_count + 1)
 	if borders:
@@ -46,61 +50,63 @@ func _build_neighbor_offsets() -> void:
 			write_index += 1
 		cell_neighbor_offsets[cell_id + 1] = write_index
 
-func set_cell_wall_state(arr_pos: Vector2i, type: int) -> void:
-	var cell_id: int = cell_id_by_array_coords(arr_pos)
-	if cell_id >= cell_count:
-		return
-	var current_type: int = cell_types[cell_id]
-	if current_type == type:
-		return
-	elif type == 0:
-		wall_count -= 1
+func set_cell_state(arr_pos: Vector2i, new_type: int) -> void:
+	var cell_id: int = int(arr_pos.x + arr_pos.y * cell_area.x)
+	var old_type: int = cell_types[cell_id]
+	
+	if new_type == CellType.EMPTY:
+		if old_type == CellType.EMPTY:
+			pass
+		elif old_type >= CellType.PUMPUP and old_type <= CellType.PUMPRIGHT:
+			pump_count -= 1
+		else:
+			wall_count -= 1
+	elif new_type >= CellType.PUMPUP and new_type <= CellType.PUMPRIGHT:
+		if old_type == CellType.EMPTY:
+			pump_count += 1
+		elif old_type >= CellType.PUMPUP and old_type <= CellType.PUMPRIGHT:
+			pass
+		else:
+			pump_count += 1
+			wall_count -= 1
 	else:
-		wall_count += 1
-	cell_types[cell_id] = type
+		if old_type == CellType.EMPTY:
+			wall_count += 1
+		elif old_type >= CellType.PUMPUP and old_type <= CellType.PUMPRIGHT:
+			wall_count += 1
+			pump_count -= 1
+		else:
+			pass
+	
+	cell_types[cell_id] = new_type
 
 func change_wall_count_by(value: int) -> void:
 	assert(wall_count + value >= 0, "WallCountValueError: Wall count cannot be smaller than 0")
 	wall_count += value
 
-func toggle_wall(type: int, coordinates: Vector2i) -> void:
-	var cell_id: int = coordinates.x + cell_area.x * coordinates.y
-	var is_currently_wall: int = cell_types[cell_id]
-	if is_currently_wall:
-		cell_types[cell_id] = 0
-		wall_count -= 1
-	else:
-		cell_types[cell_id] = type
-		wall_count += 1
-
 func build_borders() -> void:
 	var cell_area_row_size: int = cell_area.x
 	for cell_indx: int in range(cell_count):
 		if cell_indx < cell_area_row_size:
-			cell_types[cell_indx] = 1
+			cell_types[cell_indx] = CellType.NORMWALL
 			wall_count += 1
 			continue
 		elif cell_indx >= cell_count - cell_area_row_size:
-			cell_types[cell_indx] = 1
+			cell_types[cell_indx] = CellType.NORMWALL
 			wall_count += 1
 			continue
 		var cell_row_indx: int = cell_indx % cell_area_row_size
 		if cell_row_indx == 0:
-			cell_types[cell_indx] = 1
+			cell_types[cell_indx] = CellType.NORMWALL
 			wall_count += 1
 		elif cell_row_indx == cell_area_row_size - 1:
-			cell_types[cell_indx] = 1
+			cell_types[cell_indx] = CellType.NORMWALL
 			wall_count += 1
-		else:
-			cell_types[cell_indx] = 0
 
 func array_coords_by_cell_id(cell_id: int) -> Vector2i:
 	var cell_x: int = cell_id % cell_area.x
 	var cell_y: int = cell_id / cell_area.x
 	return Vector2i(cell_x, cell_y)
-
-func cell_id_by_array_coords(coords: Vector2i) -> int:
-	return int(coords.x + coords.y * cell_area.x)
 
 func cell_pos_by_array_coords(coords: Vector2i) -> Vector2:
 	var cell_x: float = float(coords.x * cell_size)

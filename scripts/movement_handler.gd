@@ -5,6 +5,8 @@ var max_speed_sq: float = max_speed ** 2
 var interaction_range_r: float = 4.0
 var interaction_range_sq: float = (interaction_range_r * Globals.default_particle_radius)**2
 var wall_thermal_coef: float = 20.0
+var pump_acceleration: float = 100.0
+var pump_max_speed: float = 10.0
 var max_force: float = Globals.max_accel
 var interaction_matrix: Array[Array] = []
 var cell_iteration_order: PackedInt32Array = [1, 3, 5, 7, 0, 2, 4, 6, 8]
@@ -114,14 +116,16 @@ func _interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbo
 	var cell_side_length: float = world_state.cell_size
 	var mass: float = world_state.particle_masses[id]
 	var wall_collision_range_sq: float = (0.45 * cell_side_length)**2
+	var cell_types: PackedByteArray = world_state.cell_types
 	assert(len(neighbor_cells) == 9, "NeighborCountError: Simulation doesn't support neighbor ranges over 1")
 	
 	
 	for cell_indx: int in cell_iteration_order: # Check up,down,left,right squares first
 		var cell_id: int = neighbor_cells[cell_indx]
+		var cell_type: int = cell_types[cell_id]
 		if cell_id < 0: # Is not cell
 			continue
-		if not world_state.cell_types[cell_id]: # cell is not wall
+		if not cell_type: # cell is not a valid item
 			continue
 		
 		var wall_array_coordinates: Vector2i = world_state.array_coords_by_cell_id(cell_id) # TODO: delete this
@@ -133,37 +137,55 @@ func _interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbo
 		
 		if distance_to_wall_squared > wall_collision_range_sq: # Wall is not in range to collide
 			continue
-		if distance_to_wall_squared == 0.0:
-			continue
 		
-		var wall_to_particle_unit: Vector2 = wall_to_particle.normalized()
-		var wall_to_particle_distance_w: float = wall_to_particle.length() / cell_side_length
-		var wall_force_magnitude: float = 2000.0 * ((0.45 / wall_to_particle_distance_w) - 1.0)
-		var wall_acceleration_magnitude: float = wall_force_magnitude / mass
-		var wall_acceleration: Vector2 = wall_to_particle_unit * wall_acceleration_magnitude
-		
-		if wall_acceleration.dot(accumulated_acceleration) > 0:
-			continue
-		
-		var thermal_acceleration: Vector2
-		var wall_type: int = world_state.cell_types[cell_id]
-		var normal_velocity: float = velocity.dot(wall_to_particle_unit)
-		match wall_type:
-			1: # Normal Wall
-				thermal_acceleration = Vector2.ZERO
-			2: # Cold Wall
-				if normal_velocity < 0:
+		if cell_type >= world_state.CellType.PUMPUP and cell_type <= world_state.CellType.PUMPRIGHT: # Cell is a pump
+			if distance_to_wall_squared != 0.0:
+				continue
+			var pump_direction: Vector2
+			match cell_type:
+				world_state.CellType.PUMPUP:
+					pump_direction = Vector2(0, -1)
+				world_state.CellType.PUMPDOWN:
+					pump_direction = Vector2(0, 1)
+				world_state.CellType.PUMPLEFT:
+					pump_direction = Vector2(-1, 0)
+				world_state.CellType.PUMPRIGHT:
+					pump_direction = Vector2(1, 0)
+			var pump_direction_velocity: float = pump_direction.dot(velocity)
+			if pump_direction_velocity < pump_max_speed:
+				accumulated_acceleration += pump_direction * pump_acceleration
+		else: # Cell is a wall
+			if distance_to_wall_squared == 0.0: # Particle is inside wall
+				continue
+			
+			var wall_to_particle_unit: Vector2 = wall_to_particle.normalized()
+			var wall_to_particle_distance_w: float = wall_to_particle.length() / cell_side_length
+			var wall_force_magnitude: float = 3000.0 * ((0.45 / wall_to_particle_distance_w) - 1.0)
+			var wall_acceleration_magnitude: float = wall_force_magnitude / mass
+			var wall_acceleration: Vector2 = wall_to_particle_unit * wall_acceleration_magnitude
+			
+			if wall_acceleration.dot(accumulated_acceleration) > 0:
+				continue
+			
+			var thermal_acceleration: Vector2
+			var wall_type: int = world_state.cell_types[cell_id]
+			var normal_velocity: float = velocity.dot(wall_to_particle_unit)
+			match wall_type:
+				world_state.CellType.NORMWALL:
 					thermal_acceleration = Vector2.ZERO
-				else:
-					thermal_acceleration = -wall_thermal_coef * normal_velocity * wall_to_particle_unit
-			3: # Hot Wall
-				if normal_velocity < 0:
-					thermal_acceleration = Vector2.ZERO
-				else:
-					thermal_acceleration = wall_thermal_coef * normal_velocity * wall_to_particle_unit
-		
-		wall_acceleration += thermal_acceleration
-		accumulated_acceleration += wall_acceleration
+				world_state.CellType.COLDWALL:
+					if normal_velocity < 0:
+						thermal_acceleration = Vector2.ZERO
+					else:
+						thermal_acceleration = -wall_thermal_coef * normal_velocity * wall_to_particle_unit
+				world_state.CellType.HOTWALL:
+					if normal_velocity < 0:
+						thermal_acceleration = Vector2.ZERO
+					else:
+						thermal_acceleration = wall_thermal_coef * normal_velocity * wall_to_particle_unit
+			
+			wall_acceleration += thermal_acceleration
+			accumulated_acceleration += wall_acceleration
 		
 	return accumulated_acceleration
 
