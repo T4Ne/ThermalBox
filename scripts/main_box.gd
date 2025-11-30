@@ -2,13 +2,15 @@ class_name MainBox
 extends Node2D
 
 var simulation_render_state: SimulationRenderState
-signal ui_info(tps: int, count: int)
 
 @onready var scheduler: Scheduler = Scheduler.new()
 @onready var world_state: WorldState
 @onready var renderer: Renderer = get_node("ParticleRenderer")
 var mouse_cell_coords: Vector2i = Vector2i(-1, -1)
 var prev_mouse_cell_coords: Vector2i = Vector2i(-1, -1)
+var last_physics_time_usec: float = 0.0
+var real_tps: float = 0.0
+var execution_time_ms: float = 0.0
 
 enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
 var selected_item: Items = Items.REMOVEWALL
@@ -16,20 +18,27 @@ var selected_item: Items = Items.REMOVEWALL
 func _ready() -> void:
 	reinitialize_sim()
 
-#func _process(delta: float) -> void:
-	#simulation_render_state.update_mouse_cell_coords(get_global_mouse_position(), world_state.cell_size)
-	#renderer.render(world_state, simulation_render_state)
-	#ui_info.emit(floor(1 / delta), world_state.particle_count)
-
-func frame(delta: float) -> void:
+func frame(_delta: float) -> void:
 	simulation_render_state.update_mouse_cell_coords(get_global_mouse_position(), world_state.cell_size)
 	renderer.render(world_state, simulation_render_state)
-	ui_info.emit(floor(1 / delta), world_state.particle_count)
 
 func _physics_process(_delta: float) -> void:
+	var physics_frame_start_usec: float = Time.get_ticks_usec()
+	if last_physics_time_usec > 0.0:
+		var time_since_last_call_usec: float = physics_frame_start_usec - last_physics_time_usec
+		if time_since_last_call_usec > 0.0:
+			var current_real_tps: float = 1000000.0 / time_since_last_call_usec
+			real_tps = lerp(real_tps, current_real_tps, 0.1)
+	last_physics_time_usec = physics_frame_start_usec
+	
 	if Globals.is_paused:
-		return
-	scheduler.step(Globals.time_step)
+		pass
+	else:
+		scheduler.step(Globals.time_step)
+	
+	var physics_frame_end_time_usec: float = Time.get_ticks_usec()
+	var duration_usec: float = physics_frame_end_time_usec - physics_frame_start_usec
+	execution_time_ms = lerp(execution_time_ms, duration_usec / 1000.0, 0.1)
 
 func reinitialize_sim() -> void:
 	world_state = WorldState.new(Globals.default_cell_size, Globals.default_simulation_area)
@@ -53,6 +62,8 @@ func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 
 func place_wall(type: int) -> void:
 	var cell_coordinates: Vector2i = simulation_render_state.mouse_cell_coords[0]
+	if cell_coordinates == Vector2i(-1, -1):
+		return
 	world_state.set_cell_state(cell_coordinates, type)
 
 func place_pump(type: int) -> void:

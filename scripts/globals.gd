@@ -8,7 +8,7 @@ var default_simulation_area: Vector2i = Vector2i(40, 30)
 var default_particle_mass: float = 1.0
 var default_particle_radius: float = 2.5
 var time_step: float = 0.015
-var lightspeed: float = ((default_particle_radius / time_step) / 2.0)*0.9
+var lightspeed: float = ((default_particle_radius / time_step) / 2.0) * 0.9
 var max_accel: float = 2.0 * lightspeed / time_step
 
 # ++ = strong attraction

@@ -24,6 +24,7 @@ func update_simulation_view_position(view_position: Vector2) -> void:
 	view_position.y - simulation_view_screen_size.y / 2.0)
 
 func update_mouse_cell_coords(global_mouse_position: Vector2, cell_size: int) -> void:
+	
 	if global_mouse_position.x < simulation_view_position.x or global_mouse_position.x >= simulation_view_position.x + simulation_view_screen_size.x:
 		mouse_cell_coords = [Vector2(-1, -1), Vector2(-1, -1)]
 		return

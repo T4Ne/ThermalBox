@@ -22,10 +22,10 @@ func _ready() -> void:
 	var simulation_true_size: Vector2i = Globals.default_cell_size * Globals.default_simulation_area
 	simulation_render_state = SimulationRenderState.new(simulation_true_size, edge_offset)
 	main_box.set_simulation_view(simulation_render_state)
-	main_box.ui_info.connect(display_info)
 
 func _process(delta: float) -> void:
 	_update_simulation_view_info()
+	display_info(main_box.real_tps, main_box.world_state.particle_count)
 	main_box.frame(delta)
 
 func _update_simulation_view_info() -> void:
@@ -108,7 +108,8 @@ func _on_particle_3_item_pressed() -> void:
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 3"
 
-func display_info(tps: int, count: int) -> void:
+func display_info(real_tps: float, count: int) -> void:
+	var tps: int = roundi(real_tps)
 	FPSLabel.text = "FPS: %d" % tps
 	Countlabel.text = "Count: %d" % count
 

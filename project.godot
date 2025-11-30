@@ -71,6 +71,9 @@ window/vsync/vsync_mode=0
 
 common/max_physics_steps_per_frame=1
 common/physics_jitter_fix=0.0
+2d/physics_engine="Dummy"
+2d/solver/solver_iterations=1
+common/enable_object_picking=false
 
 [rendering]
 
