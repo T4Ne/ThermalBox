@@ -13,7 +13,7 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var FPSLabel: Label = get_node("Control/SideBar/MainControls/FPSLabel")
 @onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
-enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
+enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
 
 var selected_item: Items = Items.REMOVEWALL
 var place_25: bool = false
@@ -68,6 +68,9 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 			main_box.place_particle(type, mouse_position, place_25)
 		Items.PARTICLE3:
 			type = 2
+			main_box.place_particle(type, mouse_position, place_25)
+		Items.PARTICLE4:
+			type = 3
 			main_box.place_particle(type, mouse_position, place_25)
 
 func _on_particle_1_item_pressed() -> void:
@@ -143,3 +146,8 @@ func _on_pump_pressed() -> void:
 	selected_item = Items.PUMP
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PUMP
 	SelectedLabel.text = "Selected: Pump"
+
+func _on_particle_4_item_pressed() -> void:
+	selected_item = Items.PARTICLE4
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
+	SelectedLabel.text = "Selected: Particle 4"

@@ -76,6 +76,8 @@ func _render_particles(world_state: WorldState, simulation_render_state: Simulat
 				mm_particles.set_instance_color(particle_id, Color("#1F6B2C"))
 			2:
 				mm_particles.set_instance_color(particle_id, Color("#2E5D9E"))
+			3:
+				mm_particles.set_instance_color(particle_id, Color("#555555"))
 			_:
 				assert(false, "ParticleTypeError: particle has no valid type")
 

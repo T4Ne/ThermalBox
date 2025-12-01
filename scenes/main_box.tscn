@@ -187,6 +187,11 @@ layout_mode = 2
 focus_mode = 0
 text = "Particle 3"
 
+[node name="Particle4Item" type="Button" parent="Control/BottomBar/ItemButtons"]
+layout_mode = 2
+focus_mode = 0
+text = "Particle 4"
+
 [node name="WallNeutral" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
 size_flags_horizontal = 4
@@ -233,6 +238,7 @@ text = "Selected: Remove Wall"
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle1Item" to="." method="_on_particle_1_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle2Item" to="." method="_on_particle_2_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle3Item" to="." method="_on_particle_3_item_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/Particle4Item" to="." method="_on_particle_4_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallNeutral" to="." method="_on_wall_neutral_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallCold" to="." method="_on_wall_cold_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallHot" to="." method="_on_wall_hot_pressed"]

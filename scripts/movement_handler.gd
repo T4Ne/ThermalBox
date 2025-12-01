@@ -6,8 +6,8 @@ var interaction_range_r: float = 4.0
 var interaction_range_sq: float = (interaction_range_r * Globals.default_particle_radius)**2
 var wall_thermal_coef: float = 20.0
 var pump_acceleration: float = 100.0
-var pump_max_speed: float = 10.0
-var max_force: float = Globals.max_accel
+var pump_max_speed: float = 5.0
+var max_acceleration: float = Globals.max_accel
 var interaction_matrix: Array[Array] = []
 var cell_iteration_order: PackedInt32Array = [1, 3, 5, 7, 0, 2, 4, 6, 8]
 
@@ -60,6 +60,8 @@ func second_half_verlet(time_step: float, world_state: WorldState, chunk: Chunk)
 		if gravity_is_on:
 			full_step_acceleration += gravity
 		full_step_acceleration += _calculate_collision_acceleration(particle_id, final_full_step_position, final_half_step_velocity, world_state)
+		if full_step_acceleration.length_squared() > max_acceleration**2:
+			full_step_acceleration = full_step_acceleration.normalized() * max_acceleration
 		
 		# full step velocity
 		var full_step_velocity: Vector2 = final_half_step_velocity + full_step_acceleration * time_step * 0.5
@@ -71,29 +73,40 @@ func second_half_verlet(time_step: float, world_state: WorldState, chunk: Chunk)
 		chunk.accelerations[particle_indx] = full_step_acceleration
 
 func _build_interaction_matrix() -> void:
-	var type_count: int = 3
+	var type_count: int = 4
 	interaction_matrix.resize(type_count)
 	for indx: int in range(type_count):
 		interaction_matrix[indx] = []
 		interaction_matrix[indx].resize(type_count)
 	
-	interaction_matrix[0][0] = [-50.0, 4.0, InterType.LENNARD_JONES]
+	interaction_matrix[0][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
 	interaction_matrix[0][1] = [-100.0, 3.5, InterType.LENNARD_JONES]
-	interaction_matrix[0][2] = [-1000.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[0][2] = [-20.0, 4.0, InterType.LENNARD_JONES]
+	interaction_matrix[0][3] = [-500.0, interaction_range_r, InterType.REPULSION]
 	interaction_matrix[1][0] = [-100.0, 3.5, InterType.LENNARD_JONES]
-	interaction_matrix[1][1] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[1][2] = [-50.0, 4.0, InterType.LENNARD_JONES]
-	interaction_matrix[2][0] = [-1000.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[2][1] = [-50.0, 4.0, InterType.LENNARD_JONES]
+	interaction_matrix[1][1] = [-1000.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[1][2] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[1][3] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[2][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
+	interaction_matrix[2][1] = [-500.0, interaction_range_r, InterType.REPULSION]
 	interaction_matrix[2][2] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[2][3] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][0] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][1] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][2] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][3] = [-500.0, interaction_range_r, InterType.REPULSION]
 	
 	# interactions:
 	# 0-0: WEAKINTER
 	# 0-1: STRONGINTER
-	# 0-2: STRONGREPUL
-	# 1-1: WEAKREPUL
-	# 1-2: WEAKINTER
-	# 2-2: WEAKREPUL
+	# 0-2: WEAKINTER
+	# 0-3: WEAKREPUL
+	# 1-1: STRONGINTER
+	# 1-2: STRONGREPUL
+	# 1-3: WEAKREPUL
+	# 2-2: WEAKINTER
+	# 2-3: WEAKREPUL
+	# 3-3: WEAKREPUL
 
 func _calculate_collision_acceleration(id: int, position: Vector2, velocity: Vector2, world_state: WorldState) -> Vector2:
 	var combined_acceleration: Vector2 = Vector2.ZERO
@@ -118,8 +131,8 @@ func _interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbo
 	var wall_collision_range_sq: float = (0.45 * cell_side_length)**2
 	var cell_types: PackedByteArray = world_state.cell_types
 	assert(len(neighbor_cells) == 9, "NeighborCountError: Simulation doesn't support neighbor ranges over 1")
-	
-	
+
+
 	for cell_indx: int in cell_iteration_order: # Check up,down,left,right squares first
 		var cell_id: int = neighbor_cells[cell_indx]
 		var cell_type: int = cell_types[cell_id]
@@ -223,16 +236,16 @@ func _interact_with_particles(id: int, position: Vector2, neighbor_cells: Packed
 			var force: float = 0.0
 			if params[2] == InterType.LENNARD_JONES:
 				if dist_r == 0.0:
-					force = -max_force
+					force = -max_acceleration * mass
 				else:
 					var b_div_d: float = params[1] / dist_r
 					force = params[0]*((b_div_d)**4 - 2*(b_div_d)**2)
 			else:
 				if dist_r == 0.0:
-					force = -max_force
+					force = -max_acceleration * mass
 				else:
 					force = params[0] * ((params[1] / dist_r) - 1.0)
-			force = clampf(force, -max_force, 1000.0)
+			#force = clampf(force, -max_force, 1000.0)
 			
 			accumulated_acceleration += uvec_to_self * (force / mass)
 	
