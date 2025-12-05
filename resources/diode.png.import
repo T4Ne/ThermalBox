@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://urllo48p3ruj"
-path="res://.godot/imported/pump.png-022350f8f8a2587e1b88aad30567dc2b.ctex"
+uid="uid://d1glh3m5fxxy"
+path="res://.godot/imported/diode.png-bb172b82b3f112c949dce4bec5d9eb8b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/pump.png"
-dest_files=["res://.godot/imported/pump.png-022350f8f8a2587e1b88aad30567dc2b.ctex"]
+source_file="res://resources/diode.png"
+dest_files=["res://.godot/imported/diode.png-bb172b82b3f112c949dce4bec5d9eb8b.ctex"]
 
 [params]
 

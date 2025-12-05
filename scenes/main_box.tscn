@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dt4phjectrhdt" path="res://scripts/main_box.gd" id="1_68iro"]
 [ext_resource type="Script" uid="uid://q2hb4lnranhq" path="res://scripts/ui.gd" id="2_eh4tv"]
 [ext_resource type="Script" uid="uid://2s1d0o5mj4gt" path="res://scripts/renderer.gd" id="2_kre7u"]
-[ext_resource type="Texture2D" uid="uid://b55g16abhh72t" path="res://resources/selection.png" id="4_5gf5c"]
+[ext_resource type="Texture2D" uid="uid://p64srgppyuqp" path="res://resources/selection.png" id="4_5gf5c"]
 
 [node name="UI" type="CanvasLayer"]
 script = ExtResource("2_eh4tv")

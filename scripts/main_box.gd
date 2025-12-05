@@ -12,9 +12,6 @@ var last_physics_time_usec: float = 0.0
 var real_tps: float = 0.0
 var execution_time_ms: float = 0.0
 
-enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
-var selected_item: Items = Items.REMOVEWALL
-
 func _ready() -> void:
 	reinitialize_sim()
 
@@ -51,7 +48,13 @@ func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
 	var particle_velocity: Vector2 = Vector2.ZERO
 	var particle_radius: float = Globals.default_particle_radius
-	var particle_mass: float = Globals.default_particle_mass
+	var particle_mass: float
+	if type == 0:
+		particle_mass = Globals.default_particle_mass * 1.5
+	elif type == 3:
+		particle_mass = Globals.default_particle_mass * 0.5
+	else:
+		particle_mass = Globals.default_particle_mass
 	if place_25:
 		for y: int in range(-2, 3):
 			for x: int in range(-2, 3):

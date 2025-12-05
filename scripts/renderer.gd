@@ -19,8 +19,8 @@ var pump_quad: QuadMesh = QuadMesh.new()
 
 func reinitialize_render() -> void:
 	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad, wall_texture)
-	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad, particle_texture)
 	_set_up_meshes(mm_pumps_instace, mm_pumps, pump_quad, pump_texture)
+	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad, particle_texture)
 
 func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh, texture: Texture2D) -> void:
 	mm_instance.z_index = 3

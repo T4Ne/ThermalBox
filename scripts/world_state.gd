@@ -9,6 +9,7 @@ var particle_radii: PackedFloat32Array = []
 var particle_masses: PackedFloat32Array = []
 var wall_count: int = 0
 var pump_count: int = 0
+var diode_count: int = 0
 var cell_size: int
 var cell_area: Vector2i
 var cell_count: int
@@ -23,7 +24,13 @@ var neighbor_range: int = 1
 var neighbor_count: int = (neighbor_range*2+1)**2
 var inverted_cell_size: float
 
-enum CellType {EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT}
+enum CountCategory {NONE, WALL, PUMP, DIODE}
+enum CellType {EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT, 
+DIODEUP, DIODEDOWN, DIODELEFT, DIODERIGHT}
+var type_category_map: Array[int] = [CountCategory.NONE, CountCategory.WALL,
+CountCategory.WALL, CountCategory.WALL, CountCategory.PUMP, CountCategory.PUMP,
+CountCategory.PUMP, CountCategory.PUMP, CountCategory.DIODE, CountCategory.DIODE,
+CountCategory.DIODE, CountCategory.DIODE]
 
 func _init(size: int, area: Vector2i, borders: bool = true) -> void:
 	cell_size = size
@@ -54,35 +61,22 @@ func set_cell_state(arr_pos: Vector2i, new_type: int) -> void:
 	var cell_id: int = int(arr_pos.x + arr_pos.y * cell_area.x)
 	var old_type: int = cell_types[cell_id]
 	
-	if new_type == CellType.EMPTY:
-		if old_type == CellType.EMPTY:
-			pass
-		elif old_type >= CellType.PUMPUP and old_type <= CellType.PUMPRIGHT:
-			pump_count -= 1
-		else:
-			wall_count -= 1
-	elif new_type >= CellType.PUMPUP and new_type <= CellType.PUMPRIGHT:
-		if old_type == CellType.EMPTY:
-			pump_count += 1
-		elif old_type >= CellType.PUMPUP and old_type <= CellType.PUMPRIGHT:
-			pass
-		else:
-			pump_count += 1
-			wall_count -= 1
-	else:
-		if old_type == CellType.EMPTY:
-			wall_count += 1
-		elif old_type >= CellType.PUMPUP and old_type <= CellType.PUMPRIGHT:
-			wall_count += 1
-			pump_count -= 1
-		else:
-			pass
+	if old_type == new_type:
+		return
+	
+	_update_count_by_category(type_category_map[old_type], -1)
+	_update_count_by_category(type_category_map[new_type], 1)
 	
 	cell_types[cell_id] = new_type
 
-func change_wall_count_by(value: int) -> void:
-	assert(wall_count + value >= 0, "WallCountValueError: Wall count cannot be smaller than 0")
-	wall_count += value
+func _update_count_by_category(category: int, change: int) -> void:
+	match category:
+		CountCategory.WALL:
+			wall_count += change
+		CountCategory.PUMP:
+			pump_count += change
+		CountCategory.DIODE:
+			diode_count += change
 
 func build_borders() -> void:
 	var cell_area_row_size: int = cell_area.x

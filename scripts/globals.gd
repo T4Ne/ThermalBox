@@ -10,6 +10,7 @@ var default_particle_radius: float = 2.5
 var time_step: float = 0.015
 var lightspeed: float = ((default_particle_radius / time_step) / 2.0) * 0.9
 var max_accel: float = 2.0 * lightspeed / time_step
+var use_kinematic_walls: bool = true
 
 # ++ = strong attraction
 # + = weak attraction
