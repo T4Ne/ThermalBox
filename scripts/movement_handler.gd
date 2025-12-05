@@ -295,21 +295,42 @@ func _collide_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 			continue
 		
 		var cell_category: int = count_category_map[cell_type]
-		if cell_category == 3:
-			pass
+		
+		if cell_category == 3: # Cell is a diode
+			if distance_to_wall_squared == 0.0: # Particle is inside wall
+				continue
+			var diode_direction: Vector2
+			match cell_type:
+				8: # diode up
+					diode_direction = Vector2(0, -1)
+				9: # diode down
+					diode_direction = Vector2(0, 1)
+				10: # diode left
+					diode_direction = Vector2(-1, 0)
+				11: # diode right
+					diode_direction = Vector2(1, 0)
+			if wall_to_particle.dot(diode_direction) <= 0.0:
+				continue
+			var wall_to_particle_unit: Vector2 = wall_to_particle.normalized()
+			var normal_velocity_mag: float = wall_to_particle_unit.dot(sequential_velocity)
+			if normal_velocity_mag > 0:
+				continue
+			var penetration: float = particle_radius - sqrt(distance_to_wall_squared)
+			sequential_position += 2 * wall_to_particle_unit * penetration
+			sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_default_coef
 		
 		elif cell_category == 2: # Cell is a pump
 			if distance_to_wall_squared != 0.0:
 				continue
 			var pump_direction: Vector2
 			match cell_type:
-				world_state.CellType.PUMPUP:
+				4: # pump up
 					pump_direction = Vector2(0, -1)
-				world_state.CellType.PUMPDOWN:
+				5: # pump down
 					pump_direction = Vector2(0, 1)
-				world_state.CellType.PUMPLEFT:
+				6: # pump left
 					pump_direction = Vector2(-1, 0)
-				world_state.CellType.PUMPRIGHT:
+				7: # pump right
 					pump_direction = Vector2(1, 0)
 			var pump_direction_velocity: float = pump_direction.dot(sequential_velocity)
 			if pump_direction_velocity < pump_max_speed:
@@ -327,11 +348,11 @@ func _collide_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 			sequential_position += 2 * wall_to_particle_unit * penetration
 			var wall_type: int = world_state.cell_types[cell_id]
 			match wall_type:
-				world_state.CellType.NORMWALL:
+				1: # norm wall
 					sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_default_coef
-				world_state.CellType.COLDWALL:
+				2: # cold wall
 					sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_thermal_coef
-				world_state.CellType.HOTWALL:
+				3: # hot wall
 					sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_thermal_coef_inv
 	
 	if Globals.gravity_is_on and not was_in_pump:

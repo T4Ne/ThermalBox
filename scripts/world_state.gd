@@ -10,6 +10,7 @@ var particle_masses: PackedFloat32Array = []
 var wall_count: int = 0
 var pump_count: int = 0
 var diode_count: int = 0
+var spawner_count: int = 0
 var cell_size: int
 var cell_area: Vector2i
 var cell_count: int
@@ -24,13 +25,14 @@ var neighbor_range: int = 1
 var neighbor_count: int = (neighbor_range*2+1)**2
 var inverted_cell_size: float
 
-enum CountCategory {NONE, WALL, PUMP, DIODE}
+enum CountCategory {NONE, WALL, PUMP, DIODE, SPAWNER}
 enum CellType {EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT, 
-DIODEUP, DIODEDOWN, DIODELEFT, DIODERIGHT}
+DIODEUP, DIODEDOWN, DIODELEFT, DIODERIGHT, SPAWNERNONE, SPAWNER1, SPAWNER2, SPAWNER3, SPAWNER4, DRAIN}
 var type_category_map: Array[int] = [CountCategory.NONE, CountCategory.WALL,
 CountCategory.WALL, CountCategory.WALL, CountCategory.PUMP, CountCategory.PUMP,
 CountCategory.PUMP, CountCategory.PUMP, CountCategory.DIODE, CountCategory.DIODE,
-CountCategory.DIODE, CountCategory.DIODE]
+CountCategory.DIODE, CountCategory.DIODE, CountCategory.SPAWNER, CountCategory.SPAWNER,
+CountCategory.SPAWNER, CountCategory.SPAWNER, CountCategory.SPAWNER, CountCategory.SPAWNER]
 
 func _init(size: int, area: Vector2i, borders: bool = true) -> void:
 	cell_size = size
@@ -77,6 +79,8 @@ func _update_count_by_category(category: int, change: int) -> void:
 			pump_count += change
 		CountCategory.DIODE:
 			diode_count += change
+		CountCategory.SPAWNER:
+			spawner_count += change
 
 func build_borders() -> void:
 	var cell_area_row_size: int = cell_area.x

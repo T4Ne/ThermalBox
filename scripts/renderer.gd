@@ -10,16 +10,26 @@ var wall_quad: QuadMesh = QuadMesh.new()
 var mm_pumps_instace: MultiMeshInstance2D = MultiMeshInstance2D.new()
 var mm_pumps: MultiMesh = MultiMesh.new()
 var pump_quad: QuadMesh = QuadMesh.new()
+var mm_diodes_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
+var mm_diodes: MultiMesh = MultiMesh.new()
+var diode_quad: QuadMesh = QuadMesh.new()
+var mm_spawners_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
+var mm_spawners: MultiMesh = MultiMesh.new()
+var spawner_quad: QuadMesh = QuadMesh.new()
 @onready var simulation_view_background: ColorRect = get_node("SimulationView")
 @onready var selected_cell: Sprite2D = get_node("SelectedCell")
 @onready var previous_cell: Sprite2D = get_node("PreviousCell")
 @onready var pump_texture: Texture2D = preload("res://resources/pump.png")
 @onready var particle_texture: Texture2D = preload("res://resources/particle.png")
 @onready var wall_texture: Texture2D = preload("res://resources/wall.png")
+@onready var diode_texture: Texture2D = preload("res://resources/diode.png")
+@onready var spawner_texture: Texture2D = preload("res://resources/void.png")
 
 func reinitialize_render() -> void:
 	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad, wall_texture)
 	_set_up_meshes(mm_pumps_instace, mm_pumps, pump_quad, pump_texture)
+	_set_up_meshes(mm_diodes_instance, mm_diodes, diode_quad, diode_texture)
+	_set_up_meshes(mm_spawners_instance, mm_spawners, spawner_quad, spawner_texture)
 	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad, particle_texture)
 
 func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh, texture: Texture2D) -> void:
@@ -84,14 +94,23 @@ func _render_particles(world_state: WorldState, simulation_render_state: Simulat
 func _render_walls(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
 	var wall_count: int = world_state.wall_count
 	var pump_count: int = world_state.pump_count
+	var diode_count: int = world_state.diode_count
+	var spawner_count: int = world_state.spawner_count
 	if mm_walls.instance_count != wall_count:
 		mm_walls.instance_count = wall_count
 	if mm_pumps.instance_count != pump_count:
 		mm_pumps.instance_count = pump_count
+	if mm_diodes.instance_count != diode_count:
+		mm_diodes.instance_count = diode_count
+	if mm_spawners.instance_count != spawner_count:
+		mm_spawners.instance_count = spawner_count
 	var current_wall_indx: int = 0
 	var current_pump_indx: int = 0
+	var current_diode_indx: int = 0
+	var current_spawner_indx: int = 0
 	var cell_count: int = world_state.cell_count
 	var cell_types: PackedByteArray = world_state.cell_types
+	var cell_categories: Array = world_state.type_category_map
 	var cell_area: Vector2i = world_state.cell_area
 	var cell_size: int = world_state.cell_size
 	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
@@ -111,29 +130,49 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 		cell_transform.x = Vector2(cell_screen_size, 0.0)
 		cell_transform.y = Vector2(0.0, cell_screen_size)
 		var cell_type: int = cell_types[cell_id]
+		var cell_category: int = cell_categories[cell_type]
 		
-		if cell_type >= world_state.CellType.PUMPUP and cell_type <= world_state.CellType.PUMPRIGHT:
+		if cell_category == 4:
+			mm_spawners.set_instance_transform_2d(current_spawner_indx, cell_transform)
+			mm_spawners.set_instance_color(current_spawner_indx, Color("ffffff"))
+			current_spawner_indx += 1
+		
+		elif cell_category == 3:
 			match cell_type:
-				world_state.CellType.PUMPUP:
+				8:
 					cell_transform = cell_transform * Transform2D(deg_to_rad(270), Vector2(0.0, 0.0))
-				world_state.CellType.PUMPDOWN:
+				9:
 					cell_transform = cell_transform * Transform2D(deg_to_rad(90), Vector2(0.0, 0.0))
-				world_state.CellType.PUMPLEFT:
+				10:
 					cell_transform = cell_transform * Transform2D(deg_to_rad(180), Vector2(0.0, 0.0))
-				world_state.CellType.PUMPRIGHT:
+				11:
 					cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
-				
+			mm_diodes.set_instance_transform_2d(current_diode_indx, cell_transform)
+			mm_diodes.set_instance_color(current_diode_indx, Color("303030"))
+			current_diode_indx += 1
+		
+		elif cell_category == 2:
+			match cell_type:
+				4:
+					cell_transform = cell_transform * Transform2D(deg_to_rad(270), Vector2(0.0, 0.0))
+				5:
+					cell_transform = cell_transform * Transform2D(deg_to_rad(90), Vector2(0.0, 0.0))
+				6:
+					cell_transform = cell_transform * Transform2D(deg_to_rad(180), Vector2(0.0, 0.0))
+				7:
+					cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
 			mm_pumps.set_instance_transform_2d(current_pump_indx, cell_transform)
 			mm_pumps.set_instance_color(current_pump_indx, Color("bbbb00"))
 			current_pump_indx += 1
-		else:
+		
+		elif cell_category == 1:
 			mm_walls.set_instance_transform_2d(current_wall_indx, cell_transform)
 			match cell_type:
-				world_state.CellType.NORMWALL:
+				1:
 					mm_walls.set_instance_color(current_wall_indx, Color("303030"))
-				world_state.CellType.COLDWALL:
+				2:
 					mm_walls.set_instance_color(current_wall_indx, Color("303080"))
-				world_state.CellType.HOTWALL:
+				3:
 					mm_walls.set_instance_color(current_wall_indx, Color("803030"))
 			current_wall_indx += 1
 

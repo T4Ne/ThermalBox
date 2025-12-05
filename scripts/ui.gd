@@ -13,7 +13,8 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var FPSLabel: Label = get_node("Control/SideBar/MainControls/FPSLabel")
 @onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
-enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP}
+enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, 
+WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN}
 
 var selected_item: Items = Items.REMOVEWALL
 var place_25: bool = false
@@ -60,6 +61,15 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 		Items.PUMP:
 			type = 4
 			main_box.place_pump(type)
+		Items.DIODE:
+			type = 8
+			main_box.place_pump(type)
+		Items.SPAWNER:
+			type = 12
+			main_box.place_wall(type)
+		Items.DRAIN:
+			type = 17
+			main_box.place_wall(type)
 		Items.PARTICLE1:
 			type = 0
 			main_box.place_particle(type, mouse_position, place_25)
@@ -151,3 +161,18 @@ func _on_particle_4_item_pressed() -> void:
 	selected_item = Items.PARTICLE4
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 4"
+
+func _on_diode_pressed() -> void:
+	selected_item = Items.DIODE
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PUMP
+	SelectedLabel.text = "Selected: Diode"
+
+func _on_spawner_pressed() -> void:
+	selected_item = Items.SPAWNER
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
+	SelectedLabel.text = "Selected: Spawner"
+
+func _on_drain_pressed() -> void:
+	selected_item = Items.DRAIN
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
+	SelectedLabel.text = "Selected: Drain"

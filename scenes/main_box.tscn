@@ -213,17 +213,30 @@ size_flags_vertical = 4
 focus_mode = 0
 text = "Hot wall"
 
+[node name="Pump" type="Button" parent="Control/BottomBar/ItemButtons"]
+layout_mode = 2
+focus_mode = 0
+text = "Pump"
+
+[node name="Diode" type="Button" parent="Control/BottomBar/ItemButtons"]
+layout_mode = 2
+focus_mode = 0
+text = "Diode"
+
+[node name="Spawner" type="Button" parent="Control/BottomBar/ItemButtons"]
+layout_mode = 2
+text = "Spawner"
+
+[node name="Drain" type="Button" parent="Control/BottomBar/ItemButtons"]
+layout_mode = 2
+text = "Despawner"
+
 [node name="WallNone" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 focus_mode = 0
 text = "Remove Wall"
-
-[node name="Pump" type="Button" parent="Control/BottomBar/ItemButtons"]
-layout_mode = 2
-focus_mode = 0
-text = "Pump"
 
 [node name="Selected" type="Label" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
@@ -242,5 +255,8 @@ text = "Selected: Remove Wall"
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallNeutral" to="." method="_on_wall_neutral_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallCold" to="." method="_on_wall_cold_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/WallHot" to="." method="_on_wall_hot_pressed"]
-[connection signal="pressed" from="Control/BottomBar/ItemButtons/WallNone" to="." method="_on_wall_none_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/Pump" to="." method="_on_pump_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/Diode" to="." method="_on_diode_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/Spawner" to="." method="_on_spawner_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/Drain" to="." method="_on_drain_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/WallNone" to="." method="_on_wall_none_pressed"]
