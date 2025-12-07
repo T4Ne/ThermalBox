@@ -11,6 +11,10 @@ script = ExtResource("2_eh4tv")
 [node name="MainBox" type="Node2D" parent="."]
 script = ExtResource("1_68iro")
 
+[node name="ParticleSpawnTimer" type="Timer" parent="MainBox"]
+wait_time = 5.0
+autostart = true
+
 [node name="ParticleRenderer" type="Node2D" parent="MainBox"]
 script = ExtResource("2_kre7u")
 
@@ -225,11 +229,13 @@ text = "Diode"
 
 [node name="Spawner" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
+focus_mode = 0
 text = "Spawner"
 
 [node name="Drain" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
-text = "Despawner"
+focus_mode = 0
+text = "Drain"
 
 [node name="WallNone" type="Button" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
@@ -242,6 +248,7 @@ text = "Remove Wall"
 layout_mode = 2
 text = "Selected: Remove Wall"
 
+[connection signal="timeout" from="MainBox/ParticleSpawnTimer" to="MainBox" method="_on_particle_spawn_timer_timeout"]
 [connection signal="gui_input" from="MainBox/ParticleRenderer/SimulationView" to="." method="_on_simulation_view_gui_input"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Pause" to="." method="_on_pause_pressed"]
 [connection signal="pressed" from="Control/SideBar/MainControls/Reset" to="." method="_on_reset_pressed"]

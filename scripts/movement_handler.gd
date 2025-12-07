@@ -6,9 +6,8 @@ var interaction_range_r: float = 4.0
 var interaction_range_sq: float = (interaction_range_r * Globals.default_particle_radius)**2
 var wall_thermal_coef: float = 0.8
 var wall_thermal_coef_inv: float = 1.0 / wall_thermal_coef
-var wall_default_coef: float = 0.975
 var pump_acceleration: float = 100.0
-var pump_max_speed: float = 12.0
+var pump_max_speed: float = 5.0
 var max_acceleration: float = Globals.max_accel
 var interaction_matrix: Array[Array] = []
 var cell_iteration_order: PackedInt32Array = [1, 3, 5, 7, 0, 2, 4, 6, 8]
@@ -95,7 +94,7 @@ func second_half_verlet(time_step: float, world_state: WorldState, chunk: Chunk)
 		var full_step_acceleration: Vector2 = Vector2.ZERO
 		var final_full_step_position: Vector2
 		var final_half_step_velocity: Vector2
-		var values: PackedVector2Array = _calculate_collisions(particle_id, predicted_full_step_position, predicted_half_step_velocity, world_state)
+		var values: PackedVector2Array = _calculate_collisions(time_step, particle_id, predicted_full_step_position, predicted_half_step_velocity, world_state)
 		final_full_step_position = values[1]
 		final_half_step_velocity = predicted_half_step_velocity #values[2]
 		full_step_acceleration += values[0]
@@ -162,7 +161,7 @@ func _interact_with_particles(id: int, position: Vector2, neighbor_cells: Packed
 			accumulated_acceleration = accumulated_acceleration.normalized() * max_acceleration
 	return accumulated_acceleration
 
-func _collide_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor_cells: PackedInt32Array, world_state: WorldState) -> PackedVector2Array:
+func _collide_with_walls(time_step: float, id: int, position: Vector2, velocity: Vector2, neighbor_cells: PackedInt32Array, world_state: WorldState) -> PackedVector2Array:
 	var accumulated_acceleration: Vector2 = Vector2.ZERO
 	var sequential_velocity: Vector2 = velocity
 	var sequential_position: Vector2 = position
@@ -217,7 +216,7 @@ func _collide_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 				continue
 			var penetration: float = particle_radius - sqrt(distance_to_wall_squared)
 			sequential_position += wall_to_particle_unit * penetration
-			accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_thermal_coef
+			accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_unit
 		
 		elif cell_category == 2: # Cell is a pump
 			if distance_to_wall_squared != 0.0:
@@ -249,18 +248,18 @@ func _collide_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 			var wall_type: int = world_state.cell_types[cell_id]
 			match wall_type:
 				1: # norm wall
-					accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_default_coef
+					accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_unit
 				2: # cold wall
-					accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_thermal_coef
+					accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_unit * wall_thermal_coef
 				3: # hot wall
-					accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_thermal_coef_inv
+					accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_unit * wall_thermal_coef_inv
 	
 	if Globals.gravity_is_on and not was_in_pump:
 		accumulated_acceleration += Globals.gravity
 	var values: PackedVector2Array = [accumulated_acceleration, sequential_position, sequential_velocity]
 	return values
 
-func _calculate_collisions(id: int, position: Vector2, velocity: Vector2, world_state: WorldState) -> PackedVector2Array:
+func _calculate_collisions(time_step: float, id: int, position: Vector2, velocity: Vector2, world_state: WorldState) -> PackedVector2Array:
 	var combined_acceleration: Vector2 = Vector2.ZERO
 	var cell_x: int = floori(position.x * world_state.inverted_cell_size)
 	var cell_y: int = floori(position.y * world_state.inverted_cell_size)
@@ -271,7 +270,7 @@ func _calculate_collisions(id: int, position: Vector2, velocity: Vector2, world_
 	var neighbor_by_cell: PackedInt32Array = world_state.cell_neighbor_ids
 	var neighbor_indx_start: int = world_state.cell_neighbor_offsets[cell_id]
 	var neighbors: PackedInt32Array = neighbor_by_cell.slice(neighbor_indx_start, neighbor_indx_start + neighbor_count)
-	var values: PackedVector2Array = _collide_with_walls(id, position, velocity, neighbors, world_state)
+	var values: PackedVector2Array = _collide_with_walls(time_step, id, position, velocity, neighbors, world_state)
 	var new_position: Vector2 = values[1]
 	var new_velocity: Vector2 = values[2]
 	combined_acceleration += values[0]

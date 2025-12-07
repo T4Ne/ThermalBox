@@ -13,7 +13,6 @@ config_version=5
 config/name="ThermalBox"
 run/main_scene="uid://dgxd2kwwi6tl8"
 config/features=PackedStringArray("4.5", "GL Compatibility")
-run/max_fps=60
 run/delta_smoothing=false
 config/icon="res://icon.svg"
 

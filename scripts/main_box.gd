@@ -109,3 +109,8 @@ func reduce_energy() -> void:
 
 func delete_particles() -> void:
 	world_state.delete_particles()
+
+func _on_particle_spawn_timer_timeout() -> void:
+	if Globals.is_paused:
+		return
+	world_state.spawn_particles_from_spawners()

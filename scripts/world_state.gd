@@ -24,6 +24,8 @@ var cell_neighbor_ids: PackedInt32Array = []
 var neighbor_range: int = 1
 var neighbor_count: int = (neighbor_range*2+1)**2
 var inverted_cell_size: float
+var particle_mass_by_type: PackedFloat32Array = [1.5, 1.0, 1.0, 0.5]
+var particle_radius: float = 2.5
 
 enum CountCategory {NONE, WALL, PUMP, DIODE, SPAWNER}
 enum CellType {EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT, 
@@ -125,6 +127,20 @@ func build_cell_map() -> void:
 			particle_positions[par_id] = Vector2(-1.0, -1.0)
 			continue
 		var cell_id: int = cell_x + cell_y * cell_area.x
+		if cell_types[cell_id] == CellType.DRAIN: # particle is in a drain
+			particle_count -= 1
+			particle_positions[par_id] = Vector2(-1.0, -1.0)
+			continue
+		if cell_types[cell_id] == CellType.SPAWNERNONE:
+			match particle_types[par_id]:
+				0:
+					cell_types[cell_id] = CellType.SPAWNER1
+				1:
+					cell_types[cell_id] = CellType.SPAWNER2
+				2:
+					cell_types[cell_id] = CellType.SPAWNER3
+				3:
+					cell_types[cell_id] = CellType.SPAWNER4
 		if cell_particle_offsets[cell_id] == 0:
 			non_empty_cells += 1
 			occupied_cell_ids.append(cell_id)
@@ -218,3 +234,48 @@ func delete_particles_by_cell(arr_pos: Vector2i) -> void:
 	for particle_indx: int in range(particles_start, particles_end):
 		var particle_id: int = cell_particle_ids[particle_indx]
 		particle_positions[particle_id] = Vector2(-1.0,-1.0)
+
+func spawn_particles_from_spawners() -> void:
+	if spawner_count <= 0:
+		return
+	for cell_id: int in range(cell_count):
+		var cell_type: CellType = cell_types[cell_id] as CellType
+		var cell_category: CountCategory = type_category_map[cell_type] as CountCategory
+		if cell_category != CountCategory.SPAWNER:
+			continue
+		var particle_type: int
+		match cell_type:
+			CellType.SPAWNER1:
+				particle_type = 0
+			CellType.SPAWNER2:
+				particle_type = 1
+			CellType.SPAWNER3:
+				particle_type = 2
+			CellType.SPAWNER4:
+				particle_type = 3
+			_:
+				continue
+		var particle_mass: float = particle_mass_by_type[particle_type]
+		var cell_x: int = cell_id % cell_area.x
+		var cell_y: int = cell_id / cell_area.x
+		var cell_coords: Vector2i = Vector2i(cell_x, cell_y)
+		var particle_position: Vector2 = Vector2(cell_coords.x * cell_size + cell_size * 0.5, cell_coords.y * cell_size + cell_size * 0.5)
+		var particle_velocity: Vector2 = Vector2.from_angle(rad_to_deg(randf_range(0, 360))) * 5
+		
+		var id: int = particle_positions.find(Vector2(-1.0,-1.0))
+		if id != -1:
+			particle_count += 1
+			particle_types[id] = particle_type
+			particle_positions[id] = particle_position
+			particle_velocities[id] = particle_velocity
+			particle_accelerations[id] = Vector2.ZERO
+			particle_radii[id] = particle_radius
+			particle_masses[id] = particle_mass
+		else:
+			particle_count += 1
+			particle_types.append(particle_type)
+			particle_positions.append(particle_position)
+			particle_velocities.append(particle_velocity)
+			particle_accelerations.append(Vector2.ZERO)
+			particle_radii.append(particle_radius)
+			particle_masses.append(particle_mass)

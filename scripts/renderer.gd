@@ -139,7 +139,19 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 		
 		if cell_category == 4:
 			mm_spawners.set_instance_transform_2d(current_spawner_indx, cell_transform)
-			mm_spawners.set_instance_color(current_spawner_indx, Color("ffffff"))
+			match cell_type:
+				12:
+					mm_spawners.set_instance_color(current_spawner_indx, Color("ffffff"))
+				13:
+					mm_spawners.set_instance_color(current_spawner_indx, Color("#A23A3A"))
+				14:
+					mm_spawners.set_instance_color(current_spawner_indx, Color("#1F6B2C"))
+				15:
+					mm_spawners.set_instance_color(current_spawner_indx, Color("#2E5D9E"))
+				16:
+					mm_spawners.set_instance_color(current_spawner_indx, Color("#555555"))
+				17:
+					mm_spawners.set_instance_color(current_spawner_indx, Color("202020"))
 			current_spawner_indx += 1
 		
 		elif cell_category == 3:
