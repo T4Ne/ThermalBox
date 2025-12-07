@@ -18,6 +18,42 @@ enum InterType {LENNARD_JONES, REPULSION}
 func _init() -> void:
 	_build_interaction_matrix()
 
+func _build_interaction_matrix() -> void:
+	var type_count: int = 4
+	interaction_matrix.resize(type_count)
+	for indx: int in range(type_count):
+		interaction_matrix[indx] = []
+		interaction_matrix[indx].resize(type_count)
+	
+	interaction_matrix[0][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
+	interaction_matrix[0][1] = [-100.0, 3.5, InterType.LENNARD_JONES]
+	interaction_matrix[0][2] = [-20.0, 4.0, InterType.LENNARD_JONES]
+	interaction_matrix[0][3] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[1][0] = [-100.0, 3.5, InterType.LENNARD_JONES]
+	interaction_matrix[1][1] = [-1000.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[1][2] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[1][3] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[2][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
+	interaction_matrix[2][1] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[2][2] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[2][3] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][0] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][1] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][2] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[3][3] = [-500.0, interaction_range_r, InterType.REPULSION]
+	
+	# interactions:
+	# 0-0: WEAKINTER
+	# 0-1: STRONGINTER
+	# 0-2: WEAKINTER
+	# 0-3: WEAKREPUL
+	# 1-1: STRONGINTER
+	# 1-2: STRONGREPUL
+	# 1-3: WEAKREPUL
+	# 2-2: WEAKINTER
+	# 2-3: WEAKREPUL
+	# 3-3: WEAKREPUL
+
 func first_half_verlet(time_step: float, world_state: WorldState, chunk: Chunk) -> void:
 	var particle_count: int = chunk.particle_count
 	var particle_ids: PackedInt32Array = chunk.particle_ids
@@ -59,15 +95,10 @@ func second_half_verlet(time_step: float, world_state: WorldState, chunk: Chunk)
 		var full_step_acceleration: Vector2 = Vector2.ZERO
 		var final_full_step_position: Vector2
 		var final_half_step_velocity: Vector2
-		if Globals.use_kinematic_walls:
-			var values: PackedVector2Array = _calculate_collisions(particle_id, predicted_full_step_position, predicted_half_step_velocity, world_state)
-			final_full_step_position = values[1]
-			final_half_step_velocity = values[2]
-			full_step_acceleration += values[0]
-		else:
-			final_full_step_position = predicted_full_step_position
-			final_half_step_velocity = predicted_half_step_velocity
-			full_step_acceleration += _calculate_collision_acceleration(particle_id, predicted_full_step_position, predicted_half_step_velocity, world_state)
+		var values: PackedVector2Array = _calculate_collisions(particle_id, predicted_full_step_position, predicted_half_step_velocity, world_state)
+		final_full_step_position = values[1]
+		final_half_step_velocity = predicted_half_step_velocity #values[2]
+		full_step_acceleration += values[0]
 		
 		if full_step_acceleration.length_squared() > max_acceleration**2:
 			full_step_acceleration = full_step_acceleration.normalized() * max_acceleration
@@ -80,137 +111,6 @@ func second_half_verlet(time_step: float, world_state: WorldState, chunk: Chunk)
 		chunk.positions[particle_indx] = final_full_step_position
 		chunk.velocities[particle_indx] = full_step_velocity
 		chunk.accelerations[particle_indx] = full_step_acceleration
-
-func _build_interaction_matrix() -> void:
-	var type_count: int = 4
-	interaction_matrix.resize(type_count)
-	for indx: int in range(type_count):
-		interaction_matrix[indx] = []
-		interaction_matrix[indx].resize(type_count)
-	
-	interaction_matrix[0][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
-	interaction_matrix[0][1] = [-100.0, 3.5, InterType.LENNARD_JONES]
-	interaction_matrix[0][2] = [-20.0, 4.0, InterType.LENNARD_JONES]
-	interaction_matrix[0][3] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[1][0] = [-100.0, 3.5, InterType.LENNARD_JONES]
-	interaction_matrix[1][1] = [-1000.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[1][2] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[1][3] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[2][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
-	interaction_matrix[2][1] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[2][2] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[2][3] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][0] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][1] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][2] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][3] = [-500.0, interaction_range_r, InterType.REPULSION]
-	
-	# interactions:
-	# 0-0: WEAKINTER
-	# 0-1: STRONGINTER
-	# 0-2: WEAKINTER
-	# 0-3: WEAKREPUL
-	# 1-1: STRONGINTER
-	# 1-2: STRONGREPUL
-	# 1-3: WEAKREPUL
-	# 2-2: WEAKINTER
-	# 2-3: WEAKREPUL
-	# 3-3: WEAKREPUL
-
-func _calculate_collision_acceleration(id: int, position: Vector2, velocity: Vector2, world_state: WorldState) -> Vector2:
-	var combined_acceleration: Vector2 = Vector2.ZERO
-	var cell_x: int = floori(position.x * world_state.inverted_cell_size)
-	var cell_y: int = floori(position.y * world_state.inverted_cell_size)
-	assert(cell_x >= 0 and cell_x < world_state.cell_area.x, "ParticleOutOfBoundsError: Particle x-coordinate couldn't be mapped to grid.")
-	assert(cell_y >= 0 and cell_y < world_state.cell_area.y, "ParticleOutOfBoundsError: Particle y-coordinate couldn't be mapped to grid.")
-	var cell_id: int = cell_x + cell_y * world_state.cell_area.x
-	var neighbor_count: int = world_state.neighbor_count
-	var neighbor_by_cell: PackedInt32Array = world_state.cell_neighbor_ids
-	var neighbor_indx_start: int = world_state.cell_neighbor_offsets[cell_id]
-	var neighbors: PackedInt32Array = neighbor_by_cell.slice(neighbor_indx_start, neighbor_indx_start + neighbor_count)
-	
-	combined_acceleration += _interact_with_walls(id, position, velocity, neighbors, world_state)
-	combined_acceleration += _interact_with_particles(id, position, neighbors, world_state)
-	return combined_acceleration
-
-func _interact_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor_cells: PackedInt32Array, world_state: WorldState) -> Vector2:
-	var accumulated_acceleration: Vector2 = Vector2.ZERO
-	var cell_side_length: float = world_state.cell_size
-	var mass: float = world_state.particle_masses[id]
-	var wall_collision_range_sq: float = (0.45 * cell_side_length)**2
-	var cell_types: PackedByteArray = world_state.cell_types
-	var cell_area: Vector2i = world_state.cell_area
-	assert(len(neighbor_cells) == 9, "NeighborCountError: Simulation doesn't support neighbor ranges over 1")
-
-	for cell_indx: int in cell_iteration_order: # Check up,down,left,right squares first
-		var cell_id: int = neighbor_cells[cell_indx]
-		var cell_type: int = cell_types[cell_id]
-		if cell_id < 0: # Is not cell
-			continue
-		if not cell_type: # cell is not a valid item
-			continue
-		
-		var cell_x: float = (float(cell_id % cell_area.x)) * cell_side_length
-		var cell_y: float = (float(cell_id / cell_area.x)) * cell_side_length
-		var wall_position: Vector2 = Vector2(cell_x, cell_y)
-		var wall_closest_x: float = clampf(position.x, wall_position.x, wall_position.x + cell_side_length)
-		var wall_closest_y: float = clampf(position.y, wall_position.y, wall_position.y + cell_side_length)
-		var wall_to_particle: Vector2 = position - Vector2(wall_closest_x, wall_closest_y)
-		var distance_to_wall_squared: float = wall_to_particle.length_squared()
-		
-		if distance_to_wall_squared > wall_collision_range_sq: # Wall is not in range to collide
-			continue
-		
-		if cell_type >= world_state.CellType.PUMPUP and cell_type <= world_state.CellType.PUMPRIGHT: # Cell is a pump
-			if distance_to_wall_squared != 0.0:
-				continue
-			var pump_direction: Vector2
-			match cell_type:
-				world_state.CellType.PUMPUP:
-					pump_direction = Vector2(0, -1)
-				world_state.CellType.PUMPDOWN:
-					pump_direction = Vector2(0, 1)
-				world_state.CellType.PUMPLEFT:
-					pump_direction = Vector2(-1, 0)
-				world_state.CellType.PUMPRIGHT:
-					pump_direction = Vector2(1, 0)
-			var pump_direction_velocity: float = pump_direction.dot(velocity)
-			if pump_direction_velocity < pump_max_speed:
-				accumulated_acceleration += pump_direction * pump_acceleration
-		else: # Cell is a wall
-			if distance_to_wall_squared == 0.0: # Particle is inside wall
-				continue
-			
-			var wall_to_particle_unit: Vector2 = wall_to_particle.normalized()
-			var wall_to_particle_distance_w: float = wall_to_particle.length() / cell_side_length
-			var wall_force_magnitude: float = 3000.0 * ((0.45 / wall_to_particle_distance_w) - 1.0)
-			var wall_acceleration_magnitude: float = wall_force_magnitude / mass
-			var wall_acceleration: Vector2 = wall_to_particle_unit * wall_acceleration_magnitude
-			
-			if wall_acceleration.dot(accumulated_acceleration) > 0:
-				continue
-			
-			var thermal_acceleration: Vector2
-			var wall_type: int = world_state.cell_types[cell_id]
-			var normal_velocity: float = velocity.dot(wall_to_particle_unit)
-			match wall_type:
-				world_state.CellType.NORMWALL:
-					thermal_acceleration = Vector2.ZERO
-				world_state.CellType.COLDWALL:
-					if normal_velocity < 0:
-						thermal_acceleration = Vector2.ZERO
-					else:
-						thermal_acceleration = -wall_thermal_coef * normal_velocity * wall_to_particle_unit
-				world_state.CellType.HOTWALL:
-					if normal_velocity < 0:
-						thermal_acceleration = Vector2.ZERO
-					else:
-						thermal_acceleration = wall_thermal_coef * normal_velocity * wall_to_particle_unit
-			
-			wall_acceleration += thermal_acceleration
-			accumulated_acceleration += wall_acceleration
-		
-	return accumulated_acceleration
 
 func _interact_with_particles(id: int, position: Vector2, neighbor_cells: PackedInt32Array, world_state: WorldState) -> Vector2:
 	var particle_positions: PackedVector2Array = world_state.particle_positions
@@ -316,8 +216,8 @@ func _collide_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 			if normal_velocity_mag > 0:
 				continue
 			var penetration: float = particle_radius - sqrt(distance_to_wall_squared)
-			sequential_position += 2 * wall_to_particle_unit * penetration
-			sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_default_coef
+			sequential_position += wall_to_particle_unit * penetration
+			accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_thermal_coef
 		
 		elif cell_category == 2: # Cell is a pump
 			if distance_to_wall_squared != 0.0:
@@ -345,15 +245,15 @@ func _collide_with_walls(id: int, position: Vector2, velocity: Vector2, neighbor
 			if normal_velocity_mag > 0:
 				continue
 			var penetration: float = particle_radius - sqrt(distance_to_wall_squared)
-			sequential_position += 2 * wall_to_particle_unit * penetration
+			sequential_position += wall_to_particle_unit * penetration
 			var wall_type: int = world_state.cell_types[cell_id]
 			match wall_type:
 				1: # norm wall
-					sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_default_coef
+					accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_default_coef
 				2: # cold wall
-					sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_thermal_coef
+					accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_thermal_coef
 				3: # hot wall
-					sequential_velocity += -2 * normal_velocity_mag * wall_to_particle_unit * wall_thermal_coef_inv
+					accumulated_acceleration += -2 * (normal_velocity_mag / 0.015) * wall_to_particle_unit * wall_thermal_coef_inv
 	
 	if Globals.gravity_is_on and not was_in_pump:
 		accumulated_acceleration += Globals.gravity

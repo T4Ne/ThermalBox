@@ -101,16 +101,6 @@ func build_borders() -> void:
 			cell_types[cell_indx] = CellType.NORMWALL
 			wall_count += 1
 
-func array_coords_by_cell_id(cell_id: int) -> Vector2i:
-	var cell_x: int = cell_id % cell_area.x
-	var cell_y: int = cell_id / cell_area.x
-	return Vector2i(cell_x, cell_y)
-
-func cell_pos_by_array_coords(coords: Vector2i) -> Vector2:
-	var cell_x: float = float(coords.x * cell_size)
-	var cell_y: float = float(coords.y * cell_size)
-	return Vector2(cell_x, cell_y)
-
 func build_cell_map() -> void:
 	occupied_cell_ids.clear()
 	cell_particle_offsets.fill(0)
@@ -167,7 +157,9 @@ func build_cell_map() -> void:
 func _get_neighbor_cells(cell_id: int) -> PackedInt32Array:
 	var row_size: int = cell_area.x
 	var column_size: int = cell_area.y
-	var cell_coords: Vector2i = array_coords_by_cell_id(cell_id)
+	var cell_x: int = cell_id % cell_area.x
+	var cell_y: int = cell_id / cell_area.x
+	var cell_coords: Vector2i = Vector2i(cell_x, cell_y)
 	
 	var neighbor_ids: PackedInt32Array = []
 	neighbor_ids.resize(neighbor_count)
@@ -218,3 +210,11 @@ func delete_particles() -> void:
 func delete_particle(id: int) -> void:
 	particle_count -= 1
 	particle_positions[id] = Vector2(-1.0, -1.0)
+
+func delete_particles_by_cell(arr_pos: Vector2i) -> void:
+	var cell_id: int = int(arr_pos.x + arr_pos.y * cell_area.x)
+	var particles_start: int = cell_particle_offsets[cell_id]
+	var particles_end: int = cell_particle_offsets[cell_id + 1]
+	for particle_indx: int in range(particles_start, particles_end):
+		var particle_id: int = cell_particle_ids[particle_indx]
+		particle_positions[particle_id] = Vector2(-1.0,-1.0)
