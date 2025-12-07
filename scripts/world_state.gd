@@ -120,9 +120,20 @@ func build_cell_map() -> void:
 	
 	# Count and determine cells of particles, also count occupied cells
 	# TODO: occupied_cell_ids append is slow
-	for par_indx: int in particle_count:
-		var cell_x: int = floori(particle_positions[par_indx].x * inverted_cell_size)
-		var cell_y: int = floori(particle_positions[par_indx].y * inverted_cell_size)
+	for par_id: int in len(particle_positions):
+		var particle_pos: Vector2 = particle_positions[par_id]
+		if particle_pos == Vector2(-1.0, -1.0): # particle is deleted
+			continue
+		var cell_x: int = floori(particle_pos.x * inverted_cell_size)
+		var cell_y: int = floori(particle_pos.y * inverted_cell_size)
+		if cell_x < 0 or cell_x >= cell_area.x: # particle out of bounds
+			particle_count -= 1
+			particle_positions[par_id] = Vector2(-1.0, -1.0)
+			continue
+		if cell_y < 0 or cell_y >= cell_area.y: # particle out of bounds
+			particle_count -= 1
+			particle_positions[par_id] = Vector2(-1.0, -1.0)
+			continue
 		var cell_id: int = cell_x + cell_y * cell_area.x
 		if cell_particle_offsets[cell_id] == 0:
 			non_empty_cells += 1
@@ -142,12 +153,15 @@ func build_cell_map() -> void:
 	
 	# Scatter pass
 	var write_cursor: PackedInt32Array = PackedInt32Array(cell_particle_offsets)
-	for par_indx: int in range(particle_count):
-		var cell_x: int = floori(particle_positions[par_indx].x * inverted_cell_size)
-		var cell_y: int = floori(particle_positions[par_indx].y * inverted_cell_size)
+	for par_id: int in len(particle_positions):
+		var particle_pos: Vector2 = particle_positions[par_id]
+		if particle_pos == Vector2(-1.0, -1.0):
+			continue
+		var cell_x: int = floori(particle_pos.x * inverted_cell_size)
+		var cell_y: int = floori(particle_pos.y * inverted_cell_size)
 		var cell_id: int = cell_x + cell_y * cell_area.x
 		var destination: int = write_cursor[cell_id]
-		cell_particle_ids[destination] = par_indx
+		cell_particle_ids[destination] = par_id
 		write_cursor[cell_id] = destination + 1
 
 func _get_neighbor_cells(cell_id: int) -> PackedInt32Array:
@@ -172,13 +186,25 @@ func _get_neighbor_cells(cell_id: int) -> PackedInt32Array:
 	return neighbor_ids
 
 func add_particle(type: int, position: Vector2, velocity: Vector2, radius: float, mass: float) -> void:
-	particle_count += 1
-	particle_types.append(type)
-	particle_positions.append(position)
-	particle_velocities.append(velocity)
-	particle_accelerations.append(Vector2.ZERO)
-	particle_radii.append(radius)
-	particle_masses.append(mass)
+	var id: int = particle_positions.find(Vector2(-1.0,-1.0))
+	if id != -1:
+		particle_count += 1
+		particle_types[id] = type
+		particle_positions[id] = position
+		particle_velocities[id] = velocity
+		particle_accelerations[id] = Vector2.ZERO
+		particle_radii[id] = radius
+		particle_masses[id] = mass
+		return
+	else:
+		particle_count += 1
+		particle_types.append(type)
+		particle_positions.append(position)
+		particle_velocities.append(velocity)
+		particle_accelerations.append(Vector2.ZERO)
+		particle_radii.append(radius)
+		particle_masses.append(mass)
+		return
 
 func delete_particles() -> void:
 	particle_count = 0
@@ -188,3 +214,7 @@ func delete_particles() -> void:
 	particle_accelerations = []
 	particle_radii = []
 	particle_masses = []
+
+func delete_particle(id: int) -> void:
+	particle_count -= 1
+	particle_positions[id] = Vector2(-1.0, -1.0)

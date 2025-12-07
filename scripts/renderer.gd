@@ -65,31 +65,36 @@ func _render_particles(world_state: WorldState, simulation_render_state: Simulat
 	var particle_count: int = world_state.particle_count
 	if mm_particles.instance_count != particle_count:
 		mm_particles.instance_count = particle_count
+	var current_particle_indx: int = 0
 	var particle_positions: PackedVector2Array = world_state.particle_positions
 	var particle_radii: PackedFloat32Array = world_state.particle_radii
 	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
 	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
 	
-	for particle_id: int in range(particle_count):
-		var particle_screen_position: Vector2 = particle_positions[particle_id] * simulation_view_scale + simulation_view_position
+	for particle_id: int in len(particle_positions):
+		var particle_position: Vector2 = particle_positions[particle_id]
+		if particle_position == Vector2(-1.0, -1.0):
+			continue
+		var particle_screen_position: Vector2 = particle_position * simulation_view_scale + simulation_view_position
 		var particle_screen_diameter: float = particle_radii[particle_id] * 2.0 * simulation_view_scale
 		var particle_transform: Transform2D = Transform2D(0.0, particle_screen_position)
 		particle_transform.x = Vector2(particle_screen_diameter, 0.0)
 		particle_transform.y = Vector2(0.0, particle_screen_diameter)
 		
-		mm_particles.set_instance_transform_2d(particle_id, particle_transform)
+		mm_particles.set_instance_transform_2d(current_particle_indx, particle_transform)
 		var particle_type: int = world_state.particle_types[particle_id]
 		match particle_type:
 			0:
-				mm_particles.set_instance_color(particle_id, Color("#A23A3A"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#A23A3A"))
 			1:
-				mm_particles.set_instance_color(particle_id, Color("#1F6B2C"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#1F6B2C"))
 			2:
-				mm_particles.set_instance_color(particle_id, Color("#2E5D9E"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#2E5D9E"))
 			3:
-				mm_particles.set_instance_color(particle_id, Color("#555555"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#555555"))
 			_:
 				assert(false, "ParticleTypeError: particle has no valid type")
+		current_particle_indx += 1
 
 func _render_walls(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
 	var wall_count: int = world_state.wall_count
