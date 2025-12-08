@@ -3,14 +3,6 @@
 /android/
 *.tmp
 *.vsidx
-gdextension/.vs/slnx.sqlite
-gdextension/.vs/ProjectSettings.json
-gdextension/.vs/gdextension.slnx/v18/ipch/AutoPCH/715ff0d52a92c9e/SIMPLE.ipch
-gdextension/.vs/gdextension.slnx/v18/ipch/AutoPCH/4f18f5b717c69287/REGISTER_TYPES.ipch
-gdextension/.vs/gdextension.slnx/v18/Browse.VC.opendb
-gdextension/.vs/gdextension.slnx/v18/Browse.VC.db-wal
-gdextension/.vs/gdextension.slnx/v18/Browse.VC.db-shm
-gdextension/.vs/gdextension.slnx/v18/Browse.VC.db
-gdextension/.vs/gdextension.slnx/v18/.wsuo
-gdextension/.vs/CMakeWorkspaceSettings.json
+gdextension/.vs/
 gdextension/.sconsign.dblite
+gdextension/godot-cpp/
