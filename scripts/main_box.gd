@@ -6,8 +6,6 @@ var simulation_render_state: SimulationRenderState
 @onready var scheduler: Scheduler = Scheduler.new()
 @onready var world_state: WorldState
 @onready var renderer: Renderer = get_node("ParticleRenderer")
-var mouse_cell_coords: Vector2i = Vector2i(-1, -1)
-var prev_mouse_cell_coords: Vector2i = Vector2i(-1, -1)
 var last_physics_time_usec: float = 0.0
 var real_tps: float = 0.0
 var execution_time_ms: float = 0.0
@@ -39,7 +37,7 @@ func _physics_process(_delta: float) -> void:
 
 func reinitialize_sim() -> void:
 	world_state = WorldState.new(Globals.default_cell_size, Globals.default_simulation_area)
-	scheduler.set_world_state(world_state)
+	scheduler.setup(world_state)
 	renderer.reinitialize_render()
 
 func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:

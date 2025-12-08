@@ -21,11 +21,11 @@ var cell_particle_ids: PackedInt32Array = []
 var cell_types: PackedByteArray = []
 var cell_neighbor_offsets: PackedInt32Array = []
 var cell_neighbor_ids: PackedInt32Array = []
-var neighbor_range: int = 1
+var neighbor_range: int = Globals.neighbor_range
 var neighbor_count: int = (neighbor_range*2+1)**2
 var inverted_cell_size: float
-var particle_mass_by_type: PackedFloat32Array = [1.5, 1.0, 1.0, 0.5]
-var particle_radius: float = 2.5
+var particle_mass_by_type: PackedFloat32Array = Globals.default_particle_mass_by_type
+var particle_radius: float = Globals.default_particle_radius
 
 enum CountCategory {NONE, WALL, PUMP, DIODE, SPAWNER}
 enum CellType {EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT, 

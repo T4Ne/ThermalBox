@@ -2,15 +2,18 @@ class_name MovementHandler
 
 var max_speed: float = Globals.lightspeed
 var max_speed_sq: float = max_speed ** 2
-var interaction_range_r: float = 4.0
+var interaction_range_r: float = Globals.interaction_range_r
 var interaction_range_sq: float = (interaction_range_r * Globals.default_particle_radius)**2
-var wall_thermal_coef: float = 0.8
+var wall_thermal_coef: float = Globals.wall_thermal_coef
 var wall_thermal_coef_inv: float = 1.0 / wall_thermal_coef
-var pump_acceleration: float = 100.0
-var pump_max_speed: float = 5.0
+var pump_acceleration: float = Globals.pump_acceleration
+var pump_max_speed: float = Globals.pump_max_speed
 var max_acceleration: float = Globals.max_accel
 var interaction_matrix: Array[Array] = []
 var cell_iteration_order: PackedInt32Array = [1, 3, 5, 7, 0, 2, 4, 6, 8]
+var gravity_is_on: bool = Globals.gravity_is_on
+var gravity: Vector2 = Globals.gravity
+
 
 enum InterType {LENNARD_JONES, REPULSION}
 
@@ -254,8 +257,8 @@ func _collide_with_walls(time_step: float, id: int, position: Vector2, velocity:
 				3: # hot wall
 					accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_unit * wall_thermal_coef_inv
 	
-	if Globals.gravity_is_on and not was_in_pump:
-		accumulated_acceleration += Globals.gravity
+	if gravity_is_on and not was_in_pump:
+		accumulated_acceleration += gravity
 	var values: PackedVector2Array = [accumulated_acceleration, sequential_position, sequential_velocity]
 	return values
 

@@ -3,7 +3,7 @@ class_name Scheduler
 var movement_handler: MovementHandler = MovementHandler.new()
 var world_state: WorldState
 var chunk_size: int = 1
-var min_chunk_time_usec: float = 2000
+var min_chunk_time_usec: float = Globals.min_chunk_time_usec
 var chunk_iterations: int
 var chunks: Array[Chunk] = []
 var time_step: float
@@ -103,5 +103,5 @@ func _prepare_chunk(chunk: Chunk) -> void:
 	chunk.particle_count = count
 	chunk.resize_buffers(count)
 
-func set_world_state(world_state_instance: WorldState) -> void:
+func setup(world_state_instance: WorldState) -> void:
 	world_state = world_state_instance
