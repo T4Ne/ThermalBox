@@ -25,7 +25,7 @@ if env["platform"] == "macos":
     )
 else:
     library = env.SharedLibrary(
-        "bin/Test{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "bin/Sim{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
         source=sources,
     )
 

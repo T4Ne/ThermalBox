@@ -7,18 +7,17 @@
 
 namespace godot {
 	class Chunk : public RefCounted {
-	GDCLASS(Chunk, RefCounted)
+		GDCLASS(Chunk, RefCounted)
 	private:
-	
 		int cell_id_start{};
 		int cell_id_end{};
 		int particle_count{};
+		float start_time_usec{};
+		float end_time_usec{};
 		PackedInt32Array particle_ids;
 		PackedVector2Array positions;
 		PackedVector2Array velocities;
 		PackedVector2Array accelerations;
-		float start_time_usec{};
-		float end_time_usec{};
 	
 	public:
 		Chunk();
@@ -52,7 +51,7 @@ namespace godot {
 	protected:
 		static void _bind_methods();
 	};
-}
+} // namespace godot
 
 
 
