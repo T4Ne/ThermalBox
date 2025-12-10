@@ -27,26 +27,26 @@ namespace godot {
 		void resize_buffers(int size);
 		
 
-		void set_cell_id_start(const int id) { cell_id_start = id; }
+		void set_cell_id_start(int id) { cell_id_start = id; }
 		int get_cell_id_start() const { return cell_id_start; }
 		
-		void set_cell_id_end(const int id) { cell_id_end = id; }
+		void set_cell_id_end(int id) { cell_id_end = id; }
 		int get_cell_id_end() const { return cell_id_end; }
 		
-		void set_particle_count(const int count) { particle_count = count; }
+		void set_particle_count(int count) { particle_count = count; }
 		int get_particle_count() const { return particle_count; }
 		
 		void set_particle_ids(const PackedInt32Array& p_ids) { particle_ids = p_ids; }
-		PackedInt32Array get_particle_ids() const { return particle_ids; }
+		PackedInt32Array& get_particle_ids() { return particle_ids; }
 		
 		void set_positions(const PackedVector2Array& p_positions) { positions = p_positions; }
-		PackedVector2Array get_positions() const { return positions; }
+		PackedVector2Array& get_positions() { return positions; }
 		
 		void set_velocities(const PackedVector2Array& p_velocities) { velocities = p_velocities; }
-		PackedVector2Array get_velocities() const { return velocities; }
+		PackedVector2Array& get_velocities() { return velocities; }
 		
 		void set_accelerations(const PackedVector2Array& p_accelerations) { accelerations = p_accelerations; }
-		PackedVector2Array get_accelerations() const { return accelerations; }
+		PackedVector2Array& get_accelerations() { return accelerations; }
 	
 	protected:
 		static void _bind_methods();

@@ -27,32 +27,32 @@ func _build_interaction_matrix() -> void:
 		interaction_matrix[indx] = []
 		interaction_matrix[indx].resize(type_count)
 	
-	interaction_matrix[0][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
-	interaction_matrix[0][1] = [-100.0, 3.5, InterType.LENNARD_JONES]
-	interaction_matrix[0][2] = [-20.0, 4.0, InterType.LENNARD_JONES]
-	interaction_matrix[0][3] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[1][0] = [-100.0, 3.5, InterType.LENNARD_JONES]
-	interaction_matrix[1][1] = [-1000.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[1][2] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[1][3] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[2][0] = [-20.0, 4.0, InterType.LENNARD_JONES]
-	interaction_matrix[2][1] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[2][2] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[2][3] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][0] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][1] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][2] = [-500.0, interaction_range_r, InterType.REPULSION]
-	interaction_matrix[3][3] = [-500.0, interaction_range_r, InterType.REPULSION]
+	interaction_matrix[0][0] = [Globals.weak_lennard[0], Globals.weak_lennard[1], InterType.LENNARD_JONES]
+	interaction_matrix[0][1] = [Globals.strong_lennard[0], Globals.strong_lennard[1], InterType.LENNARD_JONES]
+	interaction_matrix[0][2] = [Globals.weak_lennard[0], Globals.weak_lennard[1], InterType.LENNARD_JONES]
+	interaction_matrix[0][3] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[1][0] = [Globals.strong_lennard[0], Globals.strong_lennard[1], InterType.LENNARD_JONES]
+	interaction_matrix[1][1] = [Globals.strong_repul[0], Globals.strong_repul[1], InterType.REPULSION]
+	interaction_matrix[1][2] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[1][3] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[2][0] = [Globals.weak_lennard[0], Globals.weak_lennard[1], InterType.LENNARD_JONES]
+	interaction_matrix[2][1] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[2][2] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[2][3] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[3][0] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[3][1] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[3][2] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
+	interaction_matrix[3][3] = [Globals.weak_repul[0], Globals.weak_repul[1], InterType.REPULSION]
 	
 	# interactions:
 	# 0-0: WEAKINTER
 	# 0-1: STRONGINTER
 	# 0-2: WEAKINTER
 	# 0-3: WEAKREPUL
-	# 1-1: STRONGINTER
-	# 1-2: STRONGREPUL
+	# 1-1: STRONGREPUL
+	# 1-2: WEAKREPUL
 	# 1-3: WEAKREPUL
-	# 2-2: WEAKINTER
+	# 2-2: WEAKREPUL
 	# 2-3: WEAKREPUL
 	# 3-3: WEAKREPUL
 

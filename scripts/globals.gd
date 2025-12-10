@@ -17,3 +17,7 @@ var interaction_range_r: float = 4.0
 var wall_thermal_coef: float = 0.8
 var pump_acceleration: float = 100.0
 var pump_max_speed: float = 5.0
+var strong_lennard: Array[float] = [-100.0, 3.5]
+var weak_lennard: Array[float] = [-10.0, 4.0]
+var strong_repul: Array[float] = [-1000.0, interaction_range_r]
+var weak_repul: Array[float] = [-500.0, interaction_range_r]

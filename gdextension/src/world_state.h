@@ -57,7 +57,7 @@ namespace godot {
 		WorldState();
 		~WorldState();
 
-		void setup(const int size, const Vector2i area, const bool borders = true);
+		void setup(const int size, const Vector2i area, const bool borders, const Object* globals);
 		void set_globals(const Object* globals);
 		void build_neighbor_offsets();
 		PackedInt32Array get_neighbor_cells(const int cell_id) const;
@@ -83,6 +83,8 @@ namespace godot {
 
 		int get_spawner_count() const { return spawner_count; };
 
+		int get_neighbor_count() const { return neighbor_count; };
+
 		float get_cell_size() const { return cell_size; };
 
 		float get_particle_radius() const { return particle_radius; };
@@ -91,30 +93,32 @@ namespace godot {
 
 		Vector2i get_cell_area() const { return cell_area; };
 
-		PackedByteArray get_particle_types() const { return particle_types; };
+		const std::vector<int>& get_type_category_map() { return type_category_map; };
 
-		PackedByteArray get_cell_types() const { return cell_types; };
+		const PackedByteArray& get_particle_types() { return particle_types; };
 
-		PackedInt32Array get_occupied_cell_ids() const { return occupied_cell_ids; };
+		const PackedByteArray& get_cell_types() { return cell_types; };
 
-		PackedInt32Array get_cell_particle_offsets() const { return cell_particle_offsets; };
+		const PackedInt32Array& get_occupied_cell_ids() { return occupied_cell_ids; };
 
-		PackedInt32Array get_cell_particle_ids() const { return cell_particle_ids; };
+		const PackedInt32Array& get_cell_particle_offsets() { return cell_particle_offsets; };
 
-		PackedInt32Array get_cell_neighbor_offsets() const { return cell_neighbor_offsets; };
+		const PackedInt32Array& get_cell_particle_ids() { return cell_particle_ids; };
 
-		PackedInt32Array get_cell_neighbor_ids() const { return cell_neighbor_ids; };
+		const PackedInt32Array& get_cell_neighbor_offsets() { return cell_neighbor_offsets; };
 
-		PackedFloat32Array get_particle_masses() const { return particle_masses; };
+		const PackedInt32Array& get_cell_neighbor_ids() { return cell_neighbor_ids; };
 
-		PackedVector2Array get_particle_positions() const { return particle_positions; };
-		void set_particle_position_by_id(const int id, const Vector2 position);
+		const PackedFloat32Array& get_particle_masses() { return particle_masses; };
 
-		PackedVector2Array get_particle_velocities() const { return particle_velocities; };
-		void set_particle_velocity_by_id(const int id, const Vector2 velocity);
+		const PackedVector2Array& get_particle_positions() { return particle_positions; };
+		void set_particle_position_by_id(int id, Vector2 position);
 
-		PackedVector2Array get_particle_accelerations() const { return particle_accelerations; };
-		void set_particle_acceleration_by_id(const int id, const Vector2 acceleration);
+		const PackedVector2Array& get_particle_velocities() { return particle_velocities; };
+		void set_particle_velocity_by_id(int id, Vector2 velocity);
+
+		const PackedVector2Array& get_particle_accelerations() { return particle_accelerations; };
+		void set_particle_acceleration_by_id(int id, Vector2 acceleration);
 	};
 } // namespace godot
 

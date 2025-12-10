@@ -20,7 +20,7 @@ WorldState::WorldState() {
 WorldState::~WorldState() {
 }
 
-void WorldState::setup(const int size, const Vector2i area, const bool borders) {
+void WorldState::setup(const int size, const Vector2i area, const bool borders, const Object* globals) {
 	cell_size = size;
 	inverted_cell_size = 1.0 / (double)size;
 	cell_area = area;
@@ -28,6 +28,9 @@ void WorldState::setup(const int size, const Vector2i area, const bool borders) 
 	cell_types.resize(cell_count);
 	cell_types.fill(CellType::EMPTY);
 	cell_particle_offsets.resize(cell_count + 1);
+	neighbor_range = globals->get("neighbor_range");
+	particle_mass_by_type = globals->get("default_particle_mass_by_type");
+	particle_radius = globals->get("default_particle_radius");
 	if (borders) {
 		build_borders();
 	}
@@ -140,7 +143,6 @@ void WorldState::build_cell_map() {
 	Vector2* positions_ptr = particle_positions.ptrw();
 	uint8_t* cell_types_ptr = cell_types.ptrw();
 	uint8_t* par_types_ptr = particle_types.ptrw();
-	int32_t* cell_par_ptr = cell_particle_ids.ptrw();
 
 	// Count particles per cell, particle bounds check, convert spawners
 	for (int par_id = 0; par_id < particle_positions.size(); par_id++) {
@@ -188,6 +190,7 @@ void WorldState::build_cell_map() {
 	}
 
 	// Scatter pass
+	int32_t* cell_par_ptr = cell_particle_ids.ptrw();
 	PackedInt32Array write_cursor = cell_particle_offsets.duplicate();
 	int32_t* cursor_ptr = write_cursor.ptrw();
 	for (int par_id = 0; par_id < particle_positions.size(); par_id++) {
