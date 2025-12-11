@@ -102,9 +102,9 @@ void MovementHandler::first_half_verlet(float time_step, const Ref<WorldState>& 
 	const Vector2* old_pos_ptr = old_particle_positions.ptr();
 	const Vector2* old_vel_ptr = old_particle_velocities.ptr();
 	const Vector2* old_accel_ptr = old_particle_accelerations.ptr();
-	PackedVector2Array& new_particle_positions = chunk->get_positions();
-	PackedVector2Array& new_particle_velocities = chunk->get_velocities();
-	PackedVector2Array& new_particle_accelerations = chunk->get_accelerations();
+	PackedVector2Array& new_particle_positions = chunk->get_positions_mut();
+	PackedVector2Array& new_particle_velocities = chunk->get_velocities_mut();
+	PackedVector2Array& new_particle_accelerations = chunk->get_accelerations_mut();
 	Vector2* new_pos_ptr = new_particle_positions.ptrw();
 	Vector2* new_vel_ptr = new_particle_velocities.ptrw();
 	Vector2* new_accel_ptr = new_particle_accelerations.ptrw();
@@ -139,9 +139,9 @@ void MovementHandler::second_half_verlet(float time_step, const Ref<WorldState>&
 	const int32_t* id_ptr = chunk_particle_ids.ptr();
 	const Vector2* old_pos_ptr = old_particle_positions.ptr();
 	const Vector2* old_vel_ptr = old_particle_velocities.ptr();
-	PackedVector2Array& new_particle_positions = chunk->get_positions();
-	PackedVector2Array& new_particle_velocities = chunk->get_velocities();
-	PackedVector2Array& new_particle_accelerations = chunk->get_accelerations();
+	PackedVector2Array& new_particle_positions = chunk->get_positions_mut();
+	PackedVector2Array& new_particle_velocities = chunk->get_velocities_mut();
+	PackedVector2Array& new_particle_accelerations = chunk->get_accelerations_mut();
 	Vector2* new_pos_ptr = new_particle_positions.ptrw();
 	Vector2* new_vel_ptr = new_particle_velocities.ptrw();
 	Vector2* new_accel_ptr = new_particle_accelerations.ptrw();
@@ -375,7 +375,7 @@ PackedVector2Array MovementHandler::calculate_collisions(float time_step, int id
 	new_acceleration += new_values[0];
 	Vector2 new_position = new_values[1];
 
-	new_acceleration += interact_with_particles(id, position, neighbor_cells, world_state);
+	new_acceleration += interact_with_particles(id, new_position, neighbor_cells, world_state);
 	PackedVector2Array ret_values = { new_acceleration, new_position };
 
 	return ret_values;

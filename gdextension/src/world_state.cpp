@@ -20,7 +20,7 @@ WorldState::WorldState() {
 WorldState::~WorldState() {
 }
 
-void WorldState::setup(const int size, const Vector2i area, const bool borders, const Object* globals) {
+void WorldState::setup(int size, Vector2i area, bool borders, const Object* globals) {
 	cell_size = size;
 	inverted_cell_size = 1.0 / (double)size;
 	cell_area = area;
@@ -93,7 +93,7 @@ PackedInt32Array WorldState::get_neighbor_cells(int cell_id) const {
 	return neighbor_ids;
 }
 
-void WorldState::set_cell_state(const Vector2i arr_pos, const int new_type) {
+void WorldState::set_cell_state(Vector2i arr_pos, int new_type) {
 	int cell_id = arr_pos.x + arr_pos.y * cell_area.x;
 	if (cell_id < 0 || cell_id >= cell_types.size()) return;
 
@@ -106,7 +106,7 @@ void WorldState::set_cell_state(const Vector2i arr_pos, const int new_type) {
 	cell_types[cell_id] = (uint8_t) new_type;
 }
 
-void WorldState::update_count_by_category(const int category, const int change) {
+void WorldState::update_count_by_category(int category, int change) {
 	switch (category) {
 	case CAT_WALL: wall_count += change; break;
 	case CAT_PUMP: pump_count += change; break;
@@ -205,7 +205,7 @@ void WorldState::build_cell_map() {
 	}
 }
 
-void WorldState::add_particle(const int type, const Vector2 position, const Vector2 velocity) {
+void WorldState::add_particle(int type, Vector2 position, Vector2 velocity) {
 	int free_id = particle_positions.find(Vector2(-1.0, -1.0));
 	if (free_id != -1) {
 		particle_count++;
@@ -234,14 +234,14 @@ void WorldState::clear_particles() {
 	particle_masses.clear();
 }
 
-void WorldState::delete_particle(const int id) {
+void WorldState::delete_particle(int id) {
 	if (id >= 0 && id < particle_positions.size()) {
 		particle_count--;
 		particle_positions[id] = Vector2(-1.0, -1.0);
 	}
 }
 
-void WorldState::delete_particles_by_cell(const Vector2i arr_pos) {
+void WorldState::delete_particles_by_cell(Vector2i arr_pos) {
 	int cell_id = arr_pos.x + arr_pos.y * cell_area.x;
 	if (cell_id < 0 || cell_id >= cell_count) return;
 
@@ -282,17 +282,17 @@ void WorldState::spawn_particles_from_spawners() {
 	}
 }
 
-void WorldState::set_particle_position_by_id(const int id, const Vector2 position) {
+void WorldState::set_particle_position_by_id(int id, Vector2 position) {
 	if (id < 0 || id >= particle_positions.size()) return;
 	particle_positions[id] = position;
 }
 
-void WorldState::set_particle_velocity_by_id(const int id, const Vector2 velocity) {
+void WorldState::set_particle_velocity_by_id(int id, Vector2 velocity) {
 	if (id < 0 || id >= particle_velocities.size()) return;
 	particle_velocities[id] = velocity;
 }
 
-void WorldState::set_particle_acceleration_by_id(const int id, const Vector2 acceleration) {
+void WorldState::set_particle_acceleration_by_id(int id, Vector2 acceleration) {
 	if (id < 0 || id >= particle_accelerations.size()) return;
 	particle_accelerations[id] = acceleration;
 }

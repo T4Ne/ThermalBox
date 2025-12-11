@@ -57,18 +57,18 @@ namespace godot {
 		WorldState();
 		~WorldState();
 
-		void setup(const int size, const Vector2i area, const bool borders, const Object* globals);
+		void setup(int size, Vector2i area, bool borders, const Object* globals);
 		void set_globals(const Object* globals);
 		void build_neighbor_offsets();
-		PackedInt32Array get_neighbor_cells(const int cell_id) const;
-		void set_cell_state(Vector2i arr_pos, const int new_type);
-		void update_count_by_category(const int category, const int change);
+		PackedInt32Array get_neighbor_cells(int cell_id) const;
+		void set_cell_state(Vector2i arr_pos, int new_type);
+		void update_count_by_category(int category, int change);
 		void build_borders();
 		void build_cell_map();
-		void add_particle(const int type, const Vector2 position, const Vector2 velocity);
+		void add_particle(int type, Vector2 position, Vector2 velocity);
 		void clear_particles();
-		void delete_particle(const int id);
-		void delete_particles_by_cell(const Vector2i arr_pos);
+		void delete_particle(int id);
+		void delete_particles_by_cell(Vector2i arr_pos);
 		void spawn_particles_from_spawners();
 
 		int get_particle_count() const { return particle_count; };
@@ -82,6 +82,8 @@ namespace godot {
 		int get_diode_count() const { return diode_count; };
 
 		int get_spawner_count() const { return spawner_count; };
+
+		int get_occupied_cell_count() const { return occupied_cell_count; };
 
 		int get_neighbor_count() const { return neighbor_count; };
 
@@ -112,12 +114,15 @@ namespace godot {
 		const PackedFloat32Array& get_particle_masses() { return particle_masses; };
 
 		const PackedVector2Array& get_particle_positions() { return particle_positions; };
+		PackedVector2Array& get_particle_positions_mut() { return particle_positions; };
 		void set_particle_position_by_id(int id, Vector2 position);
 
 		const PackedVector2Array& get_particle_velocities() { return particle_velocities; };
+		PackedVector2Array& get_particle_velocities_mut() { return particle_velocities; };
 		void set_particle_velocity_by_id(int id, Vector2 velocity);
 
 		const PackedVector2Array& get_particle_accelerations() { return particle_accelerations; };
+		PackedVector2Array& get_particle_accelerations_mut() { return particle_accelerations; };
 		void set_particle_acceleration_by_id(int id, Vector2 acceleration);
 	};
 } // namespace godot
