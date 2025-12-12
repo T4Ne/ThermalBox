@@ -16,27 +16,27 @@ MovementHandler::MovementHandler() {
 MovementHandler::~MovementHandler() {
 }
 
-void MovementHandler::setup(const Object* globals) {
-	set_globals(globals);
+void MovementHandler::setup(const Dictionary& config) {
+	set_globals(config);
 }
 
-void MovementHandler::set_globals(const Object* globals) {
-	max_speed = globals->get("lightspeed");
+void MovementHandler::set_globals(const Dictionary& config) {
+	max_speed = config["max_speed"];
 	max_speed_sq = pow(max_speed, 2);
-	interaction_range_r = globals->get("interaction_range_r");
-	interaction_range_sq = pow(interaction_range_r * (float)globals->get("default_particle_radius"), 2);
-	wall_thermal_coef = globals->get("wall_thermal_coef");
+	interaction_range_r = config["interaction_range_r"];
+	interaction_range_sq = pow(interaction_range_r * (float)config["default_particle_radius"], 2);
+	wall_thermal_coef = config["wall_thermal_coef"];
 	wall_thermal_coef_inv = 1.0 / (double)wall_thermal_coef;
-	pump_acceleration = globals->get("pump_acceleration");
-	pump_max_speed = globals->get("pump_max_speed");
-	max_acceleration = globals->get("max_accel");
+	pump_acceleration = config["pump_acceleration"];
+	pump_max_speed = config["pump_max_speed"];
+	max_acceleration = config["max_accel"];
 	max_acceleration_sq = pow(max_acceleration, 2);
-	gravity_is_on = globals->get("gravity_is_on");
-	gravity = globals->get("gravity");
-	build_interaction_list(globals);
+	gravity_is_on = config["gravity_is_on"];
+	gravity = config["gravity"];
+	build_interaction_list(config);
 }
 
-void MovementHandler::build_interaction_list(const Object* globals) {
+void MovementHandler::build_interaction_list(const Dictionary& config) {
 	interaction_list.clear();
 	interaction_list.resize(particle_type_count * particle_type_count * inter_param_count);
 	float* interaction_ptr = interaction_list.data();
@@ -73,16 +73,16 @@ void MovementHandler::build_interaction_list(const Object* globals) {
 		Array params;
 		switch (inter_type) {
 		case WEAK_LENNARD_JONES:
-			params = globals->get("weak_lennard");
+			params = config["weak_lennard"];
 			break;
 		case STRONG_LENNARD_JONES:
-			params = globals->get("strong_lennard");
+			params = config["strong_lennard"];
 			break;
 		case WEAK_REPULSION:
-			params = globals->get("weak_repul");
+			params = config["weak_repul"];
 			break;
 		case STRONG_REPULSION:
-			params = globals->get("strong_repul");
+			params = config["strong_repul"];
 			break;
 		}
 		int write_pos = idx * inter_param_count;
@@ -92,7 +92,7 @@ void MovementHandler::build_interaction_list(const Object* globals) {
 	}
 }
 
-void MovementHandler::first_half_verlet(float time_step, const Ref<WorldState>& world_state, Ref<Chunk>& chunk) const {
+void MovementHandler::first_half_verlet(float time_step, const Ref<WorldState>& world_state, Ref<Chunk>& chunk) {
 	int chunk_particle_count = chunk->get_particle_count();
 	const PackedInt32Array& chunk_particle_ids = chunk->get_particle_ids();
 	const PackedVector2Array& old_particle_positions = world_state->get_particle_positions();
@@ -250,8 +250,8 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 	const PackedByteArray& cell_types = world_state->get_cell_types();
 	const uint8_t* types_ptr = cell_types.ptr();
 	const Vector2i cell_area = world_state->get_cell_area();
-	const std::vector<int>& type_category_map = world_state->get_type_category_map();
-	const int* type_cat_ptr = type_category_map.data();
+	const PackedInt32Array& type_category_map = world_state->get_type_category_map();
+	const int32_t* type_cat_ptr = type_category_map.ptr();
 	bool was_in_pump = false;
 	const int32_t* neighbor_ptr = neighbor_cells.ptr();
 	const int* iter_order_ptr = cell_iteration_order.data();
@@ -259,9 +259,11 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 	for (int neighbor_idx = 0; neighbor_idx < neighbor_cells.size(); neighbor_idx++) {
 		int iter_idx = iter_order_ptr[neighbor_idx];
 		int cell_id = neighbor_ptr[iter_idx];
+
+		if (cell_id < 0) continue; // neighbor is not a cell
+
 		int cell_type = types_ptr[cell_id];
 		
-		if (cell_id < -1) continue; // neighbor is not a cell
 		if (!cell_type) continue; // cell type is 0, so it's an empty cell
 		
 		float cell_xf = (cell_id % cell_area.x) * cell_side_len;

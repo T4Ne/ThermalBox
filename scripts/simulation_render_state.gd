@@ -23,7 +23,7 @@ func update_simulation_view_position(view_position: Vector2) -> void:
 	simulation_view_position = Vector2(view_position.x - simulation_view_screen_size.x / 2.0,
 	view_position.y - simulation_view_screen_size.y / 2.0)
 
-func update_mouse_cell_coords(global_mouse_position: Vector2, cell_size: int) -> void:
+func update_mouse_cell_coords(global_mouse_position: Vector2, cell_size: float) -> void:
 	
 	if global_mouse_position.x < simulation_view_position.x or global_mouse_position.x >= simulation_view_position.x + simulation_view_screen_size.x:
 		mouse_cell_coords = [Vector2(-1, -1), Vector2(-1, -1)]
@@ -31,8 +31,8 @@ func update_mouse_cell_coords(global_mouse_position: Vector2, cell_size: int) ->
 	if global_mouse_position.y < simulation_view_position.y or global_mouse_position.y >= simulation_view_position.y + simulation_view_screen_size.y:
 		mouse_cell_coords = [Vector2(-1, -1), Vector2(-1, -1)]
 		return
-	var cell_x: int = int((global_mouse_position.x - simulation_view_position.x) / simulation_view_scale) / cell_size
-	var cell_y: int = int((global_mouse_position.y - simulation_view_position.y) / simulation_view_scale) / cell_size
+	var cell_x: int = int((global_mouse_position.x - simulation_view_position.x) / simulation_view_scale / cell_size)
+	var cell_y: int = int((global_mouse_position.y - simulation_view_position.y) / simulation_view_scale / cell_size)
 	var new_cell_coords: Vector2i = Vector2i(cell_x, cell_y)
 	if new_cell_coords == mouse_cell_coords[0]:
 		return

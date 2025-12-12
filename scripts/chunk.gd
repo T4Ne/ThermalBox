@@ -1,4 +1,4 @@
-class_name Chunk
+class_name ChunkOLD
 
 var cell_start: int = -1
 var cell_end: int = -1

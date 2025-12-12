@@ -11,7 +11,7 @@
 
 using namespace godot;
 
-void initialize_sim_module(ModuleInitializationLevel p_level) {
+static void initialize_sim_module(ModuleInitializationLevel p_level) {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
         return;
     }
@@ -22,7 +22,7 @@ void initialize_sim_module(ModuleInitializationLevel p_level) {
     ClassDB::register_class<Scheduler>();
 }
 
-void uninitialize_sim_module(ModuleInitializationLevel p_level) {
+static void uninitialize_sim_module(ModuleInitializationLevel p_level) {
     if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
         return;
     }

@@ -62,27 +62,28 @@ func _render_simulation_view(simulation_view: SimulationRenderState) -> void:
 
 func _render_particles(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
 	# Resize buffer if necessary
-	var particle_count: int = world_state.particle_count
+	var particle_count: int = world_state.get_particle_count()
 	if mm_particles.instance_count != particle_count:
 		mm_particles.instance_count = particle_count
 	var current_particle_indx: int = 0
-	var particle_positions: PackedVector2Array = world_state.particle_positions
-	var particle_radii: PackedFloat32Array = world_state.particle_radii
+	var particle_positions: PackedVector2Array = world_state.get_particle_positions()
+	var particle_radius: float = world_state.get_particle_radius()
 	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
 	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
+	var particle_types: PackedByteArray = world_state.get_particle_types()
 	
 	for particle_id: int in len(particle_positions):
 		var particle_position: Vector2 = particle_positions[particle_id]
 		if particle_position == Vector2(-1.0, -1.0):
 			continue
 		var particle_screen_position: Vector2 = particle_position * simulation_view_scale + simulation_view_position
-		var particle_screen_diameter: float = particle_radii[particle_id] * 2.0 * simulation_view_scale
+		var particle_screen_diameter: float = particle_radius * 2.0 * simulation_view_scale
 		var particle_transform: Transform2D = Transform2D(0.0, particle_screen_position)
 		particle_transform.x = Vector2(particle_screen_diameter, 0.0)
 		particle_transform.y = Vector2(0.0, particle_screen_diameter)
 		
 		mm_particles.set_instance_transform_2d(current_particle_indx, particle_transform)
-		var particle_type: int = world_state.particle_types[particle_id]
+		var particle_type: int = particle_types[particle_id]
 		match particle_type:
 			0:
 				mm_particles.set_instance_color(current_particle_indx, Color("#A23A3A"))
@@ -97,10 +98,10 @@ func _render_particles(world_state: WorldState, simulation_render_state: Simulat
 		current_particle_indx += 1
 
 func _render_walls(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
-	var wall_count: int = world_state.wall_count
-	var pump_count: int = world_state.pump_count
-	var diode_count: int = world_state.diode_count
-	var spawner_count: int = world_state.spawner_count
+	var wall_count: int = world_state.get_wall_count()
+	var pump_count: int = world_state.get_pump_count()
+	var diode_count: int = world_state.get_diode_count()
+	var spawner_count: int = world_state.get_spawner_count()
 	if mm_walls.instance_count != wall_count:
 		mm_walls.instance_count = wall_count
 	if mm_pumps.instance_count != pump_count:
@@ -113,11 +114,11 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 	var current_pump_indx: int = 0
 	var current_diode_indx: int = 0
 	var current_spawner_indx: int = 0
-	var cell_count: int = world_state.cell_count
-	var cell_types: PackedByteArray = world_state.cell_types
-	var cell_categories: Array = world_state.type_category_map
-	var cell_area: Vector2i = world_state.cell_area
-	var cell_size: int = world_state.cell_size
+	var cell_count: int = world_state.get_cell_count()
+	var cell_types: PackedByteArray = world_state.get_cell_types()
+	var cell_categories: PackedInt32Array = world_state.get_type_category_map()
+	var cell_area: Vector2i = world_state.get_cell_area()
+	var cell_size: float = world_state.get_cell_size()
 	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
 	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
 	
@@ -125,8 +126,8 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 		if not cell_types[cell_id]:
 			continue
 		var cell_array_coordinates: Vector2i = Vector2i(cell_id % cell_area.x, cell_id / cell_area.x)
-		var cell_simulation_position: Vector2 = Vector2(float(cell_array_coordinates.x) * float(cell_size) + float(cell_size) / 2.0, 
-		float(cell_array_coordinates.y) * float(cell_size) + float(cell_size) / 2.0)
+		var cell_simulation_position: Vector2 = Vector2(float(cell_array_coordinates.x) * cell_size + cell_size / 2.0, 
+		float(cell_array_coordinates.y) * cell_size + cell_size / 2.0)
 		
 		var cell_screen_position: Vector2 = cell_simulation_position * simulation_view_scale + simulation_view_position
 		var cell_screen_size: float = simulation_view_scale * cell_size
@@ -195,7 +196,7 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 
 func _render_selection(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
 	var mouse_cell_coords: Array[Vector2i] = simulation_render_state.mouse_cell_coords
-	var cell_size: int = world_state.cell_size
+	var cell_size: float = world_state.get_cell_size()
 	var sim_view_scale: float = simulation_render_state.simulation_view_scale
 	var sim_view_position: Vector2 = simulation_render_state.simulation_view_position
 	var iter_range: int
@@ -220,8 +221,8 @@ func _render_selection(world_state: WorldState, simulation_render_state: Simulat
 			selected_cell.visible = true
 		else:
 			previous_cell.visible = true
-		var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * float(cell_size) + float(cell_size) / 2.0,
-		float(cell_coords.y) * float(cell_size) + float(cell_size) / 2.0)
+		var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * cell_size + cell_size / 2.0,
+		float(cell_coords.y) * cell_size + cell_size / 2.0)
 		var current_cell_screen_position: Vector2 = cell_simulation_position * sim_view_scale + sim_view_position
 		var cell_screen_size: float = sim_view_scale * cell_size
 		var cell_transform: Transform2D = Transform2D(0.0, current_cell_screen_position)

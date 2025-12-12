@@ -14,7 +14,7 @@ func _ready() -> void:
 	reinitialize_sim()
 
 func frame(_delta: float) -> void:
-	simulation_render_state.update_mouse_cell_coords(get_global_mouse_position(), world_state.cell_size)
+	simulation_render_state.update_mouse_cell_coords(get_global_mouse_position(), world_state.get_cell_size())
 	renderer.render(world_state, simulation_render_state)
 
 func _physics_process(_delta: float) -> void:
@@ -26,18 +26,19 @@ func _physics_process(_delta: float) -> void:
 			real_tps = lerp(real_tps, current_real_tps, 0.1)
 	last_physics_time_usec = physics_frame_start_usec
 	
-	if Globals.is_paused:
+	if Globals.config["is_paused"]:
 		pass
 	else:
-		scheduler.step(Globals.time_step)
+		scheduler.step(Globals.config["time_step"])
 	
 	var physics_frame_end_time_usec: float = Time.get_ticks_usec()
 	var duration_usec: float = physics_frame_end_time_usec - physics_frame_start_usec
 	execution_time_ms = lerp(execution_time_ms, duration_usec / 1000.0, 0.1)
 
 func reinitialize_sim() -> void:
-	world_state = WorldState.new(Globals.default_cell_size, Globals.default_simulation_area)
-	scheduler.setup(world_state)
+	world_state = WorldState.new()
+	world_state.setup(true, Globals.config)
+	scheduler.setup(world_state, Globals.config)
 	renderer.reinitialize_render()
 
 func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
@@ -45,21 +46,14 @@ func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
 	var particle_simulation_position: Vector2 = (mouse_position - simulation_view_position) / simulation_view_scale
 	var particle_velocity: Vector2 = Vector2.ZERO
-	var particle_radius: float = Globals.default_particle_radius
-	var particle_mass: float
-	if type == 0:
-		particle_mass = Globals.default_particle_mass * 1.5
-	elif type == 3:
-		particle_mass = Globals.default_particle_mass * 0.5
-	else:
-		particle_mass = Globals.default_particle_mass
+	var particle_radius: float = world_state.get_particle_radius()
 	if place_25:
 		for y: int in range(-2, 3):
 			for x: int in range(-2, 3):
 				var neighbor_particle_position: Vector2 = particle_simulation_position + Vector2(y * particle_radius * 3.9, x * particle_radius * 3.9)
-				world_state.add_particle(type, neighbor_particle_position, particle_velocity, particle_radius, particle_mass)
+				world_state.add_particle(type, neighbor_particle_position, particle_velocity)
 	else:
-		world_state.add_particle(type, particle_simulation_position, particle_velocity, particle_radius, particle_mass)
+		world_state.add_particle(type, particle_simulation_position, particle_velocity)
 
 func place_wall(type: int) -> void:
 	var cell_coordinates: Vector2i = simulation_render_state.mouse_cell_coords[0]
@@ -83,32 +77,17 @@ func place_pump(type: int) -> void:
 		else:
 			world_state.set_cell_state(pump_coordinates, type + 2)
 
-func print_energy() -> void:
-	var energy_sum: float = 0.0
-	var count: int = world_state.particle_count
-	
-	for particle_id: int in range(count):
-		var mass: float = world_state.particle_masses[particle_id]
-		var velocity: float = world_state.particle_velocities[particle_id].length()
-		var kinetic_energy: float = 0.5 * mass * (velocity ** 2)
-		#var potential_energy: float = mass * gravity * height
-		var total_energy: float = kinetic_energy #+ potential_energy
-		energy_sum += total_energy
-	
-	var temp: float = energy_sum / float(count)
-	print("%.0f" % temp)
-
 func set_simulation_view(render_state_instance: SimulationRenderState) -> void:
 	simulation_render_state = render_state_instance
 
 func reduce_energy() -> void:
-	for particle_id: int in range(world_state.particle_count):
-		world_state.particle_velocities[particle_id] = world_state.particle_velocities[particle_id] * 0.8
+	var coef: float = 0.8
+	world_state.change_velocity(coef)
 
 func delete_particles() -> void:
-	world_state.delete_particles()
+	world_state.clear_particles()
 
 func _on_particle_spawn_timer_timeout() -> void:
-	if Globals.is_paused:
+	if Globals.config["is_paused"]:
 		return
 	world_state.spawn_particles_from_spawners()

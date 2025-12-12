@@ -1,4 +1,4 @@
-class_name WorldState
+class_name WorldStateOLD
 
 var particle_count: int = 0
 var particle_types: PackedByteArray = []

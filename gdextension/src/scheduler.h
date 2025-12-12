@@ -27,8 +27,8 @@ namespace godot {
 		Scheduler();
 		~Scheduler();
 
-		void setup(const Ref<WorldState>& world_state, const Object* globals);
-		void set_globals(const Object* globals);
+		void setup(const Ref<WorldState>& world_state, const Dictionary& config);
+		void set_globals(const Dictionary& config);
 		void step(float delta_t);
 		void first_multithreaded_step(int chunk_iter);
 		void second_multithreaded_step(int chunk_iter);

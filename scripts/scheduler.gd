@@ -1,4 +1,4 @@
-class_name Scheduler
+class_name SchedulerOLD
 
 var movement_handler: MovementHandler = MovementHandler.new()
 var world_state: WorldState
@@ -49,7 +49,7 @@ func _assign_chunks() -> void:
 		var chunk_end: int = current_indx + chunk_size - 1
 		if chunk_end > end_indx:
 			chunk_end = end_indx
-		chunks.append(Chunk.new(current_indx, chunk_end))
+		#chunks.append(Chunk.new(current_indx, chunk_end))
 		chunk_iterations += 1
 		current_indx = chunk_end + 1
 

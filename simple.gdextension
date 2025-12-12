@@ -1,6 +1,6 @@
 [configuration]
 
-entry_symbol = "simple_library_init"
+entry_symbol = "sim_module_init"
 compatibility_minimum = "4.2"
 
 [libraries]

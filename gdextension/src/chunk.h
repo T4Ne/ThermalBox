@@ -49,11 +49,11 @@ namespace godot {
 		
 		void set_velocities(const PackedVector2Array& p_velocities) { velocities = p_velocities; }
 		const PackedVector2Array& get_velocities() { return velocities; }
-		PackedVector2Array& get_velocities_mut() { return positions; }
+		PackedVector2Array& get_velocities_mut() { return velocities; }
 		
 		void set_accelerations(const PackedVector2Array& p_accelerations) { accelerations = p_accelerations; }
 		const PackedVector2Array& get_accelerations() { return accelerations; }
-		PackedVector2Array& get_accelerations_mut() { return positions; }
+		PackedVector2Array& get_accelerations_mut() { return accelerations; }
 	
 	protected:
 		static void _bind_methods();

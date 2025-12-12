@@ -35,12 +35,12 @@ namespace godot {
 		PackedInt32Array cell_particle_ids;
 		PackedInt32Array cell_neighbor_offsets;
 		PackedInt32Array cell_neighbor_ids;
+		PackedInt32Array type_category_map;
 		PackedFloat32Array particle_masses;
-		PackedFloat32Array particle_mass_by_type;
+		Array particle_mass_by_type;
 		PackedVector2Array particle_positions;
 		PackedVector2Array particle_velocities;
 		PackedVector2Array particle_accelerations;
-		std::vector<int> type_category_map;
 
 		enum CellType {
 			EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT,
@@ -57,8 +57,8 @@ namespace godot {
 		WorldState();
 		~WorldState();
 
-		void setup(int size, Vector2i area, bool borders, const Object* globals);
-		void set_globals(const Object* globals);
+		void setup(bool borders, const Dictionary& config);
+		void set_globals(const Dictionary& config);
 		void build_neighbor_offsets();
 		PackedInt32Array get_neighbor_cells(int cell_id) const;
 		void set_cell_state(Vector2i arr_pos, int new_type);
@@ -96,7 +96,7 @@ namespace godot {
 
 		Vector2i get_cell_area() const { return cell_area; };
 
-		const std::vector<int>& get_type_category_map() { return type_category_map; };
+		const PackedInt32Array& get_type_category_map() { return type_category_map; };
 
 		const PackedByteArray& get_particle_types() { return particle_types; };
 

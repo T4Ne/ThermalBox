@@ -42,13 +42,13 @@ namespace godot {
 		MovementHandler();
 		~MovementHandler();
 
-		void setup(const Object* globals);
+		void setup(const Dictionary& config);
 
-		void set_globals(const Object* globals);
+		void set_globals(const Dictionary& config);
 
-		void build_interaction_list(const Object* globals);
+		void build_interaction_list(const Dictionary& config);
 		
-		void first_half_verlet(float time_step, const Ref<WorldState> &world_state, Ref<Chunk> &chunk) const;
+		void first_half_verlet(float time_step, const Ref<WorldState> &world_state, Ref<Chunk> &chunk);
 		
 		void second_half_verlet(float time_step, const Ref<WorldState> &world_state, Ref<Chunk> &chunk);
 		

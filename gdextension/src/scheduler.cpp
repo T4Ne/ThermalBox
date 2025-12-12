@@ -6,9 +6,11 @@
 
 using namespace godot;
 
-void godot::Scheduler::_bind_methods(){
+void Scheduler::_bind_methods(){
 	ClassDB::bind_method(D_METHOD("step"), &Scheduler::step);
 	ClassDB::bind_method(D_METHOD("setup"), &Scheduler::setup);
+	ClassDB::bind_method(D_METHOD("first_multithreaded_step"), &Scheduler::first_multithreaded_step);
+	ClassDB::bind_method(D_METHOD("second_multithreaded_step"), &Scheduler::second_multithreaded_step);
 }
 
 Scheduler::Scheduler() {
@@ -18,14 +20,14 @@ Scheduler::Scheduler() {
 godot::Scheduler::~Scheduler() {
 }
 
-void Scheduler::setup(const Ref<WorldState>& world_state, const Object* globals) {
+void Scheduler::setup(const Ref<WorldState>& world_state, const Dictionary& config) {
 	Scheduler::world_state = world_state;
-	set_globals(globals);
+	set_globals(config);
 }
 
-void Scheduler::set_globals(const Object* globals) {
-	max_chunk_time_usec = globals->get("min_chunk_time_usec");
-	movement_handler->set_globals(globals);
+void Scheduler::set_globals(const Dictionary& config) {
+	max_chunk_time_usec = config["min_chunk_time_usec"];
+	movement_handler->set_globals(config);
 }
 
 void Scheduler::step(float delta_t) {
@@ -36,7 +38,7 @@ void Scheduler::step(float delta_t) {
 	assign_chunks();
 	if (chunk_count > 0) {
 		WorkerThreadPool* pool = WorkerThreadPool::get_singleton();
-		int group_id = pool->add_group_task(Callable(this, "first_multi_threaded_step"), chunk_count);
+		int group_id = pool->add_group_task(Callable(this, "first_multithreaded_step"), chunk_count);
 		pool->wait_for_group_task_completion(group_id);
 		
 		process_chunks();
@@ -46,7 +48,7 @@ void Scheduler::step(float delta_t) {
 		assign_chunks();
 		*/
 
-		group_id = pool->add_group_task(Callable(this, "second_multi_threaded_step"), chunk_count);
+		group_id = pool->add_group_task(Callable(this, "second_multithreaded_step"), chunk_count);
 		pool->wait_for_group_task_completion(group_id);
 		
 		process_chunks();
@@ -66,7 +68,6 @@ void Scheduler::first_multithreaded_step(int chunk_iter) {
 void Scheduler::second_multithreaded_step(int chunk_iter) {
 	Ref<Chunk>& chunk = chunks[chunk_iter];
 	uint64_t start = Time::get_singleton()->get_ticks_usec();
-	prepare_chunk(chunk);
 	movement_handler->second_half_verlet(time_step, world_state, chunk);
 	uint64_t end = Time::get_singleton()->get_ticks_usec();
 	chunk->set_execution_time(end - start);
@@ -75,7 +76,14 @@ void Scheduler::second_multithreaded_step(int chunk_iter) {
 void Scheduler::assign_chunks() {
 	int current_idx = 0;
 	int occup_cell_count = world_state->get_occupied_cell_count();
-	chunk_count = ceil((occup_cell_count + 1) / chunk_size);
+	
+	if (chunk_size > 0) {
+		chunk_count = (int)std::ceil((double)occup_cell_count / (double)chunk_size);
+	}
+	else {
+		chunk_count = 1;
+	}
+	
 	if (chunk_count == 0) chunk_count = 1;
 	
 	if (chunks.size() < chunk_count) {
@@ -171,4 +179,5 @@ void Scheduler::prepare_chunk(Ref<Chunk>& chunk) {
 		}
 	}
 	chunk->resize_buffers(par_count);
+	chunk->set_particle_count(par_count);
 }

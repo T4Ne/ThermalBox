@@ -24,10 +24,10 @@ void WorldState::_bind_methods(){
 	ClassDB::bind_method(D_METHOD("get_type_category_map"), &WorldState::get_type_category_map);
 	ClassDB::bind_method(D_METHOD("get_cell_area"), &WorldState::get_cell_area);
 	ClassDB::bind_method(D_METHOD("change_velocity"), &WorldState::change_velocity);
+	ClassDB::bind_method(D_METHOD("setup"), &WorldState::setup);
 }
 
 WorldState::WorldState() {
-	neighbor_count = std::pow(neighbor_range * 2 + 1, 2);
 	type_category_map = {
 		CAT_NONE, CAT_WALL, CAT_WALL, CAT_WALL, CAT_PUMP, CAT_PUMP,
 		CAT_PUMP, CAT_PUMP, CAT_DIODE, CAT_DIODE, CAT_DIODE, CAT_DIODE,
@@ -38,27 +38,29 @@ WorldState::WorldState() {
 WorldState::~WorldState() {
 }
 
-void WorldState::setup(int size, Vector2i area, bool borders, const Object* globals) {
-	cell_size = size;
-	inverted_cell_size = 1.0 / (double)size;
-	cell_area = area;
-	cell_count = cell_area.x * cell_area.y;
-	cell_types.resize(cell_count);
-	cell_types.fill(CellType::EMPTY);
-	cell_particle_offsets.resize(cell_count + 1);
-	neighbor_range = globals->get("neighbor_range");
-	particle_mass_by_type = globals->get("default_particle_mass_by_type");
-	particle_radius = globals->get("default_particle_radius");
+void WorldState::setup(bool borders, const Dictionary& config) {
+	set_globals(config);
 	if (borders) {
 		build_borders();
 	}
 	build_neighbor_offsets();
 }
 
-void WorldState::set_globals(const Object* globals) {
-	neighbor_range = globals->get("neighbor_range");
-	particle_mass_by_type = globals->get("default_particle_mass_by_type");
-	particle_radius = globals->get("default_particle_radius");
+void WorldState::set_globals(const Dictionary& config) {
+	
+	cell_size = config["default_cell_size"];
+	inverted_cell_size = 1.0 / (double)cell_size;
+	cell_area = config["default_simulation_area"];
+	cell_count = cell_area.x * cell_area.y;
+	
+	cell_types.resize(cell_count);
+	cell_types.fill((uint8_t)EMPTY);
+	cell_particle_offsets.resize(cell_count + 1);
+	
+	neighbor_range = config["neighbor_range"];
+	neighbor_count = std::pow(neighbor_range * 2 + 1, 2);
+	particle_mass_by_type = config["default_particle_mass_by_type"];
+	particle_radius = config["default_particle_radius"];
 }
 
 void WorldState::build_neighbor_offsets() {
@@ -224,6 +226,7 @@ void WorldState::build_cell_map() {
 }
 
 void WorldState::add_particle(int type, Vector2 position, Vector2 velocity) {
+
 	int free_id = particle_positions.find(Vector2(-1.0, -1.0));
 	if (free_id != -1) {
 		particle_count++;
@@ -303,7 +306,7 @@ void WorldState::spawn_particles_from_spawners() {
 void WorldState::change_velocity(float coef) {
 	Vector2* vel_ptr = particle_velocities.ptrw();
 	for (int par_id = 0; par_id < particle_count; par_id++) {
-		vel_ptr[par_id] *= coef
+		vel_ptr[par_id] *= coef;
 	}
 }
 

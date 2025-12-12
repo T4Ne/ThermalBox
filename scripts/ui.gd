@@ -20,13 +20,13 @@ var selected_item: Items = Items.REMOVEWALL
 var place_25: bool = false
 
 func _ready() -> void:
-	var simulation_true_size: Vector2i = Globals.default_cell_size * Globals.default_simulation_area
+	var simulation_true_size: Vector2i = Globals.config["default_cell_size"] * Globals.config["default_simulation_area"]
 	simulation_render_state = SimulationRenderState.new(simulation_true_size, edge_offset)
 	main_box.set_simulation_view(simulation_render_state)
 
 func _process(delta: float) -> void:
 	_update_simulation_view_info()
-	display_info(main_box.real_tps, main_box.world_state.particle_count)
+	display_info(main_box.real_tps, main_box.world_state.get_particle_count())
 	main_box.frame(delta)
 
 func _update_simulation_view_info() -> void:
@@ -37,8 +37,8 @@ func set_sim_view(render_state_instance: SimulationRenderState) -> void:
 	simulation_render_state = render_state_instance
 
 func toggle_pause() -> void:
-	Globals.is_paused = not Globals.is_paused
-	if Globals.is_paused:
+	Globals.config["is_paused"] = not Globals.config["is_paused"]
+	if Globals.config["is_paused"]:
 		Pause.text = "Resume"
 	else:
 		Pause.text = "Pause"
@@ -99,8 +99,8 @@ func _on_reset_pressed() -> void:
 	main_box.reinitialize_sim()
 
 func _on_gravity_pressed() -> void:
-	Globals.gravity_is_on = not Globals.gravity_is_on
-	if Globals.gravity_is_on:
+	Globals.config["is_gravity_on"] = not Globals.config["is_gravity_on"]
+	if Globals.config["is_gravity_on"]:
 		Gravity.text = "Gravity Off"
 	else:
 		Gravity.text = "Gravity On"

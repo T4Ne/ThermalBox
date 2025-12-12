@@ -1,4 +1,4 @@
-class_name MovementHandler
+class_name MovementHandlerOLD
 
 var max_speed: float = Globals.lightspeed
 var max_speed_sq: float = max_speed ** 2
