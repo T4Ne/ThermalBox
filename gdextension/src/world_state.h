@@ -70,6 +70,7 @@ namespace godot {
 		void delete_particle(int id);
 		void delete_particles_by_cell(Vector2i arr_pos);
 		void spawn_particles_from_spawners();
+		void change_velocity(float coef);
 
 		int get_particle_count() const { return particle_count; };
 

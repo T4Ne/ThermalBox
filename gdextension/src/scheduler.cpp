@@ -7,6 +7,8 @@
 using namespace godot;
 
 void godot::Scheduler::_bind_methods(){
+	ClassDB::bind_method(D_METHOD("step"), &Scheduler::step);
+	ClassDB::bind_method(D_METHOD("setup"), &Scheduler::setup);
 }
 
 Scheduler::Scheduler() {
@@ -23,6 +25,7 @@ void Scheduler::setup(const Ref<WorldState>& world_state, const Object* globals)
 
 void Scheduler::set_globals(const Object* globals) {
 	max_chunk_time_usec = globals->get("min_chunk_time_usec");
+	movement_handler->set_globals(globals);
 }
 
 void Scheduler::step(float delta_t) {

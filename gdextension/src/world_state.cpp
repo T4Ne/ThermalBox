@@ -6,6 +6,24 @@
 using namespace godot;
 
 void WorldState::_bind_methods(){
+	ClassDB::bind_method(D_METHOD("get_particle_count"), &WorldState::get_particle_count);
+	ClassDB::bind_method(D_METHOD("get_cell_size"), &WorldState::get_cell_size);
+	ClassDB::bind_method(D_METHOD("add_particle"), &WorldState::add_particle);
+	ClassDB::bind_method(D_METHOD("set_cell_state"), &WorldState::set_cell_state);
+	ClassDB::bind_method(D_METHOD("clear_particles"), &WorldState::clear_particles);
+	ClassDB::bind_method(D_METHOD("spawn_particles_from_spawners"), &WorldState::spawn_particles_from_spawners);
+	ClassDB::bind_method(D_METHOD("get_particle_positions"), &WorldState::get_particle_positions);
+	ClassDB::bind_method(D_METHOD("get_particle_radius"), &WorldState::get_particle_radius);
+	ClassDB::bind_method(D_METHOD("get_particle_types"), &WorldState::get_particle_types);
+	ClassDB::bind_method(D_METHOD("get_wall_count"), &WorldState::get_wall_count);
+	ClassDB::bind_method(D_METHOD("get_pump_count"), &WorldState::get_pump_count);
+	ClassDB::bind_method(D_METHOD("get_diode_count"), &WorldState::get_diode_count);
+	ClassDB::bind_method(D_METHOD("get_spawner_count"), &WorldState::get_spawner_count);
+	ClassDB::bind_method(D_METHOD("get_cell_count"), &WorldState::get_cell_count);
+	ClassDB::bind_method(D_METHOD("get_cell_types"), &WorldState::get_cell_types);
+	ClassDB::bind_method(D_METHOD("get_type_category_map"), &WorldState::get_type_category_map);
+	ClassDB::bind_method(D_METHOD("get_cell_area"), &WorldState::get_cell_area);
+	ClassDB::bind_method(D_METHOD("change_velocity"), &WorldState::change_velocity);
 }
 
 WorldState::WorldState() {
@@ -279,6 +297,13 @@ void WorldState::spawn_particles_from_spawners() {
 		Vector2 vel = Vector2(cos(angle), sin(angle)) * 5.0;
 
 		add_particle(par_type, pos, vel);
+	}
+}
+
+void WorldState::change_velocity(float coef) {
+	Vector2* vel_ptr = particle_velocities.ptrw();
+	for (int par_id = 0; par_id < particle_count; par_id++) {
+		vel_ptr[par_id] *= coef
 	}
 }
 
