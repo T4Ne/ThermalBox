@@ -99,8 +99,8 @@ func _on_reset_pressed() -> void:
 	main_box.reinitialize_sim()
 
 func _on_gravity_pressed() -> void:
-	Globals.config["is_gravity_on"] = not Globals.config["is_gravity_on"]
-	if Globals.config["is_gravity_on"]:
+	Globals.config["gravity_is_on"] = not Globals.config["gravity_is_on"]
+	if Globals.config["gravity_is_on"]:
 		Gravity.text = "Gravity Off"
 	else:
 		Gravity.text = "Gravity On"

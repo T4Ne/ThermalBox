@@ -41,6 +41,7 @@ namespace godot {
 		PackedVector2Array particle_positions;
 		PackedVector2Array particle_velocities;
 		PackedVector2Array particle_accelerations;
+		std::vector<int> deleted_particles;
 
 		enum CellType {
 			EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT,

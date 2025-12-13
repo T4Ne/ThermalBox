@@ -222,6 +222,7 @@ Vector2 MovementHandler::interact_with_particles(int id, const Vector2 position,
 				else {
 					float b_div_d = param_1 / dist_r;
 					force = param_0 * (pow(b_div_d, 4) - 2 * pow(b_div_d, 2));
+					force = UtilityFunctions::maxf(force, -max_acceleration * mass);
 				}
 			}
 			else {
@@ -230,6 +231,7 @@ Vector2 MovementHandler::interact_with_particles(int id, const Vector2 position,
 				}
 				else {
 					force = param_0 * (param_1 / dist_r - 1.0);
+					force = UtilityFunctions::maxf(force, -max_acceleration * mass);
 				}
 			}
 			accumulated_acceleration += other_to_self_u * (force / mass);
@@ -279,7 +281,7 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 		int cell_category = type_cat_ptr[cell_type];
 		
 		if (cell_category == 3) { // cell is a diode
-			if (dist_to_wall_sq < 0.00001) continue; // spooky floating point comparison (if the particle is in the wall, the distance_sq should be zero, but you never know)
+			if (dist_to_wall_sq == 0.0f) continue; // spooky floating point comparison (if the particle is in the wall, the distance_sq should be zero, but you never know)
 			
 			Vector2 diode_dir = Vector2(0.0, 0.0);
 			switch (cell_type) {
@@ -296,19 +298,19 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 				diode_dir = Vector2(1.0, 0.0);
 				break;
 			}
-			if (wall_to_particle.dot(diode_dir) < 0.00001) continue; // particle is not against the diode. Also again, spooky floating point comparison
+			if (wall_to_particle.dot(diode_dir) <= 0.0f) continue; // particle is not against the diode.
 
 			Vector2 wall_to_particle_u = wall_to_particle.normalized();
 			float normal_velocity_mag = wall_to_particle_u.dot(velocity);
 			
-			if (normal_velocity_mag > 0.0) continue; // particle is already moving away
+			if (normal_velocity_mag > 0.0f) continue; // particle is already moving away
 
 			float penetration = particle_radius - sqrt(dist_to_wall_sq);
 			new_position += wall_to_particle_u * penetration;
 			accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_u; // mirror normal velocity component to diode with acceleration
 		}
 		else if (cell_category == 2) { // cell is a pump
-			if (dist_to_wall_sq > 0.00001) continue;
+			if (dist_to_wall_sq != 0.0f) continue;
 
 			Vector2 pump_dir = Vector2(0.0, 0.0);
 			switch (cell_type) {
@@ -333,7 +335,7 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 			was_in_pump = true;
 		}
 		else if (cell_category == 1) { // cell is a wall
-			if (dist_to_wall_sq < 0.00001) continue; // particle is inside wall
+			if (dist_to_wall_sq == 0.0f) continue; // particle is inside wall
 
 			Vector2 wall_to_particle_u = wall_to_particle.normalized();
 			float normal_velocity_mag = wall_to_particle_u.dot(velocity);
@@ -365,6 +367,12 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 PackedVector2Array MovementHandler::calculate_collisions(float time_step, int id, const Vector2 position, const Vector2 velocity, const Ref<WorldState>& world_state) {
 	int cell_x = (int)std::floor(position.x * world_state->get_inverted_cell_size());
 	int cell_y = (int)std::floor(position.y * world_state->get_inverted_cell_size());
+	Vector2i cell_area = world_state->get_cell_area();
+	if (cell_x < 0 || cell_x >= cell_area.x || cell_y < 0 || cell_y >= cell_area.y) {
+		PackedVector2Array ret_values = { Vector2(0.0, 0.0), position };
+		return ret_values;
+	}
+	 
 	int cell_id = cell_x + cell_y * world_state->get_cell_area().x;
 	
 	int neighbor_count = world_state->get_neighbor_count();
@@ -377,8 +385,8 @@ PackedVector2Array MovementHandler::calculate_collisions(float time_step, int id
 	new_acceleration += new_values[0];
 	Vector2 new_position = new_values[1];
 
-	new_acceleration += interact_with_particles(id, new_position, neighbor_cells, world_state);
+	new_acceleration += interact_with_particles(id, position, neighbor_cells, world_state);
+	
 	PackedVector2Array ret_values = { new_acceleration, new_position };
-
 	return ret_values;
 }

@@ -174,12 +174,14 @@ void WorldState::build_cell_map() {
 		if (cell_x < 0 || cell_x >= cell_area.x || cell_y < 0 || cell_y >= cell_area.y) {
 			particle_count--;
 			positions_ptr[par_id] = Vector2(-1.0, -1.0);
+			deleted_particles.push_back(par_id);
 			continue;
 		}
 		int cell_id = cell_x + cell_y * cell_area.x;
 		if (cell_types_ptr[cell_id] == DRAIN) {
 			particle_count--;
 			positions_ptr[par_id] = Vector2(-1.0, -1.0);
+			deleted_particles.push_back(par_id);
 			continue;
 		}
 		if (cell_types_ptr[cell_id] == SPAWNERNONE) {
@@ -227,14 +229,15 @@ void WorldState::build_cell_map() {
 
 void WorldState::add_particle(int type, Vector2 position, Vector2 velocity) {
 
-	int free_id = particle_positions.find(Vector2(-1.0, -1.0));
-	if (free_id != -1) {
+	if (!deleted_particles.empty()) {
+		int par_id = deleted_particles.back();
+		deleted_particles.pop_back();
 		particle_count++;
-		particle_types[free_id] = (uint8_t) type;
-		particle_positions[free_id] = position;
-		particle_velocities[free_id] = velocity;
-		particle_accelerations[free_id] = Vector2(0.0, 0.0);
-		particle_masses[free_id] = particle_mass_by_type[type];
+		particle_types[par_id] = (uint8_t) type;
+		particle_positions[par_id] = position;
+		particle_velocities[par_id] = velocity;
+		particle_accelerations[par_id] = Vector2(0.0, 0.0);
+		particle_masses[par_id] = particle_mass_by_type[type];
 	}
 	else {
 		particle_count++;
@@ -253,12 +256,14 @@ void WorldState::clear_particles() {
 	particle_velocities.clear();
 	particle_accelerations.clear();
 	particle_masses.clear();
+	deleted_particles.clear();
 }
 
 void WorldState::delete_particle(int id) {
 	if (id >= 0 && id < particle_positions.size()) {
 		particle_count--;
 		particle_positions[id] = Vector2(-1.0, -1.0);
+		deleted_particles.push_back(id);
 	}
 }
 
@@ -271,6 +276,7 @@ void WorldState::delete_particles_by_cell(Vector2i arr_pos) {
 	for (int i = start; i < end; i++) {
 		int par_id = cell_particle_ids[i];
 		particle_positions[par_id] = Vector2(-1.0, -1.0);
+		deleted_particles.push_back(par_id);
 	}
 }
 

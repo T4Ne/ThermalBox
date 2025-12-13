@@ -8,6 +8,7 @@ using namespace godot;
 
 void Scheduler::_bind_methods(){
 	ClassDB::bind_method(D_METHOD("step"), &Scheduler::step);
+	ClassDB::bind_method(D_METHOD("step_n_times"), &Scheduler::step_n_times);
 	ClassDB::bind_method(D_METHOD("setup"), &Scheduler::setup);
 	ClassDB::bind_method(D_METHOD("first_multithreaded_step"), &Scheduler::first_multithreaded_step);
 	ClassDB::bind_method(D_METHOD("second_multithreaded_step"), &Scheduler::second_multithreaded_step);
@@ -17,7 +18,7 @@ Scheduler::Scheduler() {
 	movement_handler.instantiate();
 }
 
-godot::Scheduler::~Scheduler() {
+Scheduler::~Scheduler() {
 }
 
 void Scheduler::setup(const Ref<WorldState>& world_state, const Dictionary& config) {
@@ -30,10 +31,16 @@ void Scheduler::set_globals(const Dictionary& config) {
 	movement_handler->set_globals(config);
 }
 
+void Scheduler::step_n_times(float delta_t, int n) {
+	for (int i{ 0 }; i < n; i++) {
+		step(delta_t);
+	}
+}
+
 void Scheduler::step(float delta_t) {
-	if (world_state->get_particle_count() <= 0) return;
 	time_step = delta_t;
 	world_state->build_cell_map();
+	if (world_state->get_particle_count() <= 0) return;
 	update_chunk_size();
 	assign_chunks();
 	if (chunk_count > 0) {
@@ -42,11 +49,9 @@ void Scheduler::step(float delta_t) {
 		pool->wait_for_group_task_completion(group_id);
 		
 		process_chunks();
-		/* Experimental: not mapping particles to new cells in the middle of a step. 
-		world_state->build_cell_map();
-		update_chunk_size();
+		// world_state->build_cell_map();
+		// if (world_state->get_particle_count() <= 0) return;
 		assign_chunks();
-		*/
 
 		group_id = pool->add_group_task(Callable(this, "second_multithreaded_step"), chunk_count);
 		pool->wait_for_group_task_completion(group_id);
@@ -68,6 +73,7 @@ void Scheduler::first_multithreaded_step(int chunk_iter) {
 void Scheduler::second_multithreaded_step(int chunk_iter) {
 	Ref<Chunk>& chunk = chunks[chunk_iter];
 	uint64_t start = Time::get_singleton()->get_ticks_usec();
+	prepare_chunk(chunk);
 	movement_handler->second_half_verlet(time_step, world_state, chunk);
 	uint64_t end = Time::get_singleton()->get_ticks_usec();
 	chunk->set_execution_time(end - start);

@@ -29,7 +29,7 @@ func _physics_process(_delta: float) -> void:
 	if Globals.config["is_paused"]:
 		pass
 	else:
-		scheduler.step(Globals.config["time_step"])
+		scheduler.step_n_times(Globals.config["time_step"], 2)
 	
 	var physics_frame_end_time_usec: float = Time.get_ticks_usec()
 	var duration_usec: float = physics_frame_end_time_usec - physics_frame_start_usec
