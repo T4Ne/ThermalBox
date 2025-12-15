@@ -16,7 +16,8 @@ void Chunk::setup(int start, int end) {
 	positions.clear();
 	velocities.clear();
 	accelerations.clear();
-
+	conductor_ids.clear();
+	conductor_energy_deltas.clear();
 }
 
 void Chunk::resize_buffers(int size) {
@@ -27,6 +28,11 @@ void Chunk::resize_buffers(int size) {
 
 void Chunk::push_particle_id(int id) {
 	particle_ids.append(id);
+}
+
+void Chunk::push_conductor_info(int id, float delta) {
+	conductor_ids.append(id);
+	conductor_energy_deltas.append(delta);
 }
 
 void Chunk::_bind_methods(){

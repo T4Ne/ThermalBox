@@ -21,6 +21,7 @@ namespace godot {
 		int pump_count{};
 		int diode_count{};
 		int spawner_count{};
+		int conductor_count{};
 		int occupied_cell_count{};
 		int neighbor_range{};
 		int neighbor_count{};
@@ -36,6 +37,7 @@ namespace godot {
 		PackedInt32Array cell_neighbor_offsets;
 		PackedInt32Array cell_neighbor_ids;
 		PackedInt32Array type_category_map;
+		PackedFloat32Array conductor_energies;
 		PackedFloat32Array particle_masses;
 		Array particle_mass_by_type;
 		PackedVector2Array particle_positions;
@@ -45,10 +47,10 @@ namespace godot {
 
 		enum CellType {
 			EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT,
-			DIODEUP, DIODEDOWN, DIODELEFT, DIODERIGHT, SPAWNERNONE, SPAWNER1, SPAWNER2, SPAWNER3, SPAWNER4, DRAIN
+			DIODEUP, DIODEDOWN, DIODELEFT, DIODERIGHT, SPAWNERNONE, SPAWNER1, SPAWNER2, SPAWNER3, SPAWNER4, DRAIN, CONDUCTOR
 		};
 		enum CountCategory {
-			CAT_NONE, CAT_WALL, CAT_PUMP, CAT_DIODE, CAT_SPAWNER
+			CAT_NONE, CAT_WALL, CAT_PUMP, CAT_DIODE, CAT_SPAWNER, CAT_CONDUCTOR
 		};
 	
 	protected:
@@ -89,6 +91,8 @@ namespace godot {
 
 		int get_neighbor_count() const { return neighbor_count; };
 
+		int get_conductor_count() const { return conductor_count; };
+
 		float get_cell_size() const { return cell_size; };
 
 		float get_particle_radius() const { return particle_radius; };
@@ -126,6 +130,9 @@ namespace godot {
 		const PackedVector2Array& get_particle_accelerations() { return particle_accelerations; };
 		PackedVector2Array& get_particle_accelerations_mut() { return particle_accelerations; };
 		void set_particle_acceleration_by_id(int id, Vector2 acceleration);
+
+		const PackedFloat32Array& get_conductor_energies() { return conductor_energies; };
+		PackedFloat32Array& get_conductor_energies_mut() { return conductor_energies; };
 	};
 } // namespace godot
 

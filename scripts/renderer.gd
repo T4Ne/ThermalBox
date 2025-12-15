@@ -16,6 +16,9 @@ var diode_quad: QuadMesh = QuadMesh.new()
 var mm_spawners_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
 var mm_spawners: MultiMesh = MultiMesh.new()
 var spawner_quad: QuadMesh = QuadMesh.new()
+var mm_conductors_instance: MultiMeshInstance2D = MultiMeshInstance2D.new()
+var mm_conductors: MultiMesh = MultiMesh.new()
+var conductor_quad: QuadMesh = QuadMesh.new()
 @onready var simulation_view_background: ColorRect = get_node("SimulationView")
 @onready var selected_cell: Sprite2D = get_node("SelectedCell")
 @onready var previous_cell: Sprite2D = get_node("PreviousCell")
@@ -24,12 +27,14 @@ var spawner_quad: QuadMesh = QuadMesh.new()
 @onready var wall_texture: Texture2D = preload("res://resources/wall.png")
 @onready var diode_texture: Texture2D = preload("res://resources/diode.png")
 @onready var spawner_texture: Texture2D = preload("res://resources/void.png")
+@onready var conductor_texture: Texture2D = preload("res://resources/conductor.png")
 
 func reinitialize_render() -> void:
 	_set_up_meshes(mm_walls_instance, mm_walls, wall_quad, wall_texture)
 	_set_up_meshes(mm_pumps_instace, mm_pumps, pump_quad, pump_texture)
 	_set_up_meshes(mm_diodes_instance, mm_diodes, diode_quad, diode_texture)
 	_set_up_meshes(mm_spawners_instance, mm_spawners, spawner_quad, spawner_texture)
+	_set_up_meshes(mm_conductors_instance, mm_conductors, conductor_quad, conductor_texture)
 	_set_up_meshes(mm_particles_instance, mm_particles, particle_quad, particle_texture)
 
 func _set_up_meshes(mm_instance: MultiMeshInstance2D, mm: MultiMesh, quad: QuadMesh, texture: Texture2D) -> void:
@@ -102,6 +107,7 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 	var pump_count: int = world_state.get_pump_count()
 	var diode_count: int = world_state.get_diode_count()
 	var spawner_count: int = world_state.get_spawner_count()
+	var conductor_count: int = world_state.get_conductor_count()
 	if mm_walls.instance_count != wall_count:
 		mm_walls.instance_count = wall_count
 	if mm_pumps.instance_count != pump_count:
@@ -110,20 +116,24 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 		mm_diodes.instance_count = diode_count
 	if mm_spawners.instance_count != spawner_count:
 		mm_spawners.instance_count = spawner_count
+	if mm_conductors.instance_count != conductor_count:
+		mm_conductors.instance_count = conductor_count
 	var current_wall_indx: int = 0
 	var current_pump_indx: int = 0
 	var current_diode_indx: int = 0
 	var current_spawner_indx: int = 0
+	var current_conductor_indx: int = 0
 	var cell_count: int = world_state.get_cell_count()
 	var cell_types: PackedByteArray = world_state.get_cell_types()
 	var cell_categories: PackedInt32Array = world_state.get_type_category_map()
+	var conductor_energies: PackedFloat32Array = world_state.get_conductor_energies()
 	var cell_area: Vector2i = world_state.get_cell_area()
 	var cell_size: float = world_state.get_cell_size()
 	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
 	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
 	
 	for cell_id: int in range(cell_count):
-		if not cell_types[cell_id]:
+		if cell_types[cell_id] == 0:
 			continue
 		var cell_array_coordinates: Vector2i = Vector2i(cell_id % cell_area.x, cell_id / cell_area.x)
 		var cell_simulation_position: Vector2 = Vector2(float(cell_array_coordinates.x) * cell_size + cell_size / 2.0, 
@@ -138,61 +148,65 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 		var cell_type: int = cell_types[cell_id]
 		var cell_category: int = cell_categories[cell_type]
 		
-		if cell_category == 4:
-			mm_spawners.set_instance_transform_2d(current_spawner_indx, cell_transform)
-			match cell_type:
-				12:
-					mm_spawners.set_instance_color(current_spawner_indx, Color("ffffff"))
-				13:
-					mm_spawners.set_instance_color(current_spawner_indx, Color("#A23A3A"))
-				14:
-					mm_spawners.set_instance_color(current_spawner_indx, Color("#1F6B2C"))
-				15:
-					mm_spawners.set_instance_color(current_spawner_indx, Color("#2E5D9E"))
-				16:
-					mm_spawners.set_instance_color(current_spawner_indx, Color("#555555"))
-				17:
-					mm_spawners.set_instance_color(current_spawner_indx, Color("202020"))
-			current_spawner_indx += 1
-		
-		elif cell_category == 3:
-			match cell_type:
-				8:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(270), Vector2(0.0, 0.0))
-				9:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(90), Vector2(0.0, 0.0))
-				10:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(180), Vector2(0.0, 0.0))
-				11:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
-			mm_diodes.set_instance_transform_2d(current_diode_indx, cell_transform)
-			mm_diodes.set_instance_color(current_diode_indx, Color("303030"))
-			current_diode_indx += 1
-		
-		elif cell_category == 2:
-			match cell_type:
-				4:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(270), Vector2(0.0, 0.0))
-				5:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(90), Vector2(0.0, 0.0))
-				6:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(180), Vector2(0.0, 0.0))
-				7:
-					cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
-			mm_pumps.set_instance_transform_2d(current_pump_indx, cell_transform)
-			mm_pumps.set_instance_color(current_pump_indx, Color("bbbb00"))
-			current_pump_indx += 1
-		
-		elif cell_category == 1:
-			mm_walls.set_instance_transform_2d(current_wall_indx, cell_transform)
-			match cell_type:
-				1:
-					mm_walls.set_instance_color(current_wall_indx, Color("303030"))
-				2:
-					mm_walls.set_instance_color(current_wall_indx, Color("303080"))
-				3:
-					mm_walls.set_instance_color(current_wall_indx, Color("803030"))
-			current_wall_indx += 1
+		match cell_category:
+			5:
+				mm_conductors.set_instance_transform_2d(current_conductor_indx, cell_transform)
+				var conductor_temp: float = conductor_energies[cell_id]
+				var red: float = min((48 + 0.2 * conductor_temp) / 255, 255)
+				mm_conductors.set_instance_color(current_conductor_indx, Color(red, 0.18, 0.18))
+				current_conductor_indx += 1
+			4:
+				mm_spawners.set_instance_transform_2d(current_spawner_indx, cell_transform)
+				match cell_type:
+					12:
+						mm_spawners.set_instance_color(current_spawner_indx, Color("ffffff"))
+					13:
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#A23A3A"))
+					14:
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#1F6B2C"))
+					15:
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#2E5D9E"))
+					16:
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#555555"))
+					17:
+						mm_spawners.set_instance_color(current_spawner_indx, Color("202020"))
+				current_spawner_indx += 1
+			3:
+				match cell_type:
+					8:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(270), Vector2(0.0, 0.0))
+					9:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(90), Vector2(0.0, 0.0))
+					10:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(180), Vector2(0.0, 0.0))
+					11:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
+				mm_diodes.set_instance_transform_2d(current_diode_indx, cell_transform)
+				mm_diodes.set_instance_color(current_diode_indx, Color("303030"))
+				current_diode_indx += 1
+			2:
+				match cell_type:
+					4:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(270), Vector2(0.0, 0.0))
+					5:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(90), Vector2(0.0, 0.0))
+					6:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(180), Vector2(0.0, 0.0))
+					7:
+						cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
+				mm_pumps.set_instance_transform_2d(current_pump_indx, cell_transform)
+				mm_pumps.set_instance_color(current_pump_indx, Color("bbbb00"))
+				current_pump_indx += 1
+			1:
+				mm_walls.set_instance_transform_2d(current_wall_indx, cell_transform)
+				match cell_type:
+					1:
+						mm_walls.set_instance_color(current_wall_indx, Color("303030"))
+					2:
+						mm_walls.set_instance_color(current_wall_indx, Color("303080"))
+					3:
+						mm_walls.set_instance_color(current_wall_indx, Color("803030"))
+				current_wall_indx += 1
 
 func _render_selection(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
 	var mouse_cell_coords: Array[Vector2i] = simulation_render_state.mouse_cell_coords

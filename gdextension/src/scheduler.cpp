@@ -137,9 +137,11 @@ void Scheduler::process_chunks() {
 	PackedVector2Array& world_positions = world_state->get_particle_positions_mut();
 	PackedVector2Array& world_velocities = world_state->get_particle_velocities_mut();
 	PackedVector2Array& world_accelerations = world_state->get_particle_accelerations_mut();
+	PackedFloat32Array& world_conductor_energies = world_state->get_conductor_energies_mut();
 	Vector2* world_pos_ptr = world_positions.ptrw();
 	Vector2* world_vel_ptr = world_velocities.ptrw();
 	Vector2* world_accel_ptr = world_accelerations.ptrw();
+	float* world_cond_energ_ptr = world_conductor_energies.ptrw();
 
 	for (int chunk_idx = 0; chunk_idx < chunks.size(); chunk_idx++) {
 		Ref<Chunk>& chunk = chunks[chunk_idx];
@@ -149,16 +151,29 @@ void Scheduler::process_chunks() {
 		const PackedVector2Array& chunk_positions = chunk->get_positions();
 		const PackedVector2Array& chunk_velocities = chunk->get_velocities();
 		const PackedVector2Array& chunk_accelerations = chunk->get_accelerations();
+		const PackedInt32Array& chunk_conductor_ids = chunk->get_conductor_ids();
+		const PackedFloat32Array& chunk_conductor_energies = chunk->get_conductor_energies();
 		const int32_t* chunk_ids_ptr = chunk_ids.ptr();
 		const Vector2* chunk_pos_ptr = chunk_positions.ptr();
 		const Vector2* chunk_vel_ptr = chunk_velocities.ptr();
 		const Vector2* chunk_accel_ptr = chunk_accelerations.ptr();
+		const int32_t* chunk_cond_ids_ptr = chunk_conductor_ids.ptr();
+		const float* chunk_cond_energ_ptr = chunk_conductor_energies.ptr();
 		
 		for (int par_idx = 0; par_idx < chunk_ids.size(); par_idx++) {
 			int par_id = chunk_ids_ptr[par_idx];
 			world_pos_ptr[par_id] = chunk_pos_ptr[par_idx];
 			world_vel_ptr[par_id] = chunk_vel_ptr[par_idx];
 			world_accel_ptr[par_id] = chunk_accel_ptr[par_idx];
+		}
+
+		for (int i{ 0 }; i < chunk_conductor_ids.size(); i++) {
+			int cell_id = chunk_cond_ids_ptr[i];
+			float new_conductor_energy = world_cond_energ_ptr[cell_id] + chunk_cond_energ_ptr[i];
+			if (new_conductor_energy < 0.0f) {
+				new_conductor_energy = 0.0f;
+			}
+			world_cond_energ_ptr[cell_id] = new_conductor_energy;
 		}
 	}
 }

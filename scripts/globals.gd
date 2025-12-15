@@ -5,7 +5,7 @@ var config: Dictionary = {
 	"gravity_is_on" : true,
 	"is_paused" : false,
 	"default_cell_size" : 10.0,
-	"default_simulation_area" : Vector2i(40, 30),
+	"default_simulation_area" : Vector2i(60, 40),
 	"default_particle_radius" : 2.5,
 	"time_step" : 0.008,
 	"max_chunk_time_usec" : 2500.0,
@@ -27,3 +27,4 @@ func update_dependencies() -> void:
 	config["max_accel"] = 2.0 * config["max_speed"] / config["time_step"]
 	config["strong_repul"] = [-1000.0, config["interaction_range_r"]]
 	config["weak_repul"] = [-500.0, config["interaction_range_r"]]
+	Vector2(0,0).normalized()

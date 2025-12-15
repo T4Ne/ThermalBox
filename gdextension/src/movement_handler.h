@@ -54,9 +54,9 @@ namespace godot {
 		
 		Vector2 interact_with_particles(int id, const Vector2 position, const PackedInt32Array &neighbor_cells, const Ref<WorldState> &world_state);
 		
-		PackedVector2Array collide_with_walls(float time_step, const Vector2 position, const Vector2 velocity, const PackedInt32Array& neighbor_cells, const Ref<WorldState>& world_state);
+		PackedVector2Array collide_with_walls(int id, float time_step, const Vector2 position, const Vector2 velocity, const PackedInt32Array& neighbor_cells, const Ref<WorldState>& world_state, const Ref<Chunk>& chunk);
 		
-		PackedVector2Array calculate_collisions(float time_step, int id, const Vector2 position, const Vector2 velocity, const Ref<WorldState>& world_state);
+		PackedVector2Array calculate_collisions(float time_step, int id, const Vector2 position, const Vector2 velocity, const Ref<WorldState>& world_state, const Ref<Chunk>& chunk);
 	};
 } // namespace godot
 

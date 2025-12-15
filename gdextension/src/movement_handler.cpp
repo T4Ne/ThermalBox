@@ -152,7 +152,7 @@ void MovementHandler::second_half_verlet(float time_step, const Ref<WorldState>&
 		const Vector2 old_velocity = old_vel_ptr[par_id];
 
 		// Velocity verlet step 3: full step acceleration (with position offset from collisions)
-		PackedVector2Array collision_values = calculate_collisions(time_step, par_id, old_position, old_velocity, world_state);
+		PackedVector2Array collision_values = calculate_collisions(time_step, par_id, old_position, old_velocity, world_state, chunk);
 		Vector2 full_step_acceleration = collision_values[0];
 		Vector2 updated_full_step_position = collision_values[1];
 
@@ -243,46 +243,81 @@ Vector2 MovementHandler::interact_with_particles(int id, const Vector2 position,
 	return accumulated_acceleration;
 }
 
-PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Vector2 position, const Vector2 velocity, const PackedInt32Array& neighbor_cells, const Ref<WorldState>& world_state) {
+PackedVector2Array MovementHandler::collide_with_walls(int id, float time_step, const Vector2 position, const Vector2 velocity, const PackedInt32Array& neighbor_cells, const Ref<WorldState>& world_state, const Ref<Chunk>& chunk) {
 	Vector2 accumulated_acceleration = Vector2(0.0, 0.0);
 	Vector2 new_position = position;
 	float cell_side_len = world_state->get_cell_size();
 	float particle_radius = world_state->get_particle_radius() * 1.2; // magic number to increase wall interaction range so the collisions look nicer
 	float particle_radius_sq = pow(particle_radius, 2);
 	const PackedByteArray& cell_types = world_state->get_cell_types();
-	const uint8_t* types_ptr = cell_types.ptr();
-	const Vector2i cell_area = world_state->get_cell_area();
 	const PackedInt32Array& type_category_map = world_state->get_type_category_map();
+	const PackedFloat32Array& conduc_energies = world_state->get_conductor_energies();
+	const PackedFloat32Array& particle_masses = world_state->get_particle_masses();
+	const Vector2i cell_area = world_state->get_cell_area();
+	const uint8_t* types_ptr = cell_types.ptr();
 	const int32_t* type_cat_ptr = type_category_map.ptr();
-	bool was_in_pump = false;
 	const int32_t* neighbor_ptr = neighbor_cells.ptr();
 	const int* iter_order_ptr = cell_iteration_order.data();
+	bool was_in_pump = false;
 
-	for (int neighbor_idx = 0; neighbor_idx < neighbor_cells.size(); neighbor_idx++) {
-		int iter_idx = iter_order_ptr[neighbor_idx];
+	int center_cell_id = neighbor_ptr[4]; // NOTE: will not work for neighbor ranges over 1.
+
+	if (center_cell_id >= 0) { // Checking center cell to see if it's a pump
+		int center_type = types_ptr[center_cell_id];
+		if (center_type != 0) {
+			int center_cat = type_cat_ptr[center_type];
+			if (center_cat == 2) {
+				Vector2 pump_dir = Vector2(0.0, 0.0);
+				switch (center_type) {
+				case 4: // pump up
+					pump_dir = Vector2(0.0, -1.0);
+					break;
+				case 5: // pump down
+					pump_dir = Vector2(0.0, 1.0);
+					break;
+				case 6: // pump left
+					pump_dir = Vector2(-1.0, 0.0);
+					break;
+				case 7: // pump right
+					pump_dir = Vector2(1.0, 0.0);
+					break;
+				}
+				float pump_dir_velocity = pump_dir.dot(velocity);
+				if (pump_dir_velocity < pump_max_speed) {
+					accumulated_acceleration += pump_dir * pump_acceleration;
+				}
+				was_in_pump = true;
+			}
+		}
+	}
+
+	for (int i = 0; i < neighbor_cells.size(); i++) {
+		int iter_idx = iter_order_ptr[i];
+		
+		if (iter_idx == 4) continue;
+
 		int cell_id = neighbor_ptr[iter_idx];
-
 		if (cell_id < 0) continue; // neighbor is not a cell
 
 		int cell_type = types_ptr[cell_id];
-		
-		if (!cell_type) continue; // cell type is 0, so it's an empty cell
+		if (cell_type == 0) continue; // cell type is 0, so it's an empty cell
 		
 		float cell_xf = (cell_id % cell_area.x) * cell_side_len;
 		float cell_yf = (cell_id / cell_area.x) * cell_side_len;
 		Vector2 wall_position = Vector2(cell_xf, cell_yf);
+		
 		float wall_closest_xf = (float)CLAMP(new_position.x, wall_position.x, wall_position.x + cell_side_len);
 		float wall_closest_yf = (float)CLAMP(new_position.y, wall_position.y, wall_position.y + cell_side_len);
 		Vector2 wall_to_particle = new_position - Vector2(wall_closest_xf, wall_closest_yf);
+		
 		float dist_to_wall_sq = wall_to_particle.length_squared();
 
-		if (dist_to_wall_sq > particle_radius_sq) continue; // not in range to interact with anything
+		if (dist_to_wall_sq > particle_radius_sq) continue; // not in range to interact
+		if (dist_to_wall_sq == 0.0f) continue;
 
 		int cell_category = type_cat_ptr[cell_type];
 		
 		if (cell_category == 3) { // cell is a diode
-			if (dist_to_wall_sq == 0.0f) continue; // spooky floating point comparison (if the particle is in the wall, the distance_sq should be zero, but you never know)
-			
 			Vector2 diode_dir = Vector2(0.0, 0.0);
 			switch (cell_type) {
 			case 8: // diode up
@@ -309,38 +344,11 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 			new_position += wall_to_particle_u * penetration;
 			accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_u; // mirror normal velocity component to diode with acceleration
 		}
-		else if (cell_category == 2) { // cell is a pump
-			if (dist_to_wall_sq != 0.0f) continue;
-
-			Vector2 pump_dir = Vector2(0.0, 0.0);
-			switch (cell_type) {
-			case 4: // pump up
-				pump_dir = Vector2(0.0, -1.0);
-				break;
-			case 5: // pump down
-				pump_dir = Vector2(0.0, 1.0);
-				break;
-			case 6: // pump left
-				pump_dir = Vector2(-1.0, 0.0);
-				break;
-			case 7: // pump right
-				pump_dir = Vector2(1.0, 0.0);
-				break;
-			}
-			float pump_dir_velocity = pump_dir.dot(velocity);
-
-			if (pump_dir_velocity < pump_max_speed) {
-				accumulated_acceleration += pump_dir * pump_acceleration;
-			}
-			was_in_pump = true;
-		}
 		else if (cell_category == 1) { // cell is a wall
-			if (dist_to_wall_sq == 0.0f) continue; // particle is inside wall
-
 			Vector2 wall_to_particle_u = wall_to_particle.normalized();
 			float normal_velocity_mag = wall_to_particle_u.dot(velocity);
 
-			if (normal_velocity_mag > 0.0) continue; // particle is already moving away
+			if (normal_velocity_mag > 0.0f) continue; // particle is already moving away
 
 			float penetration = particle_radius - sqrt(dist_to_wall_sq);
 			new_position += wall_to_particle_u * penetration;
@@ -356,6 +364,31 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 				break;
 			}
 		}
+		else if (cell_category == 5) { // cell is a conductor
+			Vector2 wall_to_particle_u = wall_to_particle.normalized();
+			float normal_velocity_mag = wall_to_particle_u.dot(velocity);
+			
+			if (normal_velocity_mag > 0.0f) continue; // particle is already moving away
+
+			float penetration = particle_radius - sqrt(dist_to_wall_sq);
+			new_position += wall_to_particle_u * penetration;
+
+			float wall_temp = conduc_energies[cell_id];
+			float particle_temp_equiv = normal_velocity_mag * normal_velocity_mag;
+			float conductivity = 0.5f;
+
+			float target_temp = particle_temp_equiv + conductivity * (wall_temp - particle_temp_equiv);
+			float v_out_mag = sqrt(abs(target_temp));
+
+			float mass = particle_masses[id];
+			float energy_gained_par = 0.5f * mass * (v_out_mag * v_out_mag - particle_temp_equiv);
+
+			chunk->push_conductor_info(cell_id, -energy_gained_par);
+
+			float delta_v = normal_velocity_mag - v_out_mag;
+
+			accumulated_acceleration += -1 * (delta_v / time_step) * wall_to_particle_u;
+		}
 	}
 	if (gravity_is_on && !was_in_pump) {
 		accumulated_acceleration += gravity;
@@ -364,7 +397,7 @@ PackedVector2Array MovementHandler::collide_with_walls(float time_step, const Ve
 	return ret_values;
 }
 
-PackedVector2Array MovementHandler::calculate_collisions(float time_step, int id, const Vector2 position, const Vector2 velocity, const Ref<WorldState>& world_state) {
+PackedVector2Array MovementHandler::calculate_collisions(float time_step, int id, const Vector2 position, const Vector2 velocity, const Ref<WorldState>& world_state, const Ref<Chunk>& chunk) {
 	int cell_x = (int)std::floor(position.x * world_state->get_inverted_cell_size());
 	int cell_y = (int)std::floor(position.y * world_state->get_inverted_cell_size());
 	Vector2i cell_area = world_state->get_cell_area();
@@ -381,7 +414,7 @@ PackedVector2Array MovementHandler::calculate_collisions(float time_step, int id
 	PackedInt32Array neighbor_cells = cell_neighbor_ids.slice(neighbor_idx_start, neighbor_idx_start + neighbor_count);
 	
 	Vector2 new_acceleration = Vector2(0.0, 0.0);
-	PackedVector2Array new_values = collide_with_walls(time_step, position, velocity, neighbor_cells, world_state);
+	PackedVector2Array new_values = collide_with_walls(id, time_step, position, velocity, neighbor_cells, world_state, chunk);
 	new_acceleration += new_values[0];
 	Vector2 new_position = new_values[1];
 

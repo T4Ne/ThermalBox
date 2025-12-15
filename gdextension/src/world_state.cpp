@@ -25,13 +25,16 @@ void WorldState::_bind_methods(){
 	ClassDB::bind_method(D_METHOD("get_cell_area"), &WorldState::get_cell_area);
 	ClassDB::bind_method(D_METHOD("change_velocity"), &WorldState::change_velocity);
 	ClassDB::bind_method(D_METHOD("setup"), &WorldState::setup);
+	ClassDB::bind_method(D_METHOD("get_conductor_count"), &WorldState::get_conductor_count);
+	ClassDB::bind_method(D_METHOD("get_conductor_energies"), &WorldState::get_conductor_energies);
 }
 
 WorldState::WorldState() {
 	type_category_map = {
 		CAT_NONE, CAT_WALL, CAT_WALL, CAT_WALL, CAT_PUMP, CAT_PUMP,
 		CAT_PUMP, CAT_PUMP, CAT_DIODE, CAT_DIODE, CAT_DIODE, CAT_DIODE,
-		CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER
+		CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER,
+		CAT_CONDUCTOR
 	};
 }
 
@@ -56,6 +59,8 @@ void WorldState::set_globals(const Dictionary& config) {
 	cell_types.resize(cell_count);
 	cell_types.fill((uint8_t)EMPTY);
 	cell_particle_offsets.resize(cell_count + 1);
+	conductor_energies.resize(cell_count);
+	conductor_energies.fill(0.0f);
 	
 	neighbor_range = config["neighbor_range"];
 	neighbor_count = std::pow(neighbor_range * 2 + 1, 2);
@@ -123,6 +128,10 @@ void WorldState::set_cell_state(Vector2i arr_pos, int new_type) {
 	update_count_by_category(type_category_map[old_type], -1);
 	update_count_by_category(type_category_map[new_type], 1);
 
+	if (type_category_map[new_type] == CAT_CONDUCTOR) {
+		conductor_energies[cell_id] = 0.0f;
+	}
+
 	cell_types[cell_id] = (uint8_t) new_type;
 }
 
@@ -132,6 +141,7 @@ void WorldState::update_count_by_category(int category, int change) {
 	case CAT_PUMP: pump_count += change; break;
 	case CAT_DIODE: diode_count += change; break;
 	case CAT_SPAWNER: spawner_count += change; break;
+	case CAT_CONDUCTOR: conductor_count += change; break;
 	}
 }
 
@@ -330,4 +340,5 @@ void WorldState::set_particle_acceleration_by_id(int id, Vector2 acceleration) {
 	if (id < 0 || id >= particle_accelerations.size()) return;
 	particle_accelerations[id] = acceleration;
 }
+
 

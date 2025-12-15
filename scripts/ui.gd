@@ -14,7 +14,7 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
 enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, 
-WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN}
+WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN, CONDUCTOR}
 
 var selected_item: Items = Items.REMOVEWALL
 var place_25: bool = false
@@ -57,6 +57,9 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 			main_box.place_wall(type)
 		Items.WALLHOT:
 			type = 3
+			main_box.place_wall(type)
+		Items.CONDUCTOR:
+			type = 18
 			main_box.place_wall(type)
 		Items.PUMP:
 			type = 4
@@ -176,3 +179,8 @@ func _on_drain_pressed() -> void:
 	selected_item = Items.DRAIN
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Drain"
+
+func _on_conductor_pressed() -> void:
+	selected_item = Items.CONDUCTOR
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
+	SelectedLabel.text = "Selected: Conductor"
