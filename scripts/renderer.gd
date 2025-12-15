@@ -91,13 +91,13 @@ func _render_particles(world_state: WorldState, simulation_render_state: Simulat
 		var particle_type: int = particle_types[particle_id]
 		match particle_type:
 			0:
-				mm_particles.set_instance_color(current_particle_indx, Color("#A23A3A"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#4D8FAC"))
 			1:
-				mm_particles.set_instance_color(current_particle_indx, Color("#1F6B2C"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#E8E6EB"))
 			2:
-				mm_particles.set_instance_color(current_particle_indx, Color("#2E5D9E"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#7D9575"))
 			3:
-				mm_particles.set_instance_color(current_particle_indx, Color("#555555"))
+				mm_particles.set_instance_color(current_particle_indx, Color("#C25E86"))
 			_:
 				assert(false, "ParticleTypeError: particle has no valid type")
 		current_particle_indx += 1
@@ -151,25 +151,27 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 		match cell_category:
 			5:
 				mm_conductors.set_instance_transform_2d(current_conductor_indx, cell_transform)
-				var conductor_temp: float = conductor_energies[cell_id]
-				var red: float = min((48 + 0.2 * conductor_temp) / 255, 255)
-				mm_conductors.set_instance_color(current_conductor_indx, Color(red, 0.18, 0.18))
+				var conductor_temp_coef: float = conductor_energies[cell_id] / 3000.0
+				conductor_temp_coef = min(conductor_temp_coef, 1.0)
+				var cold_color: Color = Color("#2A4B5F")
+				var hot_color: Color = Color("#D95E3D")
+				mm_conductors.set_instance_color(current_conductor_indx, cold_color.lerp(hot_color, conductor_temp_coef))
 				current_conductor_indx += 1
 			4:
 				mm_spawners.set_instance_transform_2d(current_spawner_indx, cell_transform)
 				match cell_type:
 					12:
-						mm_spawners.set_instance_color(current_spawner_indx, Color("ffffff"))
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#432543"))
 					13:
-						mm_spawners.set_instance_color(current_spawner_indx, Color("#A23A3A"))
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#4D8FAC"))
 					14:
-						mm_spawners.set_instance_color(current_spawner_indx, Color("#1F6B2C"))
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#E8E6EB"))
 					15:
-						mm_spawners.set_instance_color(current_spawner_indx, Color("#2E5D9E"))
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#7D9575"))
 					16:
-						mm_spawners.set_instance_color(current_spawner_indx, Color("#555555"))
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#C25E86"))
 					17:
-						mm_spawners.set_instance_color(current_spawner_indx, Color("202020"))
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#000000"))
 				current_spawner_indx += 1
 			3:
 				match cell_type:
@@ -182,7 +184,7 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 					11:
 						cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
 				mm_diodes.set_instance_transform_2d(current_diode_indx, cell_transform)
-				mm_diodes.set_instance_color(current_diode_indx, Color("303030"))
+				mm_diodes.set_instance_color(current_diode_indx, Color("#5F5F63"))
 				current_diode_indx += 1
 			2:
 				match cell_type:
@@ -195,17 +197,17 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 					7:
 						cell_transform = cell_transform * Transform2D(deg_to_rad(0), Vector2(0.0, 0.0))
 				mm_pumps.set_instance_transform_2d(current_pump_indx, cell_transform)
-				mm_pumps.set_instance_color(current_pump_indx, Color("bbbb00"))
+				mm_pumps.set_instance_color(current_pump_indx, Color("#D69E2E"))
 				current_pump_indx += 1
 			1:
 				mm_walls.set_instance_transform_2d(current_wall_indx, cell_transform)
 				match cell_type:
 					1:
-						mm_walls.set_instance_color(current_wall_indx, Color("303030"))
+						mm_walls.set_instance_color(current_wall_indx, Color("#5F5F63"))
 					2:
-						mm_walls.set_instance_color(current_wall_indx, Color("303080"))
+						mm_walls.set_instance_color(current_wall_indx, Color("#2A4B5F"))
 					3:
-						mm_walls.set_instance_color(current_wall_indx, Color("803030"))
+						mm_walls.set_instance_color(current_wall_indx, Color("#D95E3D"))
 				current_wall_indx += 1
 
 func _render_selection(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:

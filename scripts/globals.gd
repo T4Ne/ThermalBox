@@ -15,7 +15,7 @@ var config: Dictionary = {
 	"wall_thermal_coef" : 0.8,
 	"pump_acceleration" : 100.0,
 	"pump_max_speed" : 5.0,
-	"strong_lennard" : [-100.0, 3.5],
+	"strong_lennard" : [-200.0, 3.5],
 	"weak_lennard" : [-20.0, 4.0]
 }
 
@@ -23,8 +23,8 @@ func _ready() -> void:
 	update_dependencies()
 
 func update_dependencies() -> void:
-	config["max_speed"] = ((config["default_particle_radius"] / config["time_step"]) / 4.0)
+	config["max_speed"] = ((config["default_particle_radius"] / config["time_step"]) / 3.0)
 	config["max_accel"] = 2.0 * config["max_speed"] / config["time_step"]
 	config["strong_repul"] = [-1000.0, config["interaction_range_r"]]
-	config["weak_repul"] = [-500.0, config["interaction_range_r"]]
+	config["weak_repul"] = [-100.0, config["interaction_range_r"]]
 	Vector2(0,0).normalized()
