@@ -5,10 +5,12 @@ var simulation_view_screen_size: Vector2 = Vector2(0.0, 0.0)
 var simulation_view_position: Vector2 = Vector2(0.0, 0.0)
 var simulation_view_scale: float = 0.0
 var simulation_view_edge_offset: Vector2
+var mouse_sim_position: Vector2 = Vector2(-1, -1)
 var mouse_cell_coords: Array[Vector2i] = [Vector2i(-1, -1), Vector2i(-1, -1)]
 var item_placement_mode: ItemPlacementMode
+var extended_range: bool = false
 
-enum ItemPlacementMode {PARTICLE, WALL, PUMP}
+enum ItemPlacementMode {PARTICLEDELETE, PARTICLE, WALL, PUMP, TEMPCHANGE}
 
 func _init(simulation_size: Vector2i, edge_offset: Vector2 = Vector2(60.0, 60.0)) -> void:
 	simulation_view_simulation_size = simulation_size
@@ -27,12 +29,17 @@ func update_mouse_cell_coords(global_mouse_position: Vector2, cell_size: float) 
 	
 	if global_mouse_position.x < simulation_view_position.x or global_mouse_position.x >= simulation_view_position.x + simulation_view_screen_size.x:
 		mouse_cell_coords = [Vector2(-1, -1), Vector2(-1, -1)]
+		mouse_sim_position = Vector2(-1, -1)
 		return
 	if global_mouse_position.y < simulation_view_position.y or global_mouse_position.y >= simulation_view_position.y + simulation_view_screen_size.y:
 		mouse_cell_coords = [Vector2(-1, -1), Vector2(-1, -1)]
+		mouse_sim_position = Vector2(-1, -1)
 		return
-	var cell_x: int = int((global_mouse_position.x - simulation_view_position.x) / simulation_view_scale / cell_size)
-	var cell_y: int = int((global_mouse_position.y - simulation_view_position.y) / simulation_view_scale / cell_size)
+	var mouse_sim_x: float = (global_mouse_position.x - simulation_view_position.x) / simulation_view_scale
+	var mouse_sim_y: float = (global_mouse_position.y - simulation_view_position.y) / simulation_view_scale
+	mouse_sim_position = Vector2(mouse_sim_x, mouse_sim_y)
+	var cell_x: int = int(mouse_sim_x / cell_size)
+	var cell_y: int = int(mouse_sim_y / cell_size)
 	var new_cell_coords: Vector2i = Vector2i(cell_x, cell_y)
 	if new_cell_coords == mouse_cell_coords[0]:
 		return

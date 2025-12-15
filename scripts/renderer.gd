@@ -22,6 +22,9 @@ var conductor_quad: QuadMesh = QuadMesh.new()
 @onready var simulation_view_background: ColorRect = get_node("SimulationView")
 @onready var selected_cell: Sprite2D = get_node("SelectedCell")
 @onready var previous_cell: Sprite2D = get_node("PreviousCell")
+@onready var large_selection: Sprite2D = get_node("LargeSelection")
+@onready var particle_placement: Sprite2D = get_node("ParticlePlacement")
+@onready var particle_placement_many: Sprite2D = get_node("ParticlePlacementMany")
 @onready var pump_texture: Texture2D = preload("res://resources/pump.png")
 @onready var particle_texture: Texture2D = preload("res://resources/particle.png")
 @onready var wall_texture: Texture2D = preload("res://resources/wall.png")
@@ -216,40 +219,106 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 
 func _render_selection(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
 	var mouse_cell_coords: Array[Vector2i] = simulation_render_state.mouse_cell_coords
+	var mouse_sim_coords: Vector2 = simulation_render_state.mouse_sim_position
 	var cell_size: float = world_state.get_cell_size()
 	var sim_view_scale: float = simulation_render_state.simulation_view_scale
 	var sim_view_position: Vector2 = simulation_render_state.simulation_view_position
-	var iter_range: int
-	match simulation_render_state.item_placement_mode:
-		simulation_render_state.ItemPlacementMode.PARTICLE:
-			iter_range = 0
-		simulation_render_state.ItemPlacementMode.WALL:
-			iter_range = 1
-		simulation_render_state.ItemPlacementMode.PUMP:
-			iter_range = 2
+	selected_cell.visible = false
+	previous_cell.visible = false
+	large_selection.visible = false
+	particle_placement.visible = false
+	particle_placement_many.visible = false
 	
-	for indx: int in range(iter_range):
-		var cell_coords: Vector2i = mouse_cell_coords[indx]
-		if cell_coords == Vector2i(-1, -1):
-			if indx == 0:
-				selected_cell.visible = false
+	match simulation_render_state.item_placement_mode:
+		
+		simulation_render_state.ItemPlacementMode.TEMPCHANGE:
+			var cell_coords: Vector2i = mouse_cell_coords[0]
+			if cell_coords == Vector2i(-1, -1):
+				return
+			var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * cell_size + cell_size / 2.0,
+			float(cell_coords.y) * cell_size + cell_size / 2.0)
+			var current_cell_screen_position: Vector2 = cell_simulation_position * sim_view_scale + sim_view_position
+			var cell_screen_size: float = sim_view_scale * cell_size
+			var cell_transform: Transform2D = Transform2D(0.0, current_cell_screen_position)
+			cell_transform.x = Vector2(cell_screen_size / 16.0, 0.0)
+			cell_transform.y = Vector2(0.0, cell_screen_size / 16.0)
+			
+			if simulation_render_state.extended_range:
+				large_selection.visible = true
+				large_selection.global_transform = cell_transform
 			else:
-				previous_cell.visible = false
-			indx += 1
-			continue
-		if indx == 0:
+				selected_cell.visible = true
+				selected_cell.global_transform = cell_transform
+		
+		simulation_render_state.ItemPlacementMode.PARTICLEDELETE:
+			var cell_coords: Vector2i = mouse_cell_coords[0]
+			if cell_coords == Vector2i(-1, -1):
+				return
+			var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * cell_size + cell_size / 2.0,
+			float(cell_coords.y) * cell_size + cell_size / 2.0)
+			var current_cell_screen_position: Vector2 = cell_simulation_position * sim_view_scale + sim_view_position
+			var cell_screen_size: float = sim_view_scale * cell_size
+			var cell_transform: Transform2D = Transform2D(0.0, current_cell_screen_position)
+			cell_transform.x = Vector2(cell_screen_size / 16.0, 0.0)
+			cell_transform.y = Vector2(0.0, cell_screen_size / 16.0)
+			
+			if simulation_render_state.extended_range:
+				large_selection.visible = true
+				large_selection.global_transform = cell_transform
+			else:
+				selected_cell.visible = true
+				selected_cell.global_transform = cell_transform
+		
+		simulation_render_state.ItemPlacementMode.PARTICLE:
+			if mouse_sim_coords == Vector2(-1, -1):
+				return
+			var mouse_screen_position: Vector2 = mouse_sim_coords * sim_view_scale + sim_view_position
+			var cell_screen_size: float = sim_view_scale * cell_size
+			var cell_transform: Transform2D = Transform2D(0.0, mouse_screen_position)
+			cell_transform.x = Vector2(cell_screen_size / 16.0, 0.0)
+			cell_transform.y = Vector2(0.0, cell_screen_size / 16.0)
+			if simulation_render_state.extended_range:
+				particle_placement_many.visible = true
+				particle_placement_many.global_transform = cell_transform
+			else:
+				particle_placement.visible = true
+				particle_placement.global_transform = cell_transform
+		
+		simulation_render_state.ItemPlacementMode.WALL:
+			var cell_coords: Vector2i = mouse_cell_coords[0]
+			if cell_coords == Vector2i(-1, -1):
+				return
 			selected_cell.visible = true
-		else:
-			previous_cell.visible = true
-		var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * cell_size + cell_size / 2.0,
-		float(cell_coords.y) * cell_size + cell_size / 2.0)
-		var current_cell_screen_position: Vector2 = cell_simulation_position * sim_view_scale + sim_view_position
-		var cell_screen_size: float = sim_view_scale * cell_size
-		var cell_transform: Transform2D = Transform2D(0.0, current_cell_screen_position)
-		cell_transform.x = Vector2(cell_screen_size / 16.0, 0.0)
-		cell_transform.y = Vector2(0.0, cell_screen_size / 16.0)
-		if indx == 0:
+			var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * cell_size + cell_size / 2.0,
+			float(cell_coords.y) * cell_size + cell_size / 2.0)
+			var current_cell_screen_position: Vector2 = cell_simulation_position * sim_view_scale + sim_view_position
+			var cell_screen_size: float = sim_view_scale * cell_size
+			var cell_transform: Transform2D = Transform2D(0.0, current_cell_screen_position)
+			cell_transform.x = Vector2(cell_screen_size / 16.0, 0.0)
+			cell_transform.y = Vector2(0.0, cell_screen_size / 16.0)
 			selected_cell.global_transform = cell_transform
-		else:
-			previous_cell.global_transform = cell_transform
-		indx += 1
+		
+		simulation_render_state.ItemPlacementMode.PUMP:
+			for indx: int in range(2):
+				var cell_coords: Vector2i = mouse_cell_coords[indx]
+				if cell_coords == Vector2i(-1, -1):
+					if indx == 0:
+						selected_cell.visible = false
+					else:
+						previous_cell.visible = false
+					continue
+				if indx == 0:
+					selected_cell.visible = true
+				else:
+					previous_cell.visible = true
+				var cell_simulation_position: Vector2 = Vector2(float(cell_coords.x) * cell_size + cell_size / 2.0,
+				float(cell_coords.y) * cell_size + cell_size / 2.0)
+				var current_cell_screen_position: Vector2 = cell_simulation_position * sim_view_scale + sim_view_position
+				var cell_screen_size: float = sim_view_scale * cell_size
+				var cell_transform: Transform2D = Transform2D(0.0, current_cell_screen_position)
+				cell_transform.x = Vector2(cell_screen_size / 16.0, 0.0)
+				cell_transform.y = Vector2(0.0, cell_screen_size / 16.0)
+				if indx == 0:
+					selected_cell.global_transform = cell_transform
+				else:
+					previous_cell.global_transform = cell_transform

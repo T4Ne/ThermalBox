@@ -1,9 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://dgxd2kwwi6tl8"]
+[gd_scene load_steps=8 format=3 uid="uid://dgxd2kwwi6tl8"]
 
 [ext_resource type="Script" uid="uid://dt4phjectrhdt" path="res://scripts/main_box.gd" id="1_68iro"]
 [ext_resource type="Script" uid="uid://q2hb4lnranhq" path="res://scripts/ui.gd" id="2_eh4tv"]
 [ext_resource type="Script" uid="uid://2s1d0o5mj4gt" path="res://scripts/renderer.gd" id="2_kre7u"]
-[ext_resource type="Texture2D" uid="uid://p64srgppyuqp" path="res://resources/selection.png" id="4_5gf5c"]
+[ext_resource type="Texture2D" uid="uid://bsj4aah6mdvba" path="res://resources/selection.png" id="4_5gf5c"]
+[ext_resource type="Texture2D" uid="uid://cmhjx1wxjowjr" path="res://resources/large_selection.png" id="5_lx4cx"]
+[ext_resource type="Texture2D" uid="uid://bek1xrt5oocbd" path="res://resources/place_one_particle.png" id="6_ho4ic"]
+[ext_resource type="Texture2D" uid="uid://b452evheghadt" path="res://resources/place_multiple_particles.png" id="7_htkke"]
 
 [node name="UI" type="CanvasLayer"]
 script = ExtResource("2_eh4tv")
@@ -34,6 +37,21 @@ visible = false
 modulate = Color(0.5330367, 0.5330367, 0.5330367, 1)
 z_index = 4
 texture = ExtResource("4_5gf5c")
+
+[node name="LargeSelection" type="Sprite2D" parent="MainBox/ParticleRenderer"]
+visible = false
+z_index = 4
+texture = ExtResource("5_lx4cx")
+
+[node name="ParticlePlacement" type="Sprite2D" parent="MainBox/ParticleRenderer"]
+visible = false
+z_index = 4
+texture = ExtResource("6_ho4ic")
+
+[node name="ParticlePlacementMany" type="Sprite2D" parent="MainBox/ParticleRenderer"]
+visible = false
+z_index = 4
+texture = ExtResource("7_htkke")
 
 [node name="Control" type="Control" parent="."]
 layout_mode = 3
@@ -142,6 +160,11 @@ layout_mode = 2
 focus_mode = 0
 text = "Gravity Off"
 
+[node name="Exit" type="Button" parent="Control/SideBar/MainControls"]
+layout_mode = 2
+focus_mode = 0
+text = "Exit"
+
 [node name="BottomBar" type="Control" parent="Control"]
 layout_mode = 1
 anchors_preset = 12
@@ -238,18 +261,21 @@ layout_mode = 2
 focus_mode = 0
 text = "Drain"
 
-[node name="WallNone" type="Button" parent="Control/BottomBar/ItemButtons/GridContainer"]
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-focus_mode = 0
-text = "Remove Wall"
-
 [node name="Conductor" type="Button" parent="Control/BottomBar/ItemButtons/GridContainer"]
 layout_mode = 2
 focus_mode = 0
 text = "Conductor
 "
+
+[node name="HeatUp" type="Button" parent="Control/BottomBar/ItemButtons/GridContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Heat Up"
+
+[node name="CoolDown" type="Button" parent="Control/BottomBar/ItemButtons/GridContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Cool Down"
 
 [node name="Selected" type="Label" parent="Control/BottomBar/ItemButtons"]
 layout_mode = 2
@@ -274,5 +300,6 @@ text = "Selected: Remove Wall"
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Diode" to="." method="_on_diode_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Spawner" to="." method="_on_spawner_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Drain" to="." method="_on_drain_pressed"]
-[connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/WallNone" to="." method="_on_wall_none_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Conductor" to="." method="_on_conductor_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/HeatUp" to="." method="_on_heat_up_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/CoolDown" to="." method="_on_cool_down_pressed"]

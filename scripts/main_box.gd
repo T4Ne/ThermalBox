@@ -54,10 +54,33 @@ func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	if place_25:
 		for y: int in range(-2, 3):
 			for x: int in range(-2, 3):
-				var neighbor_particle_position: Vector2 = particle_simulation_position + Vector2(y * particle_radius * 3.9, x * particle_radius * 3.9)
+				var neighbor_particle_position: Vector2 = particle_simulation_position + Vector2(y * particle_radius * 3.95, x * particle_radius * 3.95)
 				world_state.add_particle(type, neighbor_particle_position, particle_velocity)
 	else:
 		world_state.add_particle(type, particle_simulation_position, particle_velocity)
+
+func delete_particles_by_cell(extended_range: bool) -> void:
+	var cell_coordinates: Vector2i = simulation_render_state.mouse_cell_coords[0]
+	if cell_coordinates == Vector2i(-1, -1):
+		return
+	if extended_range:
+		world_state.delete_particles_by_area(cell_coordinates)
+	else:
+		world_state.delete_particles_by_cell(cell_coordinates)
+
+func change_particle_temps_by_cell(heating: bool, extended_range: bool) -> void:
+	var cell_coordinates: Vector2i = simulation_render_state.mouse_cell_coords[0]
+	if cell_coordinates == Vector2i(-1, -1):
+		return
+	var coef: float
+	if heating:
+		coef = 1.1
+	else:
+		coef = 0.90
+	if extended_range:
+		world_state.change_velocity_by_area(coef, cell_coordinates)
+	else:
+		world_state.change_velocity_by_cell(coef, cell_coordinates)
 
 func place_wall(type: int) -> void:
 	var cell_coordinates: Vector2i = simulation_render_state.mouse_cell_coords[0]

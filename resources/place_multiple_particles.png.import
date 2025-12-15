@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bsj4aah6mdvba"
-path="res://.godot/imported/selection.png-dd702fb8555301a8ffbb43dd0091fa63.ctex"
+uid="uid://b452evheghadt"
+path="res://.godot/imported/place_multiple_particles.png-770f3f61f680f9184156bb94bfe4b567.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://resources/selection.png"
-dest_files=["res://.godot/imported/selection.png-dd702fb8555301a8ffbb43dd0091fa63.ctex"]
+source_file="res://resources/place_multiple_particles.png"
+dest_files=["res://.godot/imported/place_multiple_particles.png-770f3f61f680f9184156bb94bfe4b567.ctex"]
 
 [params]
 

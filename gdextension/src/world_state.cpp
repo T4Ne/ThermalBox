@@ -28,6 +28,10 @@ void WorldState::_bind_methods(){
 	ClassDB::bind_method(D_METHOD("get_conductor_count"), &WorldState::get_conductor_count);
 	ClassDB::bind_method(D_METHOD("get_conductor_energies"), &WorldState::get_conductor_energies);
 	ClassDB::bind_method(D_METHOD("set_globals"), &WorldState::set_globals);
+	ClassDB::bind_method(D_METHOD("delete_particles_by_cell"), &WorldState::delete_particles_by_cell);
+	ClassDB::bind_method(D_METHOD("delete_particles_by_area"), &WorldState::delete_particles_by_area);
+	ClassDB::bind_method(D_METHOD("change_velocity_by_cell"), &WorldState::change_velocity_by_cell);
+	ClassDB::bind_method(D_METHOD("change_velocity_by_area"), &WorldState::change_velocity_by_area);
 }
 
 WorldState::WorldState() {
@@ -270,11 +274,12 @@ void WorldState::clear_particles() {
 }
 
 void WorldState::delete_particle(int id) {
-	if (id >= 0 && id < particle_positions.size()) {
-		particle_count--;
-		particle_positions[id] = Vector2(-1.0, -1.0);
-		deleted_particles.push_back(id);
-	}
+	if (id < 0 || id >= particle_positions.size()) return;
+	Vector2 pos = particle_positions[id];
+	if (pos.x == -1.0f && pos.y == -1.0f) return;
+	particle_count--;
+	particle_positions[id] = Vector2(-1.0, -1.0);
+	deleted_particles.push_back(id);
 }
 
 void WorldState::delete_particles_by_cell(Vector2i arr_pos) {
@@ -285,8 +290,25 @@ void WorldState::delete_particles_by_cell(Vector2i arr_pos) {
 	int end = cell_particle_offsets[cell_id + 1];
 	for (int i = start; i < end; i++) {
 		int par_id = cell_particle_ids[i];
-		particle_positions[par_id] = Vector2(-1.0, -1.0);
-		deleted_particles.push_back(par_id);
+		delete_particle(par_id);
+	}
+}
+
+void WorldState::delete_particles_by_area(Vector2i arr_pos) {
+	int cell_id = arr_pos.x + arr_pos.y * cell_area.x;
+	if (cell_id < 0 || cell_id >= cell_count) return;
+
+	int neighbors_start = cell_neighbor_offsets[cell_id];
+	int neighbors_end = cell_neighbor_offsets[cell_id + 1];
+	for (int i = neighbors_start; i < neighbors_end; i++) {
+		int neighbor_id = cell_neighbor_ids[i];
+		if (neighbor_id < 0) continue;
+		int particles_start = cell_particle_offsets[neighbor_id];
+		int particles_end = cell_particle_offsets[neighbor_id + 1];
+		for (int j = particles_start; j < particles_end; j++) {
+			int par_id = cell_particle_ids[j];
+			delete_particle(par_id);
+		}
 	}
 }
 
@@ -324,6 +346,36 @@ void WorldState::change_velocity(float coef) {
 	Vector2* vel_ptr = particle_velocities.ptrw();
 	for (int par_id = 0; par_id < particle_count; par_id++) {
 		vel_ptr[par_id] *= coef;
+	}
+}
+
+void WorldState::change_velocity_by_cell(float coef, Vector2i arr_pos) {
+	int cell_id = arr_pos.x + arr_pos.y * cell_area.x;
+	if (cell_id < 0 || cell_id >= cell_count) return;
+
+	int start = cell_particle_offsets[cell_id];
+	int end = cell_particle_offsets[cell_id + 1];
+	for (int i = start; i < end; i++) {
+		int par_id = cell_particle_ids[i];
+		particle_velocities[par_id] *= coef;
+	}
+}
+
+void WorldState::change_velocity_by_area(float coef, Vector2i arr_pos) {
+	int cell_id = arr_pos.x + arr_pos.y * cell_area.x;
+	if (cell_id < 0 || cell_id >= cell_count) return;
+
+	int neighbors_start = cell_neighbor_offsets[cell_id];
+	int neighbors_end = cell_neighbor_offsets[cell_id + 1];
+	for (int i = neighbors_start; i < neighbors_end; i++) {
+		int neighbor_id = cell_neighbor_ids[i];
+		if (neighbor_id < 0) continue;
+		int particles_start = cell_particle_offsets[neighbor_id];
+		int particles_end = cell_particle_offsets[neighbor_id + 1];
+		for (int j = particles_start; j < particles_end; j++) {
+			int par_id = cell_particle_ids[j];
+			particle_velocities[par_id] *= coef;
+		}
 	}
 }
 

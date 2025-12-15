@@ -13,10 +13,12 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var FPSLabel: Label = get_node("Control/SideBar/MainControls/FPSLabel")
 @onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
-enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, 
-WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN, CONDUCTOR, PARTICLE5}
+enum Items {NONE, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN, CONDUCTOR, HEATUP, COOLDOWN}
+enum Particles {NONE, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, PARTICLE5}
 
-var selected_item: Items = Items.REMOVEWALL
+var selected_particle: Particles = Particles.NONE
+var selected_item: Items = Items.NONE
+var particle_delete_mode: bool = false
 var place_25: bool = false
 
 func _ready() -> void:
@@ -43,60 +45,67 @@ func toggle_pause() -> void:
 	else:
 		Pause.text = "Pause"
 
-func _handle_item_placement(mouse_position: Vector2) -> void:
-	var type: int
-	match selected_item:
-		Items.REMOVEWALL:
-			type = 0
-			main_box.place_wall(type)
-		Items.WALLNEUTRAL:
-			type = 1
-			main_box.place_wall(type)
-		Items.WALLCOLD:
-			type = 2
-			main_box.place_wall(type)
-		Items.WALLHOT:
-			type = 3
-			main_box.place_wall(type)
-		Items.CONDUCTOR:
-			type = 18
-			main_box.place_wall(type)
-		Items.PUMP:
-			type = 4
-			main_box.place_pump(type)
-		Items.DIODE:
-			type = 8
-			main_box.place_pump(type)
-		Items.SPAWNER:
-			type = 12
-			main_box.place_wall(type)
-		Items.DRAIN:
-			type = 17
-			main_box.place_wall(type)
-		Items.PARTICLE1:
-			type = 0
-			main_box.place_particle(type, mouse_position, place_25)
-		Items.PARTICLE2:
-			type = 1
-			main_box.place_particle(type, mouse_position, place_25)
-		Items.PARTICLE3:
-			type = 2
-			main_box.place_particle(type, mouse_position, place_25)
-		Items.PARTICLE4:
-			type = 3
-			main_box.place_particle(type, mouse_position, place_25)
-		Items.PARTICLE5:
-			type = 4
-			main_box.place_particle(type, mouse_position, place_25)
+func _handle_placement(mouse_position: Vector2) -> void:
+	assert(selected_item == Items.NONE or selected_particle == Particles.NONE)
+	
+	if selected_item != Items.NONE:
+		match selected_item:
+			Items.WALLNEUTRAL:
+				main_box.place_wall(1)
+			Items.WALLCOLD:
+				main_box.place_wall(2)
+			Items.WALLHOT:
+				main_box.place_wall(3)
+			Items.CONDUCTOR:
+				main_box.place_wall(18)
+			Items.PUMP:
+				main_box.place_pump(4)
+			Items.DIODE:
+				main_box.place_pump(8)
+			Items.SPAWNER:
+				main_box.place_wall(12)
+			Items.DRAIN:
+				main_box.place_wall(17)
+			Items.HEATUP:
+				main_box.change_particle_temps_by_cell(true, place_25)
+			Items.COOLDOWN:
+				main_box.change_particle_temps_by_cell(false, place_25)
+	else:
+		match selected_particle:
+			Particles.PARTICLE1:
+				main_box.place_particle(0, mouse_position, place_25)
+			Particles.PARTICLE2:
+				main_box.place_particle(1, mouse_position, place_25)
+			Particles.PARTICLE3:
+				main_box.place_particle(2, mouse_position, place_25)
+			Particles.PARTICLE4:
+				main_box.place_particle(3, mouse_position, place_25)
+			Particles.PARTICLE5:
+				main_box.place_particle(4, mouse_position, place_25)
+
+func _handle_deletion() -> void:
+	assert(selected_item == Items.NONE or selected_particle == Particles.NONE)
+	if selected_particle != Particles.NONE:
+		main_box.delete_particles_by_cell(place_25)
+	else:
+		main_box.place_wall(0)
 
 func _on_particle_1_item_pressed() -> void:
-	selected_item = Items.PARTICLE1
-	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
+	selected_particle = Particles.PARTICLE1
+	selected_item = Items.NONE
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 1"
 
 func _on_simulation_view_gui_input(_event: InputEvent) -> void:
 	if Input.is_action_pressed("primary action"):
-		_handle_item_placement(main_box.get_global_mouse_position())
+		_handle_placement(main_box.get_global_mouse_position())
+	elif Input.is_action_pressed("secondary action"):
+		_handle_deletion()
+		if simulation_render_state.item_placement_mode == simulation_render_state.ItemPlacementMode.PARTICLE:
+			simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLEDELETE
+	else:
+		if simulation_render_state.item_placement_mode == simulation_render_state.ItemPlacementMode.PARTICLEDELETE:
+			simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 
 func _on_pause_pressed() -> void:
 	toggle_pause()
@@ -119,12 +128,14 @@ func _input(event: InputEvent) -> void:
 		main_box.reduce_energy()
 
 func _on_particle_2_item_pressed() -> void:
-	selected_item = Items.PARTICLE2
+	selected_particle = Particles.PARTICLE2
+	selected_item = Items.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 2"
 
 func _on_particle_3_item_pressed() -> void:
-	selected_item = Items.PARTICLE3
+	selected_particle = Particles.PARTICLE3
+	selected_item = Items.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 3"
 
@@ -135,61 +146,79 @@ func display_info(real_tps: float, count: int) -> void:
 
 func _on_place_many_toggled(toggled_on: bool) -> void:
 	place_25 = toggled_on
+	simulation_render_state.extended_range = toggled_on
 
 func _on_particles_reset_pressed() -> void:
 	main_box.delete_particles()
 
 func _on_wall_neutral_pressed() -> void:
 	selected_item = Items.WALLNEUTRAL
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Neutral Wall"
 
 func _on_wall_cold_pressed() -> void:
 	selected_item = Items.WALLCOLD
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Cold Wall"
 
 func _on_wall_hot_pressed() -> void:
 	selected_item = Items.WALLHOT
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Hot Wall"
 
-func _on_wall_none_pressed() -> void:
-	selected_item = Items.REMOVEWALL
-	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
-	SelectedLabel.text = "Selected: Remove Wall"
-
 func _on_pump_pressed() -> void:
 	selected_item = Items.PUMP
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PUMP
 	SelectedLabel.text = "Selected: Pump"
 
 func _on_particle_4_item_pressed() -> void:
-	selected_item = Items.PARTICLE4
+	selected_particle = Particles.PARTICLE4
+	selected_item = Items.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 4"
 
 func _on_diode_pressed() -> void:
 	selected_item = Items.DIODE
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PUMP
 	SelectedLabel.text = "Selected: Diode"
 
 func _on_spawner_pressed() -> void:
 	selected_item = Items.SPAWNER
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Spawner"
 
 func _on_drain_pressed() -> void:
 	selected_item = Items.DRAIN
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Drain"
 
 func _on_conductor_pressed() -> void:
 	selected_item = Items.CONDUCTOR
+	selected_particle = Particles.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Conductor"
 
 func _on_particle_5_item_pressed() -> void:
-	selected_item = Items.PARTICLE5
+	selected_particle = Particles.PARTICLE5
+	selected_item = Items.NONE
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
 	SelectedLabel.text = "Selected: Particle 5"
+
+func _on_heat_up_pressed() -> void:
+	selected_item = Items.HEATUP
+	selected_particle = Particles.NONE
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.TEMPCHANGE
+	SelectedLabel.text = "Selected: Heat Up"
+
+func _on_cool_down_pressed() -> void:
+	selected_item = Items.COOLDOWN
+	selected_particle = Particles.NONE
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.TEMPCHANGE
+	SelectedLabel.text = "Selected: Cool Down"
