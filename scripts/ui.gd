@@ -14,7 +14,7 @@ var edge_offset: Vector2 = Vector2(60.0, 60.0)
 @onready var Countlabel: Label = get_node("Control/SideBar/MainControls/CountLabel")
 
 enum Items {REMOVEWALL, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, 
-WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN, CONDUCTOR}
+WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN, CONDUCTOR, PARTICLE5}
 
 var selected_item: Items = Items.REMOVEWALL
 var place_25: bool = false
@@ -85,6 +85,9 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 		Items.PARTICLE4:
 			type = 3
 			main_box.place_particle(type, mouse_position, place_25)
+		Items.PARTICLE5:
+			type = 4
+			main_box.place_particle(type, mouse_position, place_25)
 
 func _on_particle_1_item_pressed() -> void:
 	selected_item = Items.PARTICLE1
@@ -107,6 +110,7 @@ func _on_gravity_pressed() -> void:
 		Gravity.text = "Gravity Off"
 	else:
 		Gravity.text = "Gravity On"
+	main_box.set_sim_globals()
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("simulation toggle"):
@@ -184,3 +188,8 @@ func _on_conductor_pressed() -> void:
 	selected_item = Items.CONDUCTOR
 	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Conductor"
+
+func _on_particle_5_item_pressed() -> void:
+	selected_item = Items.PARTICLE5
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
+	SelectedLabel.text = "Selected: Particle 5"

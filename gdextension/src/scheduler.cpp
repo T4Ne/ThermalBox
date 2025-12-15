@@ -12,6 +12,7 @@ void Scheduler::_bind_methods(){
 	ClassDB::bind_method(D_METHOD("setup"), &Scheduler::setup);
 	ClassDB::bind_method(D_METHOD("first_multithreaded_step"), &Scheduler::first_multithreaded_step);
 	ClassDB::bind_method(D_METHOD("second_multithreaded_step"), &Scheduler::second_multithreaded_step);
+	ClassDB::bind_method(D_METHOD("set_globals"), &Scheduler::set_globals);
 }
 
 Scheduler::Scheduler() {

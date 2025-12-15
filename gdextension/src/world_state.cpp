@@ -27,6 +27,7 @@ void WorldState::_bind_methods(){
 	ClassDB::bind_method(D_METHOD("setup"), &WorldState::setup);
 	ClassDB::bind_method(D_METHOD("get_conductor_count"), &WorldState::get_conductor_count);
 	ClassDB::bind_method(D_METHOD("get_conductor_energies"), &WorldState::get_conductor_energies);
+	ClassDB::bind_method(D_METHOD("set_globals"), &WorldState::set_globals);
 }
 
 WorldState::WorldState() {
@@ -43,6 +44,11 @@ WorldState::~WorldState() {
 
 void WorldState::setup(bool borders, const Dictionary& config) {
 	set_globals(config);
+	cell_types.resize(cell_count);
+	cell_types.fill((uint8_t)EMPTY);
+	cell_particle_offsets.resize(cell_count + 1);
+	conductor_energies.resize(cell_count);
+	conductor_energies.fill(0.0f);
 	if (borders) {
 		build_borders();
 	}
@@ -55,13 +61,6 @@ void WorldState::set_globals(const Dictionary& config) {
 	inverted_cell_size = 1.0 / (double)cell_size;
 	cell_area = config["default_simulation_area"];
 	cell_count = cell_area.x * cell_area.y;
-	
-	cell_types.resize(cell_count);
-	cell_types.fill((uint8_t)EMPTY);
-	cell_particle_offsets.resize(cell_count + 1);
-	conductor_energies.resize(cell_count);
-	conductor_energies.fill(0.0f);
-	
 	neighbor_range = config["neighbor_range"];
 	neighbor_count = std::pow(neighbor_range * 2 + 1, 2);
 	particle_mass_by_type = config["default_particle_mass_by_type"];

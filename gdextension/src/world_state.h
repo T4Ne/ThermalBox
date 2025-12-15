@@ -44,6 +44,11 @@ namespace godot {
 		PackedVector2Array particle_velocities;
 		PackedVector2Array particle_accelerations;
 		std::vector<int> deleted_particles;
+	
+	protected:
+		static void _bind_methods();
+
+	public:
 
 		enum CellType {
 			EMPTY, NORMWALL, COLDWALL, HOTWALL, PUMPUP, PUMPDOWN, PUMPLEFT, PUMPRIGHT,
@@ -52,11 +57,7 @@ namespace godot {
 		enum CountCategory {
 			CAT_NONE, CAT_WALL, CAT_PUMP, CAT_DIODE, CAT_SPAWNER, CAT_CONDUCTOR
 		};
-	
-	protected:
-		static void _bind_methods();
 
-	public:
 		WorldState();
 		~WorldState();
 

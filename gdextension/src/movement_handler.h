@@ -15,7 +15,7 @@ namespace godot {
 	
 	private:
 		bool gravity_is_on{};
-		int particle_type_count = 4; // TODO: move this to globals
+		int particle_type_count = 5; // TODO: move this to globals
 		int inter_param_count = 3; // TODO: move this to globals
 		float max_speed{};
 		float max_speed_sq{};
@@ -32,7 +32,7 @@ namespace godot {
 		Vector2 gravity;
 
 		enum InterTypes {
-			WEAK_LENNARD_JONES, STRONG_LENNARD_JONES, WEAK_REPULSION, STRONG_REPULSION
+			WEAK_LENNARD_JONES, MEDIUM_LENNARD_JONES, STRONG_LENNARD_JONES, WEAK_REPULSION, STRONG_REPULSION
 		};
 
 	protected:

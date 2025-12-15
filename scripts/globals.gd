@@ -10,12 +10,13 @@ var config: Dictionary = {
 	"time_step" : 0.008,
 	"max_chunk_time_usec" : 2500.0,
 	"neighbor_range" : 1,
-	"default_particle_mass_by_type" : [1.5, 1.0, 1.0, 0.5],
+	"default_particle_mass_by_type" : [1.2, 0.5, 1.0, 0.5, 1.5],
 	"interaction_range_r" : 4.0,
 	"wall_thermal_coef" : 0.8,
 	"pump_acceleration" : 100.0,
 	"pump_max_speed" : 5.0,
 	"strong_lennard" : [-200.0, 3.5],
+	"medium_lennard": [-60, 3.75],
 	"weak_lennard" : [-20.0, 4.0]
 }
 

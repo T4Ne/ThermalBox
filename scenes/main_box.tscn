@@ -198,6 +198,11 @@ layout_mode = 2
 focus_mode = 0
 text = "Particle 4"
 
+[node name="Particle5Item" type="Button" parent="Control/BottomBar/ItemButtons/GridContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Particle 5"
+
 [node name="WallNeutral" type="Button" parent="Control/BottomBar/ItemButtons/GridContainer"]
 layout_mode = 2
 focus_mode = 0
@@ -261,6 +266,7 @@ text = "Selected: Remove Wall"
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Particle2Item" to="." method="_on_particle_2_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Particle3Item" to="." method="_on_particle_3_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Particle4Item" to="." method="_on_particle_4_item_pressed"]
+[connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/Particle5Item" to="." method="_on_particle_5_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/WallNeutral" to="." method="_on_wall_neutral_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/WallCold" to="." method="_on_wall_cold_pressed"]
 [connection signal="pressed" from="Control/BottomBar/ItemButtons/GridContainer/WallHot" to="." method="_on_wall_hot_pressed"]

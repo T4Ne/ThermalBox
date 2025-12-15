@@ -50,30 +50,44 @@ void MovementHandler::build_interaction_list(const Dictionary& config) {
 		}
 		InterTypes inter_type = WEAK_REPULSION;
 		if (type_1 == 0) {
-			if (type_2 == 0) inter_type = WEAK_LENNARD_JONES;
-			else if (type_2 == 1) inter_type = STRONG_LENNARD_JONES;
-			else if (type_2 == 2) inter_type = WEAK_LENNARD_JONES;
+			if (type_2 == 1) inter_type = MEDIUM_LENNARD_JONES;
+			else if (type_2 == 2) inter_type = STRONG_LENNARD_JONES;
+			else if (type_2 == 4) inter_type = WEAK_LENNARD_JONES;
 		}
 		else if (type_1 == 1) {
-			if (type_2 == 1) inter_type = STRONG_REPULSION;
+			if (type_2 == 1) inter_type = WEAK_LENNARD_JONES;
+			else if (type_1 == 2) inter_type = STRONG_REPULSION;
 		}
+		else if (type_1 == 2) {
+			if (type_2 == 2) inter_type = WEAK_LENNARD_JONES;
+			else if (type_1 == 4) inter_type = WEAK_LENNARD_JONES;
+		}
+		else if (type_1 == 4) inter_type = STRONG_LENNARD_JONES;
 		/* 
 		interactions by particle type:
-		0 - 0: WEAKINTER
-		0 - 1: STRONGINTER
-		0 - 2: WEAKINTER
+		0 - 0: WEAKREPUL
+		0 - 1: MEDIUMLENNARD
+		0 - 2: STRONGLENNARD
 		0 - 3: WEAKREPUL
-		1 - 1: STRONGREPUL
-		1 - 2: WEAKREPUL
+		0 - 4: WEAKLENNARD
+		1 - 1: WEAKLENNARD
+		1 - 2: STRONGREPUL
 		1 - 3: WEAKREPUL
-		2 - 2: WEAKREPUL
+		1 - 4: WEAKREPUL
+		2 - 2: WEAKLENNARD
 		2 - 3: WEAKREPUL
+		2 - 4: WEAKLENNARD
 		3 - 3: WEAKREPUL
+		3 - 4: WEAKREPUL
+		4 - 4: STRONGLENNARD
 		*/
 		Array params;
 		switch (inter_type) {
 		case WEAK_LENNARD_JONES:
 			params = config["weak_lennard"];
+			break;
+		case MEDIUM_LENNARD_JONES:
+			params = config["medium_lennard"];
 			break;
 		case STRONG_LENNARD_JONES:
 			params = config["strong_lennard"];
@@ -215,7 +229,7 @@ Vector2 MovementHandler::interact_with_particles(int id, const Vector2 position,
 			float param_1 = inter_ptr[inter_memory_offset + 1];
 			int param_2 = (int)inter_ptr[inter_memory_offset + 2];
 			float force{};
-			if (param_2 == WEAK_LENNARD_JONES || param_2 == STRONG_LENNARD_JONES) {
+			if (param_2 == WEAK_LENNARD_JONES || param_2 == STRONG_LENNARD_JONES || param_2 == MEDIUM_LENNARD_JONES) {
 				if (dist_r == 0.0) {
 					force = -max_acceleration * mass;
 				}
@@ -266,19 +280,19 @@ PackedVector2Array MovementHandler::collide_with_walls(int id, float time_step, 
 		int center_type = types_ptr[center_cell_id];
 		if (center_type != 0) {
 			int center_cat = type_cat_ptr[center_type];
-			if (center_cat == 2) {
+			if (center_cat == godot::WorldState::CountCategory::CAT_PUMP) {
 				Vector2 pump_dir = Vector2(0.0, 0.0);
 				switch (center_type) {
-				case 4: // pump up
+				case godot::WorldState::CellType::PUMPUP: 
 					pump_dir = Vector2(0.0, -1.0);
 					break;
-				case 5: // pump down
+				case godot::WorldState::CellType::PUMPDOWN:
 					pump_dir = Vector2(0.0, 1.0);
 					break;
-				case 6: // pump left
+				case godot::WorldState::CellType::PUMPLEFT: 
 					pump_dir = Vector2(-1.0, 0.0);
 					break;
-				case 7: // pump right
+				case godot::WorldState::CellType::PUMPRIGHT: 
 					pump_dir = Vector2(1.0, 0.0);
 					break;
 				}
@@ -317,19 +331,19 @@ PackedVector2Array MovementHandler::collide_with_walls(int id, float time_step, 
 
 		int cell_category = type_cat_ptr[cell_type];
 		
-		if (cell_category == 3) { // cell is a diode
+		if (cell_category == godot::WorldState::CountCategory::CAT_DIODE) {
 			Vector2 diode_dir = Vector2(0.0, 0.0);
 			switch (cell_type) {
-			case 8: // diode up
+			case godot::WorldState::CellType::DIODEUP:
 				diode_dir = Vector2(0.0, -1.0);
 				break;
-			case 9: // diode down
+			case godot::WorldState::CellType::DIODEDOWN:
 				diode_dir = Vector2(0.0, 1.0);
 				break;
-			case 10: // diode left
+			case godot::WorldState::CellType::DIODELEFT:
 				diode_dir = Vector2(-1.0, 0.0);
 				break;
-			case 11: // diode right
+			case godot::WorldState::CellType::DIODERIGHT:
 				diode_dir = Vector2(1.0, 0.0);
 				break;
 			}
@@ -344,7 +358,7 @@ PackedVector2Array MovementHandler::collide_with_walls(int id, float time_step, 
 			new_position += wall_to_particle_u * penetration;
 			accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_u; // mirror normal velocity component to diode with acceleration
 		}
-		else if (cell_category == 1) { // cell is a wall
+		else if (cell_category == godot::WorldState::CountCategory::CAT_WALL) { // cell is a wall
 			Vector2 wall_to_particle_u = wall_to_particle.normalized();
 			float normal_velocity_mag = wall_to_particle_u.dot(velocity);
 
@@ -353,18 +367,18 @@ PackedVector2Array MovementHandler::collide_with_walls(int id, float time_step, 
 			float penetration = particle_radius - sqrt(dist_to_wall_sq);
 			new_position += wall_to_particle_u * penetration;
 			switch (cell_type) {
-			case 1: // normal wall
+			case godot::WorldState::CellType::NORMWALL:
 				accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_u; // mirror normal vel with accel
 				break;
-			case 2: // cold wall
+			case godot::WorldState::CellType::COLDWALL:
 				accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_u * wall_thermal_coef; // mirror normal vel with accel
 				break;
-			case 3: // hot wall
+			case godot::WorldState::CellType::HOTWALL:
 				accumulated_acceleration += -2 * (normal_velocity_mag / time_step) * wall_to_particle_u * wall_thermal_coef_inv; // mirror normal vel with accel
 				break;
 			}
 		}
-		else if (cell_category == 5) { // cell is a conductor
+		else if (cell_category == godot::WorldState::CountCategory::CAT_CONDUCTOR) { // cell is a conductor
 			Vector2 wall_to_particle_u = wall_to_particle.normalized();
 			float normal_velocity_mag = wall_to_particle_u.dot(velocity);
 			

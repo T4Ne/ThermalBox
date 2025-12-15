@@ -41,6 +41,10 @@ func reinitialize_sim() -> void:
 	scheduler.setup(world_state, Globals.config)
 	renderer.reinitialize_render()
 
+func set_sim_globals() -> void:
+	world_state.set_globals(Globals.config)
+	scheduler.set_globals(Globals.config)
+
 func place_particle(type: int, mouse_position: Vector2, place_25: bool) -> void:
 	var simulation_view_position: Vector2 = simulation_render_state.simulation_view_position
 	var simulation_view_scale: float = simulation_render_state.simulation_view_scale
