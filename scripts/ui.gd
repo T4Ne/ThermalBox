@@ -91,7 +91,7 @@ func _handle_item_placement(mouse_position: Vector2) -> void:
 
 func _on_particle_1_item_pressed() -> void:
 	selected_item = Items.PARTICLE1
-	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.PARTICLE
+	simulation_render_state.item_placement_mode = simulation_render_state.ItemPlacementMode.WALL
 	SelectedLabel.text = "Selected: Particle 1"
 
 func _on_simulation_view_gui_input(_event: InputEvent) -> void:

@@ -172,6 +172,8 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 						mm_spawners.set_instance_color(current_spawner_indx, Color("#7D9575"))
 					16:
 						mm_spawners.set_instance_color(current_spawner_indx, Color("#C25E86"))
+					19:
+						mm_spawners.set_instance_color(current_spawner_indx, Color("#D4C86A"))
 					17:
 						mm_spawners.set_instance_color(current_spawner_indx, Color("#000000"))
 				current_spawner_indx += 1

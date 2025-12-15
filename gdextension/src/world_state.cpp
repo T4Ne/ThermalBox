@@ -35,7 +35,7 @@ WorldState::WorldState() {
 		CAT_NONE, CAT_WALL, CAT_WALL, CAT_WALL, CAT_PUMP, CAT_PUMP,
 		CAT_PUMP, CAT_PUMP, CAT_DIODE, CAT_DIODE, CAT_DIODE, CAT_DIODE,
 		CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER, CAT_SPAWNER,
-		CAT_CONDUCTOR
+		CAT_CONDUCTOR, CAT_SPAWNER
 	};
 }
 
@@ -199,6 +199,7 @@ void WorldState::build_cell_map() {
 			case 1: cell_types_ptr[cell_id] = SPAWNER2; break;
 			case 2: cell_types_ptr[cell_id] = SPAWNER3; break;
 			case 3: cell_types_ptr[cell_id] = SPAWNER4; break;
+			case 4: cell_types_ptr[cell_id] = SPAWNER5; break;
 			}
 		}
 		if (offsets_ptr[cell_id] == 0) {
@@ -306,6 +307,7 @@ void WorldState::spawn_particles_from_spawners() {
 		case SPAWNER2: par_type = 1; break;
 		case SPAWNER3: par_type = 2; break;
 		case SPAWNER4: par_type = 3; break;
+		case SPAWNER5: par_type = 4; break;
 		default: continue;
 		}
 		int cell_x = cell_id % cell_area.x;
