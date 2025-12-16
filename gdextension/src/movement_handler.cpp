@@ -33,6 +33,8 @@ void MovementHandler::set_globals(const Dictionary& config) {
 	max_acceleration_sq = pow(max_acceleration, 2);
 	gravity_is_on = config["gravity_is_on"];
 	gravity = config["gravity"];
+	global_cooling = config["global_cooling"];
+	global_cooling_coef = config["global_cooling_coef"];
 	build_interaction_list(config);
 }
 
@@ -176,6 +178,10 @@ void MovementHandler::second_half_verlet(float time_step, const Ref<WorldState>&
 		// Velocity verlet step 4: full step velocity
 		Vector2 full_step_velocity = old_velocity + full_step_acceleration * time_step * 0.5;
 		
+		if (global_cooling) {
+			full_step_velocity *= global_cooling_coef;
+		}
+
 		if (full_step_velocity.length_squared() > max_speed_sq) {
 			full_step_velocity = full_step_velocity.normalized() * max_speed;
 		}

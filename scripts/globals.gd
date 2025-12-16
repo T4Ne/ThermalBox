@@ -4,6 +4,8 @@ var config: Dictionary = {
 	"gravity" : Vector2(0, 5.0),
 	"gravity_is_on" : true,
 	"is_paused" : false,
+	"global_cooling": false,
+	"global_cooling_coef": 0.999,
 	"default_cell_size" : 10.0,
 	"default_simulation_area" : Vector2i(60, 40),
 	"default_particle_radius" : 2.5,
@@ -27,5 +29,4 @@ func update_dependencies() -> void:
 	config["max_speed"] = ((config["default_particle_radius"] / config["time_step"]) / 3.0)
 	config["max_accel"] = 2.0 * config["max_speed"] / config["time_step"]
 	config["strong_repul"] = [-1000.0, config["interaction_range_r"]]
-	config["weak_repul"] = [-100.0, config["interaction_range_r"]]
-	Vector2(0,0).normalized()
+	config["weak_repul"] = [-200.0, config["interaction_range_r"]]

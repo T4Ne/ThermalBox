@@ -12,7 +12,10 @@ var extended_range: bool = false
 
 enum ItemPlacementMode {PARTICLEDELETE, PARTICLE, WALL, PUMP, TEMPCHANGE}
 
-func _init(simulation_size: Vector2i, edge_offset: Vector2 = Vector2(60.0, 60.0)) -> void:
+func _init() -> void:
+	pass
+
+func reset(simulation_size: Vector2i, edge_offset: Vector2 = Vector2(60.0, 60.0)) -> void:
 	simulation_view_simulation_size = simulation_size
 	simulation_view_edge_offset = edge_offset
 

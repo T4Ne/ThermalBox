@@ -27,6 +27,8 @@ namespace godot {
 		float max_acceleration{};
 		float max_acceleration_sq{};
 		double wall_thermal_coef_inv{};
+		bool global_cooling{};
+		float global_cooling_coef{};
 		std::vector<float> interaction_list;
 		std::vector<int> cell_iteration_order = { 1, 3, 5, 7, 0, 2, 4, 6, 8 };
 		Vector2 gravity;

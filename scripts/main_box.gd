@@ -11,7 +11,7 @@ var real_tps: float = 0.0
 var execution_time_ms: float = 0.0
 
 func _ready() -> void:
-	reinitialize_sim()
+	reinitialize_sim(true)
 
 func frame(_delta: float) -> void:
 	simulation_render_state.update_mouse_cell_coords(get_global_mouse_position(), world_state.get_cell_size())
@@ -35,9 +35,9 @@ func _physics_process(_delta: float) -> void:
 	var duration_usec: float = physics_frame_end_time_usec - physics_frame_start_usec
 	execution_time_ms = lerp(execution_time_ms, duration_usec / 1000.0, 0.1)
 
-func reinitialize_sim() -> void:
+func reinitialize_sim(draw_borders: bool) -> void:
 	world_state = WorldState.new()
-	world_state.setup(true, Globals.config)
+	world_state.setup(draw_borders, Globals.config)
 	scheduler.setup(world_state, Globals.config)
 	renderer.reinitialize_render()
 
@@ -74,9 +74,9 @@ func change_particle_temps_by_cell(heating: bool, extended_range: bool) -> void:
 		return
 	var coef: float
 	if heating:
-		coef = 1.1
+		coef = 1.2
 	else:
-		coef = 0.90
+		coef = 0.80
 	if extended_range:
 		world_state.change_velocity_by_area(coef, cell_coordinates)
 	else:

@@ -1,0 +1,46 @@
+[gd_resource type="Theme" load_steps=5 format=3 uid="uid://q2l26guwlu6x"]
+
+[ext_resource type="FontFile" uid="uid://bkmjyxxq0ry83" path="res://resources/Chakra_Petch/ChakraPetch-SemiBold.ttf" id="1_4ae3a"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f5jpq"]
+content_margin_left = 7.0
+content_margin_right = 7.0
+bg_color = Color(0.2627451, 0.14509805, 0.2627451, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gevul"]
+content_margin_left = 7.0
+content_margin_top = 3.0
+content_margin_right = 7.0
+content_margin_bottom = 3.0
+bg_color = Color(0.31764707, 0.15686275, 0.2784314, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4ae3a"]
+content_margin_left = 7.0
+content_margin_right = 7.0
+bg_color = Color(0.1882353, 0.13333334, 0.20784314, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[resource]
+Button/colors/font_color = Color(0.875, 0.875, 0.875, 1)
+Button/colors/font_focus_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/font_hover_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/font_hover_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/font_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/fonts/font = ExtResource("1_4ae3a")
+Button/styles/hover = SubResource("StyleBoxFlat_f5jpq")
+Button/styles/normal = SubResource("StyleBoxFlat_gevul")
+Button/styles/pressed = SubResource("StyleBoxFlat_4ae3a")

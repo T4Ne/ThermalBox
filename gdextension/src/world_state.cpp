@@ -344,7 +344,7 @@ void WorldState::spawn_particles_from_spawners() {
 
 void WorldState::change_velocity(float coef) {
 	Vector2* vel_ptr = particle_velocities.ptrw();
-	for (int par_id = 0; par_id < particle_count; par_id++) {
+	for (int par_id = 0; par_id < particle_velocities.size(); par_id++) {
 		vel_ptr[par_id] *= coef;
 	}
 }

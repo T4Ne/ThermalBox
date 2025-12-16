@@ -1,0 +1,130 @@
+[gd_resource type="Theme" load_steps=22 format=3 uid="uid://dtscl0pgc5nc3"]
+
+[ext_resource type="FontFile" uid="uid://bkmjyxxq0ry83" path="res://resources/Chakra_Petch/ChakraPetch-SemiBold.ttf" id="1_vtpje"]
+[ext_resource type="FontFile" uid="uid://do8b6uwqgv3k2" path="res://resources/Chakra_Petch/ChakraPetch-Regular.ttf" id="2_8bt5f"]
+[ext_resource type="Texture2D" uid="uid://dpanvxoyrcdyl" path="res://resources/button_textures/checkbox_checked.png" id="3_8bt5f"]
+[ext_resource type="Texture2D" uid="uid://b4mfht2y0jsfe" path="res://resources/button_textures/checkbox_empty.png" id="4_1veuc"]
+[ext_resource type="Texture2D" uid="uid://df6husq7pssi8" path="res://resources/button_textures/toggle_off.png" id="5_fymu4"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eqrkb"]
+content_margin_left = 7.0
+content_margin_right = 7.0
+bg_color = Color(0.5137255, 0.16078432, 0.16862746, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7mn6o"]
+content_margin_left = 7.0
+content_margin_right = 7.0
+bg_color = Color(0.58431375, 0.25490198, 0.15686275, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7jhsh"]
+content_margin_left = 7.0
+content_margin_right = 7.0
+bg_color = Color(0.31764707, 0.15686275, 0.2784314, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tmhl1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_41u3k"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pkoyb"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gqcs2"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_eiubu"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_vtpje"]
+load_path = "res://.godot/imported/toggle_on.png-9b96351998f578a072281feb0c177817.ctex"
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_1veuc"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_fymu4"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_uox0t"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2lfko"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_io17e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vtpje"]
+content_margin_left = 7.0
+content_margin_right = 7.0
+bg_color = Color(0.09803922, 0.09019608, 0.11764706, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.58431375, 0.25490198, 0.15686275, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8bt5f"]
+content_margin_left = 7.0
+content_margin_right = 7.0
+bg_color = Color(0.09803922, 0.09019608, 0.11764706, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+anti_aliasing = false
+
+[resource]
+Button/colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/font_focus_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/font_hover_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/font_hover_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/font_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/icon_focus_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/icon_hover_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/icon_hover_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/icon_normal_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/colors/icon_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Button/fonts/font = ExtResource("1_vtpje")
+Button/styles/hover = SubResource("StyleBoxFlat_eqrkb")
+Button/styles/normal = SubResource("StyleBoxFlat_7mn6o")
+Button/styles/pressed = SubResource("StyleBoxFlat_7jhsh")
+CheckBox/colors/checkbox_checked_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+CheckBox/colors/checkbox_unchecked_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+CheckBox/colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+CheckBox/colors/font_focus_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+CheckBox/colors/font_hover_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+CheckBox/colors/font_hover_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+CheckBox/colors/font_pressed_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+CheckBox/font_sizes/font_size = 16
+CheckBox/fonts/font = ExtResource("2_8bt5f")
+CheckBox/icons/checked = ExtResource("3_8bt5f")
+CheckBox/icons/unchecked = ExtResource("4_1veuc")
+CheckBox/styles/focus = SubResource("StyleBoxEmpty_tmhl1")
+CheckBox/styles/hover = SubResource("StyleBoxEmpty_41u3k")
+CheckBox/styles/hover_pressed = SubResource("StyleBoxEmpty_pkoyb")
+CheckBox/styles/normal = SubResource("StyleBoxEmpty_gqcs2")
+CheckBox/styles/pressed = SubResource("StyleBoxEmpty_eiubu")
+CheckButton/icons/checked = SubResource("CompressedTexture2D_vtpje")
+CheckButton/icons/unchecked = ExtResource("5_fymu4")
+CheckButton/styles/focus = SubResource("StyleBoxEmpty_1veuc")
+CheckButton/styles/hover = SubResource("StyleBoxEmpty_fymu4")
+CheckButton/styles/hover_pressed = SubResource("StyleBoxEmpty_uox0t")
+CheckButton/styles/normal = SubResource("StyleBoxEmpty_2lfko")
+CheckButton/styles/pressed = SubResource("StyleBoxEmpty_io17e")
+Label/colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+Label/fonts/font = ExtResource("2_8bt5f")
+LineEdit/colors/font_color = Color(0.875, 0.875, 0.875, 1)
+LineEdit/fonts/font = ExtResource("2_8bt5f")
+LineEdit/styles/focus = SubResource("StyleBoxFlat_vtpje")
+LineEdit/styles/normal = SubResource("StyleBoxFlat_8bt5f")
