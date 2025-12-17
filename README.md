@@ -1,6 +1,9 @@
 # ThermalBox
 A high-performance particle and thermal fluid effects simulator built with Godot 4.5 and C++ (GDExtension).
 
+<img width="1161" height="861" alt="Screenshot 2025-12-17 014907" src="https://github.com/user-attachments/assets/bd2eb36d-d4c3-472c-8b55-0f37f6b2a43a" />
+
+
 ## 1. Technical Architecture (GDExtension Components)
 The simulation logic is decoupled from Godot's built-in physics and implemented via custom C++ classes:
 * **WorldState**: Manages the global simulation data, including particle positions (`PackedVector2Array`), velocities, and cellular grid states (e.g., `NORMWALL`, `COLDWALL`, `SPAWNER`).
