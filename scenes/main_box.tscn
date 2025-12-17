@@ -615,6 +615,7 @@ icon_alignment = 2
 [connection signal="text_submitted" from="Control/SideBar/MainControls/yEditContainer/LineEdity" to="." method="_on_line_edity_text_submitted"]
 [connection signal="toggled" from="Control/SideBar/MainControls/Gravity" to="." method="_on_gravity_toggled"]
 [connection signal="toggled" from="Control/SideBar/MainControls/Cooling" to="." method="_on_cooling_toggled"]
+[connection signal="pressed" from="Control/SideBar/MainControls/ExitContainer/Exit" to="." method="_on_exit_pressed"]
 [connection signal="toggled" from="Control/BottomBar/Items/Selected/PlaceMany" to="." method="_on_place_many_toggled"]
 [connection signal="pressed" from="Control/BottomBar/Items/Particles/GridContainer/Particle1Item" to="." method="_on_particle_1_item_pressed"]
 [connection signal="pressed" from="Control/BottomBar/Items/Particles/GridContainer/Particle2Item" to="." method="_on_particle_2_item_pressed"]

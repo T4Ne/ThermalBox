@@ -42,6 +42,7 @@ enum Items {NONE, WALLNEUTRAL, WALLCOLD, WALLHOT, PUMP, DIODE, SPAWNER, DRAIN, C
 enum Particles {NONE, PARTICLE1, PARTICLE2, PARTICLE3, PARTICLE4, PARTICLE5}
 
 func _ready() -> void:
+	DisplayServer.window_set_min_size(Vector2i(1024, 640))
 	main_box.set_simulation_view(simulation_render_state)
 	_reset()
 	_on_particle_1_item_pressed()
@@ -353,3 +354,6 @@ func update_item_helper() -> void:
 		new_secondary_icon = particle_texture_lookup[0]
 	primary_action_icon.texture = new_primary_icon
 	secondary_action_icon.texture = new_secondary_icon
+
+func _on_exit_pressed() -> void:
+	get_tree().quit()

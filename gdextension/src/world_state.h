@@ -43,7 +43,6 @@ namespace godot {
 		PackedVector2Array particle_positions;
 		PackedVector2Array particle_velocities;
 		PackedVector2Array particle_accelerations;
-		std::vector<int> deleted_particles;
 	
 	protected:
 		static void _bind_methods();
