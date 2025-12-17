@@ -42,4 +42,4 @@ scons platform=<your_platform> target=template_debug
 ```
 
 ## 5. License
-This project is released under the CC0 1.0 Universal (CC0 1.0) Public Domain Dedication. You may copy, modify, and distribute the code without restriction.
+This is free and unencumbered software released into the public domain under The Unlicense. Anyone is free to copy, modify, publish, use, compile, sell, or distribute this software, either in source code form or as a compiled binary, for any purpose, commercial or non-commercial, and by any means.
