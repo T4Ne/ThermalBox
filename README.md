@@ -39,3 +39,7 @@ The following hardware inputs are hardcoded in `project.godot`:
 Navigate to the `gdextension/` directory and execute the following:
 ```bash
 scons platform=<your_platform> target=template_debug
+```
+
+## 5. License
+This project is released under the CC0 1.0 Universal (CC0 1.0) Public Domain Dedication. You may copy, modify, and distribute the code without restriction.
