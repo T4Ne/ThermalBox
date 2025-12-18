@@ -10,7 +10,7 @@ var config: Dictionary = {
 	"default_simulation_area" : Vector2i(60, 40),
 	"default_particle_radius" : 2.5,
 	"time_step" : 0.008,
-	"max_chunk_time_usec" : 2500.0,
+	"max_chunk_time_usec" : 2000.0,
 	"neighbor_range" : 1,
 	"default_particle_mass_by_type" : [1.2, 0.5, 1.0, 0.5, 1.5],
 	"interaction_range_r" : 4.0,

@@ -69,10 +69,10 @@ func _render_simulation_view(simulation_view: SimulationRenderState) -> void:
 	simulation_view_background.global_position = simulation_view_position
 
 func _render_particles(world_state: WorldState, simulation_render_state: SimulationRenderState) -> void:
-	# Resize buffer if necessary
 	var particle_count: int = world_state.get_particle_count()
-	if mm_particles.instance_count != particle_count:
+	if mm_particles.instance_count < particle_count:
 		mm_particles.instance_count = particle_count
+	mm_particles.visible_instance_count = particle_count
 	var current_particle_indx: int = 0
 	var particle_positions: PackedVector2Array = world_state.get_particle_positions()
 	var particle_radius: float = world_state.get_particle_radius()
@@ -113,16 +113,21 @@ func _render_walls(world_state: WorldState, simulation_render_state: SimulationR
 	var diode_count: int = world_state.get_diode_count()
 	var spawner_count: int = world_state.get_spawner_count()
 	var conductor_count: int = world_state.get_conductor_count()
-	if mm_walls.instance_count != wall_count:
+	if mm_walls.instance_count < wall_count:
 		mm_walls.instance_count = wall_count
-	if mm_pumps.instance_count != pump_count:
+	mm_walls.visible_instance_count = wall_count
+	if mm_pumps.instance_count < pump_count:
 		mm_pumps.instance_count = pump_count
-	if mm_diodes.instance_count != diode_count:
+	mm_pumps.visible_instance_count = pump_count
+	if mm_diodes.instance_count < diode_count:
 		mm_diodes.instance_count = diode_count
-	if mm_spawners.instance_count != spawner_count:
+	mm_diodes.visible_instance_count = diode_count
+	if mm_spawners.instance_count < spawner_count:
 		mm_spawners.instance_count = spawner_count
-	if mm_conductors.instance_count != conductor_count:
+	mm_spawners.visible_instance_count = spawner_count
+	if mm_conductors.instance_count < conductor_count:
 		mm_conductors.instance_count = conductor_count
+	mm_conductors.visible_instance_count = conductor_count
 	var current_wall_indx: int = 0
 	var current_pump_indx: int = 0
 	var current_diode_indx: int = 0

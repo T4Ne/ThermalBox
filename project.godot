@@ -79,7 +79,6 @@ window/stretch/aspect="ignore"
 [physics]
 
 common/max_physics_steps_per_frame=1
-common/physics_jitter_fix=0.0
 2d/physics_engine="Dummy"
 3d/physics_engine="Dummy"
 2d/solver/solver_iterations=1
@@ -90,6 +89,4 @@ common/enable_object_picking=false
 textures/canvas_textures/default_texture_filter=3
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/vram_compression/compress_with_gpu=false
-textures/vram_compression/cache_gpu_compressor=false
 textures/lossless_compression/force_png=true
