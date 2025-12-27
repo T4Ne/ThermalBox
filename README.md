@@ -33,7 +33,7 @@ The following hardware inputs are hardcoded in `project.godot`:
 * **Dependencies**: You **must** have the `godot-cpp` library installed and correctly path-linked in your environment to compile the source code.
 
 ### Running the Project
-1. **Via Executable**: Run the binaries located in the `executables/` directory.
+1. **Via Executable**: Run the binaries (for x86-64 Windows and Linux) located in the `executables/` directory.
 2. **Via Godot Editor**: Open `project.godot` in the Godot 4.5 editor. Ensure the `sim_module.gdextension` file is recognized. Run the main scene (`main_box.tscn`).
 
 ### Compiling from Source
