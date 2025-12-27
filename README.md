@@ -1,5 +1,5 @@
 # ThermalBox
-A high-performance particle and thermal fluid effects simulator built with Godot 4.5 and C++ (GDExtension).
+A high-performance molecular dynamics simulator built with Godot 4.5 and C++ (GDExtension).
 
 <img width="1161" height="861" alt="Screenshot 2025-12-17 014907" src="https://github.com/user-attachments/assets/bd2eb36d-d4c3-472c-8b55-0f37f6b2a43a" />
 <img width="1206" height="900" alt="Screenshot 2025-12-17 204354" src="https://github.com/user-attachments/assets/c2bbba73-f71f-4782-8153-d6edcfc4496b" />
